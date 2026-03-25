@@ -1026,23 +1026,25 @@ window.debugRender = async function(itemId) {
 
 // ========== COMPONENTS ==========
 
-// ItemTexture: tries render/ → item/ → block/ → emoji
+// ItemTexture: tries render/ → texmap → item/ → block/ → emoji
 const RENDERS="assets/minecraft/renders/";
 function ItemTexture({itemId,size,className}){
   const[stage,setStage]=useState(0);
   const sz=size||"100%";
   const cls=`itx ${className||""}`;
+  const explicit=getTexPath(itemId);
 
   useEffect(()=>{setStage(0);},[itemId]);
 
-  if(stage===0){
-    return <img className={cls} src={`${RENDERS}${itemId}.png`} style={{width:sz,height:sz}} alt="" draggable={false} onError={()=>setStage(1)}/>;
-  }
-  if(stage===1){
-    return <img className={cls} src={`${TEX}item/${itemId}.png`} style={{width:sz,height:sz}} alt="" draggable={false} onError={()=>setStage(2)}/>;
-  }
-  if(stage===2){
-    return <img className={cls} src={`${TEX}block/${itemId}.png`} style={{width:sz,height:sz}} alt="" draggable={false} onError={()=>setStage(3)}/>;
+  const srcs=[
+    `${RENDERS}${itemId}.png`,
+    explicit,
+    `${TEX}item/${itemId}.png`,
+    `${TEX}block/${itemId}.png`,
+  ].filter(Boolean);
+
+  if(stage<srcs.length){
+    return <img className={cls} src={srcs[stage]} style={{width:sz,height:sz}} alt="" draggable={false} onError={()=>setStage(stage+1)}/>;
   }
   return <span className={`itx-e ${className||""}`} style={{fontSize:typeof sz==='number'?sz*.55:16}}>{"❓"}</span>;
 }
