@@ -174,7 +174,6 @@ textarea{resize:vertical;min-height:60px}
 <div id="root"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
 <script type="text/babel">
 const {useState,useReducer,useEffect,useCallback,useRef,useMemo}=React;
@@ -988,9 +987,8 @@ const renderPipeline = {
   } catch(e) {}
 })();
 
-setTimeout(() => {
-  if (typeof THREE !== "undefined") renderPipeline.start();
-}, 2000);
+// 3D render pipeline disabled — using pre-rendered static PNGs from assets/minecraft/renders/
+// renderPipeline.start() available manually via console if needed
 
 // Debug: test single item render and show diagnostic
 window.debugRender = async function(itemId) {
@@ -1028,30 +1026,23 @@ window.debugRender = async function(itemId) {
 
 // ========== COMPONENTS ==========
 
-// ItemTexture: tries item/ → block/ → CSS → emoji
+// ItemTexture: tries render/ → item/ → block/ → emoji
+const RENDERS="assets/minecraft/renders/";
 function ItemTexture({itemId,size,className}){
   const[stage,setStage]=useState(0);
   const sz=size||"100%";
-  const explicit=getTexPath(itemId);
-  const cached3D=renderCache.get(itemId);
+  const cls=`itx ${className||""}`;
 
   useEffect(()=>{setStage(0);},[itemId]);
 
-  if(cached3D){
-    return <img className={`itx ${className||""}`} src={cached3D} style={{width:sz,height:sz}} alt="" draggable={false}/>;
+  if(stage===0){
+    return <img className={cls} src={`${RENDERS}${itemId}.png`} style={{width:sz,height:sz}} alt="" draggable={false} onError={()=>setStage(1)}/>;
   }
-  if(stage===0&&explicit){
-    return <img className={`itx ${className||""}`} src={explicit} style={{width:sz,height:sz}} alt="" draggable={false} onError={()=>setStage(1)}/>;
-  }
-  if(stage<=1){
-    return <img className={`itx ${className||""}`} src={`${TEX}item/${itemId}.png`} style={{width:sz,height:sz}} alt="" draggable={false} onError={()=>setStage(2)}/>;
+  if(stage===1){
+    return <img className={cls} src={`${TEX}item/${itemId}.png`} style={{width:sz,height:sz}} alt="" draggable={false} onError={()=>setStage(2)}/>;
   }
   if(stage===2){
-    return <img className={`itx ${className||""}`} src={`${TEX}block/${itemId}.png`} style={{width:sz,height:sz}} alt="" draggable={false} onError={()=>setStage(3)}/>;
-  }
-  const css=CSS_FB[itemId];
-  if(stage===3&&css){
-    return <div className={`itx ${className||""}`} style={{width:sz,height:sz,background:css,borderRadius:2}}/>;
+    return <img className={cls} src={`${TEX}block/${itemId}.png`} style={{width:sz,height:sz}} alt="" draggable={false} onError={()=>setStage(3)}/>;
   }
   return <span className={`itx-e ${className||""}`} style={{fontSize:typeof sz==='number'?sz*.55:16}}>{"❓"}</span>;
 }
@@ -1449,11 +1440,14 @@ function App(){
   const lastClick=useRef(null);
   const saveT=useRef(null);
   const painting=useRef(false);
+  const rmbDown=useRef(false);
+  const rmbDragged=useRef(false);
+  const rmbStart=useRef(null);
   const[,forceRender]=useState(0);
   useEffect(()=>{window._forceUpdate=()=>forceRender(n=>n+1);return()=>{window._forceUpdate=null;};},[]);
 
   useEffect(()=>{const h=e=>{if(htt)setHTT(prev=>prev?{...prev,x:e.clientX,y:e.clientY}:null);};window.addEventListener("mousemove",h);return()=>window.removeEventListener("mousemove",h);},[htt]);
-  useEffect(()=>{const h=()=>{painting.current=false;};window.addEventListener("mouseup",h);return()=>window.removeEventListener("mouseup",h);},[]);
+  useEffect(()=>{const h=()=>{painting.current=false;rmbDown.current=false;rmbDragged.current=false;rmbStart.current=null;};window.addEventListener("mouseup",h);return()=>window.removeEventListener("mouseup",h);},[]);
   useEffect(()=>{setSaveStatus("...");clearTimeout(saveT.current);saveT.current=setTimeout(()=>{saveProj(proj);savePrefs({...loadPrefs(),lastOpenProject:proj.id});setSaveStatus("Saved");},1000);return()=>clearTimeout(saveT.current);},[proj]);
   useEffect(()=>{const h=()=>saveProj(proj);window.addEventListener("beforeunload",h);return()=>window.removeEventListener("beforeunload",h);},[proj]);
 
@@ -1474,6 +1468,10 @@ function App(){
   const onSlotMD=(e,key)=>{
     // Middle click = eyedropper
     if(e.button===1){e.preventDefault();const d=proj.slots[key];if(d){setPalItem(d.itemId);setRecent(prev=>[d.itemId,...prev.filter(x=>x!==d.itemId)].slice(0,8));}else{setPalItem(null);}return;}
+    // RMB hold = brush (with item) or multi-select (without item)
+    if(e.button===2){rmbDown.current=true;rmbDragged.current=false;rmbStart.current=key;lastClick.current=key;
+      if(!palItem){setMultiSel(prev=>{const n=new Set(prev);n.add(key);return n;});setSelSlot(key);}
+      return;}
     if(e.button!==0)return;setHTT(null);
     // Alt+Click = brush mode
     if(e.altKey&&palItem){e.preventDefault();painting.current=true;dispatch({type:'SS',key,data:defSlot(palItem)});setRecent(prev=>[palItem,...prev.filter(x=>x!==palItem)].slice(0,8));return;}
@@ -1482,7 +1480,10 @@ function App(){
     if(palItem){if(multiSel.size>1){const slots={};for(const k of multiSel)slots[k]=defSlot(palItem);slots[key]=defSlot(palItem);dispatch({type:'SM',slots});setRecent(prev=>[palItem,...prev.filter(x=>x!==palItem)].slice(0,8));setMultiSel(new Set());setSelSlot(key);}else{dispatch({type:'SS',key,data:defSlot(palItem)});setRecent(prev=>[palItem,...prev.filter(x=>x!==palItem)].slice(0,8));setSelSlot(key);setMultiSel(new Set());}}
     else{setSelSlot(key===selSlot?null:key);setMultiSel(new Set());}lastClick.current=key;};
 
-  const onSlotCtx=(e,key)=>{e.preventDefault();setHTT(null);const items=[];
+  const onSlotCtx=(e,key)=>{e.preventDefault();
+    if(rmbDragged.current){rmbDown.current=false;rmbDragged.current=false;rmbStart.current=null;return;}
+    rmbDown.current=false;rmbStart.current=null;
+    setHTT(null);const items=[];
     if(proj.slots[key]){items.push({l:"Редактировать",fn:()=>{setSelSlot(key);setMultiSel(new Set());}});items.push({l:"Копировать",fn:()=>setClipboard({m:false,d:JSON.parse(JSON.stringify(proj.slots[key]))})});}
     if(clipboard)items.push({l:"Вставить",fn:()=>dispatch({type:'SS',key,data:JSON.parse(JSON.stringify(clipboard.m?Object.values(clipboard.d)[0]:clipboard.d))})});
     if(palItem){items.push({sep:true});if(multiSel.size>0)items.push({l:`Fill ${multiSel.size} sel`,fn:()=>{const slots={};for(const k of multiSel)slots[k]=defSlot(palItem);dispatch({type:'SM',slots});setMultiSel(new Set());}});items.push({l:"Залить пустые",fn:()=>dispatch({type:'FE',data:defSlot(palItem)})});}
@@ -1495,7 +1496,15 @@ function App(){
   const saveTpl=()=>{const name=prompt("Название шаблона:",proj.name);if(!name)return;const desc=prompt("Описание:","");const tpl={name,desc:desc||"",rows:proj.rows,slots:JSON.parse(JSON.stringify(proj.slots))};const upd=[...uTpls,tpl];setUTpls(upd);saveUTpls(upd);};
   const delTpl=i=>{const upd=uTpls.filter((_,j)=>j!==i);setUTpls(upd);saveUTpls(upd);};
   const fillSel=()=>{if(!palItem||multiSel.size===0)return;const slots={};for(const k of multiSel)slots[k]=defSlot(palItem);dispatch({type:'SM',slots});setRecent(prev=>[palItem,...prev.filter(x=>x!==palItem)].slice(0,8));};
-  const onPaint=(key)=>{if(painting.current&&palItem){dispatch({type:'SS',key,data:defSlot(palItem)});}};
+  const onPaint=(key)=>{
+    if(painting.current&&palItem){dispatch({type:'SS',key,data:defSlot(palItem)});return;}
+    if(rmbDown.current&&key!==rmbStart.current){
+      if(!rmbDragged.current&&palItem&&rmbStart.current){dispatch({type:'SS',key:rmbStart.current,data:defSlot(palItem)});}
+      rmbDragged.current=true;
+      if(palItem){dispatch({type:'SS',key,data:defSlot(palItem)});setRecent(prev=>[palItem,...prev.filter(x=>x!==palItem)].slice(0,8));}
+      else{setMultiSel(prev=>{const n=new Set(prev);n.add(key);return n;});setSelSlot(key);}
+    }
+  };
 
   const[showMenu,setShowMenu]=useState(false);
   const menuRef=useRef(null);
@@ -1556,8 +1565,7 @@ if(d.projects){
     <div className="sb">
       <span>{selSlot?`Slot ${selSlot} (#${parseInt(selSlot.split("-")[0])*9+parseInt(selSlot.split("-")[1])})`:multiSel.size>1?`${multiSel.size} selected`:""}</span>
       <span>{palItem?`Размещение:${itemName(palItem)}`:""}</span>
-      <span>{renderPipeline.running?`Рендер: ${renderPipeline.done}/${renderPipeline.total} · `
-:""}{proj.rows}x9 {"·"} {Object.keys(proj.slots).length} предм. {"·"} {saveStatus}</span>
+      <span>{proj.rows}x9 {"·"} {Object.keys(proj.slots).length} предм. {"·"} {saveStatus}</span>
     </div>
     {htt&&<HoverTT data={htt.data} x={htt.x} y={htt.y}/>}
     {showExport&&<ExportModal project={proj} onClose={()=>setShowExport(false)}/>}
