@@ -1959,6 +1959,14 @@ function App(){
   const[showExport,setShowExport]=useState(false);
   const[showGrad,setShowGrad]=useState(false);
   const[showColorPicker,setShowColorPicker]=useState(false);
+  const[mode,setMode]=useState("editor");
+  const[activeWS,setActiveWS]=useState(null);
+  const[projectCache,setProjectCache]=useState({});
+  const refreshProjectCache=ws=>{if(!ws)return;const c={};for(const m of ws.menus){const p=loadProj(m.projectId);if(p)c[m.projectId]=p;}setProjectCache(c);};
+  const openCanvas=ws=>{setActiveWS(ws);refreshProjectCache(ws);setMode("canvas");};
+  const updateWS=ws=>{setActiveWS(ws);saveWS(ws);refreshProjectCache(ws);};
+  const editMenuFromCanvas=pid=>{const p=loadProj(pid);if(p){saveProj(proj);dispatch({type:'LP',project:p});setSelSlot(null);setMultiSel(new Set());setMode("editor");}};
+  useEffect(()=>{if(mode==="canvas"&&activeWS){saveProj(proj);refreshProjectCache(activeWS);}},[mode]);
   const[showTpls,setShowTpls]=useState(false);
   const[showProjs,setShowProjs]=useState(false);
   const[showNums,setShowNums]=useState(false);
@@ -2064,6 +2072,8 @@ function App(){
         <button className="b" onClick={()=>setShowColorPicker(true)}><span style={{display:"inline-block",width:10,height:10,borderRadius:2,background:"linear-gradient(135deg,#ff0000,#00ff00,#0000ff)",marginRight:3}}/>{"Цвета"}</button>
         <button className="b bp" onClick={()=>setShowExport(true)}>{"Экспорт"}</button>
         <div className="tsep"/>
+        {mode==="editor"?<button className="b" onClick={()=>{const wl=loadWSList();if(wl.length){const ws=loadWS(wl[wl.length-1]);if(ws){openCanvas(ws);return;}}const ws=newWS();saveWS(ws);openCanvas(ws);}} style={{borderColor:"var(--ac)"}}>{"Canvas"}</button>
+        :<button className="b" onClick={()=>setMode("editor")} style={{borderColor:"var(--ac)"}}>{"← Редактор"}</button>}
         <div className="burger" ref={menuRef}>
           <button className="b" onClick={()=>setShowMenu(!showMenu)}>{"☰"}</button>
           {showMenu&&<div className="burger-dd">
@@ -2093,20 +2103,24 @@ if(d.projects){
   saveProj(p);dispatch({type:'LP',project:p});setSelSlot(null);setMultiSel(new Set());
 }
 }catch(err){alert("Ошибка: "+err.message);}};r.readAsText(f);};inp.click();}}>{"Импорт"}</button>
+            <div style={{height:1,background:"var(--bd)",margin:"2px 0"}}/>
+            <button className="b" onClick={()=>{setShowMenu(false);const ws=newWS();saveWS(ws);openCanvas(ws);}}>{"Новый workspace"}</button>
+            {loadWSList().map(id=>{const ws=loadWS(id);return ws?<button key={id} className="b" onClick={()=>{setShowMenu(false);openCanvas(ws);}}>{"\uD83D\uDDFA "+ws.name}</button>:null;})}
           </div>}
         </div>
       </div>
     </div>
-    <div className="workspace">
+    {mode==="editor"?<div className="workspace">
       <Palette selItem={palItem} onSelect={(id,preset)=>{if(id===palItem&&!preset){setPalItem(null);setPalPreset(null);}else{setPalItem(id);setPalPreset(preset||null);}}} recent={recent}/>
       <Grid project={proj} selSlot={selSlot} multiSel={multiSel} onSlotMD={onSlotMD} onSlotCtx={onSlotCtx} dispatch={dispatch} showNums={showNums} setHTT={setHTT} onPaint={onPaint} onBgClick={()=>{setPalItem(null);setSelSlot(null);setMultiSel(new Set());}}/>
       <ItemEditor data={selSlot?proj.slots[selSlot]:null} slotKey={selSlot} dispatch={dispatch}/>
     </div>
-    <div className="sb">
+    :<CanvasView workspace={activeWS} onUpdateWS={updateWS} onEditMenu={editMenuFromCanvas} projects={projectCache}/>}
+    {mode==="editor"&&<div className="sb">
       <span>{selSlot?`Slot ${selSlot} (#${parseInt(selSlot.split("-")[0])*9+parseInt(selSlot.split("-")[1])})`:multiSel.size>1?`${multiSel.size} selected`:""}</span>
       <span>{palItem?`Размещение:${itemName(palItem)}`:""}</span>
       <span>{proj.rows}x9 {"·"} {Object.keys(proj.slots).length} предм. {"·"} {saveStatus}</span>
-    </div>
+    </div>}
     {htt&&<HoverTT data={htt.data} x={htt.x} y={htt.y}/>}
     {showExport&&<ExportModal project={proj} onClose={()=>setShowExport(false)}/>}
     {showGrad&&<GradientModal onClose={()=>setShowGrad(false)} onApply={selSlot&&proj.slots[selSlot]?(segs)=>{dispatch({type:'SS',key:selSlot,data:{...proj.slots[selSlot],displayName:segs}});}:null}/>}
