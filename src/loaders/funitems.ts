@@ -1,6 +1,7 @@
 import type { ItemDatabase } from '@/types'
 import { parseMM } from '@/utils/minimessage'
 import { intToHex } from '@/utils/color'
+import { assetUrl } from '@/utils/paths'
 
 interface FunItemEntry {
   item?: string
@@ -75,12 +76,12 @@ export function setRPIndex(index: Record<string, string>) {
 
 export async function loadFunItems(db: ItemDatabase): Promise<number> {
   try {
-    const r = await fetch('/assets/funitems/index.json')
+    const r = await fetch(assetUrl('assets/funitems/index.json'))
     if (!r.ok) return 0
     const files: string[] = await r.json()
 
     const results = await Promise.all(
-      files.map(f => fetch(`/assets/funitems/${f}`).then(r => r.ok ? r.json() as Promise<FunItemCategory> : null).catch(() => null))
+      files.map(f => fetch(assetUrl(`assets/funitems/${f}`)).then(r => r.ok ? r.json() as Promise<FunItemCategory> : null).catch(() => null))
     )
 
     let total = 0
@@ -100,7 +101,8 @@ export async function loadFunItems(db: ItemDatabase): Promise<number> {
         const pc = parsePotionColor(entry)
         const skull = parseSkullTexture(entry)
         const cmd = parseCMD(entry)
-        const rpTex = cmd ? rpIndex[`${mat}:${cmd}`] || null : null
+        const rpRaw = cmd ? rpIndex[`${mat}:${cmd}`] || null : null
+        const rpTex = rpRaw ? assetUrl(rpRaw) : null
 
         items.push({
           id: mat,

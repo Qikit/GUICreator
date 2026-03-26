@@ -1,8 +1,9 @@
 import { useRef, useEffect } from 'react'
-import { hexToRgb, rgbToHex } from '@/utils/color'
+import { hexToRgb } from '@/utils/color'
+import { assetUrl } from '@/utils/paths'
 import s from '@/styles/shared.module.css'
 
-const TEX = '/assets/minecraft/textures/'
+const TEX = assetUrl('assets/minecraft/textures/')
 const POTION_LAYERS: Record<string, { base: string; overlay: string }> = {
   potion: { base: `${TEX}item/potion.png`, overlay: `${TEX}item/potion_overlay.png` },
   splash_potion: { base: `${TEX}item/splash_potion.png`, overlay: `${TEX}item/potion_overlay.png` },

@@ -1,8 +1,9 @@
 import { setRuLocale } from '@/utils/slot'
+import { assetUrl } from '@/utils/paths'
 
 export async function loadLocale(): Promise<number> {
   try {
-    const r = await fetch('/assets/minecraft/lang/ru_ru.json')
+    const r = await fetch(assetUrl('assets/minecraft/lang/ru_ru.json'))
     if (!r.ok) return 0
     const data: Record<string, string> = await r.json()
     const result: Record<string, string> = {}
