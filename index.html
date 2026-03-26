@@ -1538,20 +1538,44 @@ function ColorPickerModal({onClose,onApply}){
 }
 
 // Export Modal
+function seg2amText(segs){if(!segs||!segs.length)return"";let r="";for(const s of segs){r+="<"+s.color+">";if(s.bold)r+="&l";if(s.italic)r+="&o";if(s.underlined)r+="&n";if(s.strikethrough)r+="&m";if(s.obfuscated)r+="&k";r+=s.text;}return r;}
 function ExportModal({project,onClose}){
   const[tab,setTab]=useState("json");const[copied,setCopied]=useState(false);
+  const[amCmd,setAmCmd]=useState(project.name.toLowerCase().replace(/[^a-z0-9]/g,"")||"menu");
+  const[fmClass,setFmClass]=useState(project.name.replace(/[^a-zA-Z0-9]/g,"")+"GUI"||"PreviewGUI");
   const gen=()=>{const filled=[];for(let r=0;r<project.rows;r++)for(let c=0;c<9;c++){const k=`${r}-${c}`;const s=project.slots[k];if(s)filled.push({slot:r*9+c,...s});}
     if(tab==="json")return JSON.stringify({menu:{title:project.name,size:project.rows*9,rows:project.rows},slots:filled.map(s=>({slot:s.slot,material:s.itemId.toUpperCase(),displayName:{legacy:seg2leg(s.displayName),minimessage:seg2mm(s.displayName),segments:s.displayName},lore:{legacy:s.lore.map(l=>seg2leg(l)),minimessage:s.lore.map(l=>seg2mm(l)),segments:s.lore},amount:s.amount,enchanted:s.enchanted,customModelData:s.customModelData})),metadata:{exportedAt:new Date().toISOString(),tool:"MC Menu Designer v3.0",totalSlots:project.rows*9,filledSlots:filled.length}},null,2);
     if(tab==="yaml"){let y=`title: "${seg2leg([ds(project.name,"#FFFFFF")])}"\nsize: ${project.rows*9}\nitems:\n`;for(const s of filled){y+=`  '${s.slot}':\n    material: ${s.itemId.toUpperCase()}\n    name: "${seg2leg(s.displayName)}"\n`;if(s.lore.length){y+=`    lore:\n`;for(const l of s.lore)y+=`      - "${seg2leg(l)}"\n`;}y+=`    amount: ${s.amount}\n`;if(s.enchanted)y+=`    enchanted: true\n`;}return y;}
     if(tab==="legacy"){let t=`Menu: ${project.name} (${project.rows}x9)\n\n`;for(const s of filled){t+=`Slot ${s.slot}: ${seg2leg(s.displayName)}\n`;for(let i=0;i<s.lore.length;i++)t+=`  Lore ${i+1}: ${seg2leg(s.lore[i])}\n`;}return t;}
     if(tab==="minimessage"){let t=`Menu: ${project.name} (${project.rows}x9)\n\n`;for(const s of filled){t+=`Slot ${s.slot}: ${seg2mm(s.displayName)}\n`;for(let i=0;i<s.lore.length;i++)t+=`  Lore ${i+1}: ${seg2mm(s.lore[i])}\n`;}return t;}
+    if(tab==="abstractmenus"){let c=`title: "&8${project.name}"\nsize: ${project.rows}\nactivators {\n  command: "${amCmd}"\n}\nitems: [\n`;
+      for(const s of filled){c+=`  {\n    slot: ${s.slot}\n    material: ${s.itemId.toUpperCase()}\n`;
+        const nm=seg2amText(s.displayName);if(nm)c+=`    name: "${nm}"\n`;
+        if(s.lore&&s.lore.length>0){c+=`    lore: [\n`;for(const l of s.lore)c+=`      "${seg2amText(l)}"\n`;c+=`    ]\n`;}
+        if(s.enchanted)c+=`    glow: true\n`;if(s.amount>1)c+=`    count: ${s.amount}\n`;
+        c+=`    flags: ["HIDE_ATTRIBUTES","HIDE_ENCHANTS"]\n  }\n`;}c+=`]\n`;return c;}
+    if(tab==="funmenu"){const chars="123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuv";let ci=0;const sc={};const pat=[];
+      for(let r=0;r<project.rows;r++){let line="";for(let c=0;c<9;c++){const k=r+"-"+c;if(project.slots[k]){const ch=chars[ci++]||"?";sc[k]=ch;line+=ch;}else line+=".";}pat.push(line);}
+      let code=`package su.funtime.menu.menus.preview\n\nimport org.bukkit.Material\nimport su.funtime.agui.*\nimport su.funtime.menu.FunMenu\n\nclass ${fmClass}(inst: FunMenu) : SingleGUISurface(${project.rows}, inst) {\n\n    override fun onUpdateNodes() {\n        with(newPattern("""\n`;
+      for(const l of pat)code+=`            ${l}\n`;code+=`        """.trimIndent())) {\n            title { !"${project.name.replace(/"/g,'\\"')}" }\n\n`;
+      for(const[k,ch]of Object.entries(sc)){const d=project.slots[k];if(!d)continue;
+        code+=`            iconAt(pos('${ch}')) {\n                type(Material.${d.itemId.toUpperCase()})\n`;
+        const ns=d.displayName||[];if(ns.length>0&&ns.some(s=>s.text.trim())){
+          code+=`                name(${ns.map(s=>`"${s.color.replace("#","").toUpperCase()}".hex + "${s.text.replace(/"/g,'\\"')}"`).join(" + ")})\n`;}
+        else code+=`                name(!" ")\n`;
+        for(const ll of(d.lore||[])){if(!ll||!ll.length){code+=`                loreLine(!F_BONE + "")\n`;continue;}
+          code+=`                loreLine(${ll.map(s=>`"${s.color.replace("#","").toUpperCase()}".hex + "${s.text.replace(/"/g,'\\"')}"`).join(" + ")})\n`;}
+        if(d.enchanted)code+=`                glow()\n`;code+=`                allFlags()\n            }\n`;}
+      code+=`        }\n    }\n}\n`;return code;}
     return"";};
   const txt=gen();
   const copy=()=>navigator.clipboard.writeText(txt).then(()=>{setCopied(true);setTimeout(()=>setCopied(false),2000);});
-  const dl=()=>{const ext=tab==="yaml"?"yml":tab==="json"?"json":"txt";const b=new Blob([txt],{type:"text/plain;charset=utf-8"});const u=URL.createObjectURL(b);const a=document.createElement("a");a.href=u;a.download=`${project.name.replace(/[^a-zA-Z0-9Ѐ-ӿ]/g,"_")}.${ext}`;a.click();URL.revokeObjectURL(u);};
+  const dl=()=>{const ext=tab==="yaml"?"yml":tab==="json"?"json":tab==="abstractmenus"?"conf":tab==="funmenu"?"kt":"txt";const b=new Blob([txt],{type:"text/plain;charset=utf-8"});const u=URL.createObjectURL(b);const a=document.createElement("a");a.href=u;a.download=`${project.name.replace(/[^a-zA-Z0-9Ѐ-ӿ]/g,"_")}.${ext}`;a.click();URL.revokeObjectURL(u);};
   return(<div className="mo" onClick={onClose}><div className="md" onClick={e=>e.stopPropagation()}>
     <div className="md-t">{"Экспорт"}</div>
-    <div className="md-tabs">{[{id:"json",l:"JSON"},{id:"yaml",l:"YAML"},{id:"legacy",l:"\u00A7-Codes"},{id:"minimessage",l:"MiniMessage"}].map(t=><div key={t.id} className={"md-tab"+(tab===t.id?" on":"")} onClick={()=>{setTab(t.id);setCopied(false);}}>{t.l}</div>)}</div>
+    <div className="md-tabs">{[{id:"json",l:"JSON"},{id:"yaml",l:"YAML"},{id:"legacy",l:"§-Codes"},{id:"minimessage",l:"MiniMessage"},{id:"abstractmenus",l:"AbstractMenus"},{id:"funmenu",l:"FunMenu"}].map(t=><div key={t.id} className={"md-tab"+(tab===t.id?" on":"")} onClick={()=>{setTab(t.id);setCopied(false);}}>{t.l}</div>)}</div>
+    {tab==="abstractmenus"&&<div style={{display:"flex",gap:6,alignItems:"center",marginBottom:6}}><span style={{fontSize:11,color:"var(--tx2)"}}>{"Команда:"}</span><input value={amCmd} onChange={e=>setAmCmd(e.target.value)} style={{width:120,fontSize:12}}/></div>}
+    {tab==="funmenu"&&<div style={{display:"flex",gap:6,alignItems:"center",marginBottom:6}}><span style={{fontSize:11,color:"var(--tx2)"}}>{"Класс:"}</span><input value={fmClass} onChange={e=>setFmClass(e.target.value)} style={{width:180,fontSize:12}}/></div>}
     <div className="md-code">{txt}</div>
     <div className="md-acts"><button className="b bp" onClick={copy}>{copied?"Скопировано!":"Копировать"}</button><button className="b" onClick={dl} style={{border:"1px solid var(--bd2)"}}>{"Скачать"}</button><button className="b" onClick={onClose}>{"Закрыть"}</button></div>
   </div></div>);
