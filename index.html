@@ -1464,6 +1464,22 @@ function ProjModal({list,onOpen,onDel,onClose}){
 }
 
 // Gradient Generator (Birdflop-style)
+const GRAD_PRESETS=[
+  {name:"Огонь",colors:["#FF0000","#FF6600","#FFFF00"],text:"Огненный текст"},
+  {name:"Океан",colors:["#0066FF","#00CCFF","#00FFCC"],text:"Глубины океана"},
+  {name:"Закат",colors:["#FF0000","#FF6600","#FF00FF"],text:"Закат солнца"},
+  {name:"Радуга",colors:["#FF0000","#FF7700","#FFFF00","#00FF00","#0000FF","#8B00FF"],text:"Радужный текст"},
+  {name:"Лёд",colors:["#00FFFF","#0088FF","#FFFFFF"],text:"Ледяной текст"},
+  {name:"Оригинальный",colors:["#4498DB","#DB44C5","#DB8044"],text:"Оригинальный предмет"},
+  {name:"Легендарный",colors:["#ADFF00","#CEC700","#FF7400"],text:"Легендарный"},
+  {name:"Призрачный",colors:["#737373","#362F2F"],text:"Призрачный предмет"},
+  {name:"Дьявольский",colors:["#C41010","#362F2F","#C41010"],text:"Талисман Дьявола"},
+  {name:"Мистический",colors:["#950000","#FF0000","#950000"],text:"Мистический огонь"},
+  {name:"Изумрудный",colors:["#00AA00","#55FF55","#FFFFFF"],text:"Изумрудный блеск"},
+  {name:"Золотой",colors:["#FF6600","#FFC155","#FFFFE6"],text:"Золотая надпись"},
+  {name:"Неоновый",colors:["#FF00FF","#00FFFF","#FF00FF"],text:"Неоновая вывеска"},
+  {name:"Кровавый",colors:["#8D0000","#FF0000","#8D0000"],text:"Кровавый клинок"},
+];
 function GradientModal({onApply,onClose}){
   const[text,setText]=useState("Пример текста");
   const[colors,setColors]=useState(["#FF0000","#00FF00"]);
@@ -1493,6 +1509,10 @@ function GradientModal({onApply,onClose}){
   const copy=(t,label)=>{navigator.clipboard.writeText(t).then(()=>{setCopied(label);setTimeout(()=>setCopied(""),1500);});};
   return(<div className="mo" onClick={onClose}><div className="md" onClick={e=>e.stopPropagation()} style={{minWidth:520}}>
     <div className="md-t">{"Градиент-генератор"}</div>
+    <div className="ed-s">
+      <div className="ed-st">{"Пресеты"}</div>
+      <div style={{display:"flex",flexWrap:"wrap",gap:4}}>{GRAD_PRESETS.map((p,i)=><button key={i} className="b" style={{background:`linear-gradient(90deg,${p.colors.join(",")})`,color:"#fff",textShadow:"0 1px 2px #000",fontSize:10,padding:"3px 8px"}} onClick={()=>{setColors([...p.colors]);setText(p.text);}}>{p.name}</button>)}</div>
+    </div>
     <div className="ed-s">
       <div className="ed-st">{"Текст"}</div>
       <input value={text} onChange={e=>setText(e.target.value)} style={{width:"100%",padding:"8px 12px",fontSize:14,borderRadius:"var(--r8)"}} placeholder={"Введите текст..."}/>
