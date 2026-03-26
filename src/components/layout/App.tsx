@@ -4,7 +4,7 @@ import { useProjectStore } from '@/store/projectStore'
 import { usePrefsStore } from '@/store/prefsStore'
 import { ITEM_DB } from '@/data/items'
 import { BUILT_TPLS } from '@/data/templates'
-import { saveProject, loadProject, loadProjectList, deleteProject, loadPrefs, savePrefs, saveWorkspace, loadWorkspace, loadWorkspaceList, newWorkspace } from '@/storage'
+import { saveProject, loadProject, loadProjectList, deleteProject, loadPrefs, savePrefs, saveWorkspace, loadWorkspace, loadWorkspaceList, newWorkspace, saveUserTemplates } from '@/storage'
 import { loadLocale, loadFunItems, loadResourcepackIndex } from '@/loaders'
 import { defSlot, makeSlot, newProject, ERASER_ID, itemName } from '@/utils/slot'
 import { parseMM } from '@/utils/minimessage'
@@ -37,6 +37,8 @@ export function App() {
   const [recent, setRecent] = useState<string[]>([])
   const [clipboard, setClipboard] = useState<{ multi: boolean; data: Record<string, SlotData> | SlotData; keys?: string[] } | null>(null)
   const [showMenu, setShowMenu] = useState(false)
+  const [uTpls, setUTpls] = useState<unknown[]>([])
+  const saveTpl = (t: unknown) => { const upd = [...uTpls, t]; setUTpls(upd); saveUserTemplates(upd) }
   const [mode, setMode] = useState<'editor' | 'canvas'>('editor')
   const [activeWS, setActiveWS] = useState<Workspace | null>(null)
   const [projectCache, setProjectCache] = useState<Record<string, Project>>({})
@@ -74,6 +76,9 @@ export function App() {
     }, 1000)
     return () => clearTimeout(saveTimer.current)
   }, [proj])
+
+  // Save on close
+  useEffect(() => { const h = () => saveProject(proj); window.addEventListener('beforeunload', h); return () => window.removeEventListener('beforeunload', h) }, [proj])
 
   // Hover tooltip follow
   useEffect(() => {
@@ -304,8 +309,17 @@ export function App() {
             {showMenu && (
               <div className={tb.burgerDd}>
                 <button className={ss.btn} onClick={() => { setShowMenu(false); setShowTpls(true) }}>Шаблоны</button>
+                <button className={ss.btn} onClick={() => { setShowMenu(false); if (!palItem || palItem === ERASER_ID) { alert('Сначала выберите предмет'); return }; dispatch({ type: 'FE', data: makeSlot(palItem, palPreset) }) }}>Залить пустые</button>
+                <button className={ss.btn} onClick={() => { setShowMenu(false); const name = prompt('Название шаблона:', proj.name); if (!name) return; const desc = prompt('Описание:', ''); saveTpl({ name, desc: desc || '', rows: proj.rows, slots: JSON.parse(JSON.stringify(proj.slots)) }) }}>Сохранить шаблон</button>
+                <div style={{ height: 1, background: 'var(--bd)', margin: '2px 0' }} />
                 <button className={ss.btn} onClick={() => { setShowMenu(false); const np = newProject(); saveProject(proj); loadProj(np); setSelSlot(null); setMultiSel(new Set()) }}>Новый проект</button>
                 <button className={ss.btn} onClick={() => { setShowMenu(false); setShowProjs(true) }}>Открыть проект</button>
+                <div style={{ height: 1, background: 'var(--bd)', margin: '2px 0' }} />
+                <button className={ss.btn} onClick={() => { setShowMenu(false); const all = loadProjectList().map(id => loadProject(id)).filter(Boolean); const d = { projects: all, templates: uTpls }; const blob = new Blob([JSON.stringify(d, null, 2)], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'mc-menu-backup.json'; a.click(); URL.revokeObjectURL(url) }}>Бэкап</button>
+                <button className={ss.btn} onClick={() => { setShowMenu(false); const inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.json'; inp.onchange = (ev: Event) => { const f = (ev.target as HTMLInputElement).files?.[0]; if (!f) return; const reader = new FileReader(); reader.onload = (re) => { try { const d = JSON.parse(re.target?.result as string); if (d.projects) { for (const p of d.projects) saveProject(p); const last = d.projects[d.projects.length - 1]; if (last) { loadProj(last); setSelSlot(null); setMultiSel(new Set()) } } } catch (err) { alert('Ошибка: ' + (err as Error).message) } }; reader.readAsText(f) }; inp.click() }}>Импорт</button>
+                <div style={{ height: 1, background: 'var(--bd)', margin: '2px 0' }} />
+                <button className={ss.btn} onClick={() => { setShowMenu(false); const ws = newWorkspace(); saveWorkspace(ws); openCanvas(ws) }}>Новый workspace</button>
+                {loadWorkspaceList().map(id => { const ws = loadWorkspace(id); return ws ? <button key={id} className={ss.btn} onClick={() => { setShowMenu(false); openCanvas(ws) }}>{'\uD83D\uDDFA ' + ws.name}</button> : null })}
               </div>
             )}
           </div>

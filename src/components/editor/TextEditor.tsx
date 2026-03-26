@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { TextSegment } from '@/types'
 import { parseMM } from '@/utils/minimessage'
 import { defaultSegment } from '@/utils/slot'
+import { MC_SYMBOLS } from '@/data/loreTemplates'
 import { McText } from '@/components/shared'
 import s from '@/styles/editor.module.css'
 import ss from '@/styles/shared.module.css'
@@ -23,6 +24,7 @@ const FORMATS: Array<{ key: keyof TextSegment; label: string }> = [
 export function TextEditor({ label, segs, onChange }: Props) {
   const [mode, setMode] = useState<'visual' | 'mm'>('visual')
   const [mmText, setMmText] = useState('')
+  const [showSymbols, setShowSymbols] = useState(false)
 
   const updateSeg = (i: number, patch: Partial<TextSegment>) => {
     const next = segs.map((seg, j) => j === i ? { ...seg, ...patch } : seg)
@@ -81,7 +83,33 @@ export function TextEditor({ label, segs, onChange }: Props) {
               <button className={s.segRemove} onClick={() => removeSeg(i)}>✕</button>
             </div>
           ))}
-          <button className={s.addBtn} onClick={addSeg}>+ Сегмент</button>
+          <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+            <button className={s.addBtn} onClick={addSeg}>+ Сегмент</button>
+            <div style={{ position: 'relative' }}>
+              <button className={s.addBtn} onClick={() => setShowSymbols(!showSymbols)}>⚝ Символы</button>
+              {showSymbols && (
+                <div style={{ position: 'absolute', zIndex: 100, background: 'var(--pan)', border: '1px solid var(--bd2)', borderRadius: 5, padding: 6, boxShadow: '0 6px 16px rgba(0,0,0,.5)', width: 240, top: '100%', left: 0 }}>
+                  {MC_SYMBOLS.map((g, gi) => (
+                    <div key={gi} style={{ marginBottom: 4 }}>
+                      <div style={{ fontSize: 9, color: 'var(--tx3)', marginBottom: 2 }}>{g.group}</div>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+                        {g.symbols.map((sym, si) => (
+                          <button key={si} style={{ width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--bd)', borderRadius: 2, cursor: 'pointer', fontSize: 12, background: 'none', color: 'var(--tx1)' }}
+                            onClick={() => {
+                              const last = segs.length - 1
+                              if (last >= 0) updateSeg(last, { text: segs[last].text + sym })
+                              else onChange([defaultSegment(sym)])
+                              setShowSymbols(false)
+                            }}
+                            title={sym}>{sym}</button>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
         </>
       ) : (
         <>
