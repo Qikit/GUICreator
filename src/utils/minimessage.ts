@@ -53,7 +53,7 @@ export function parseMM(input: string): TextSegment[] {
       if (tag === 'reset' || tag === 'r') { stack.length = 1; stack[0] = { ...DEF_STYLE }; continue }
       if (tag === 'newline' || tag === 'br') continue
       const st = { ...cur() }
-      if (tag in FMT) { (st as Record<string, boolean>)[FMT[tag]] = true }
+      if (tag in FMT) { (st as unknown as Record<string, boolean>)[FMT[tag]] = true }
       else if (tag.startsWith('#') && /^#[0-9A-Fa-f]{6}$/.test(tag)) { st.color = tag.toUpperCase() }
       else if (tag.startsWith('color:') || tag.startsWith('c:')) {
         const cn = tag.split(':')[1]
