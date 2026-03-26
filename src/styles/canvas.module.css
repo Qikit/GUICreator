@@ -1,0 +1,17 @@
+.canvasWrap { flex: 1; overflow: hidden; position: relative; background: #0a0a0c; cursor: grab; }
+.canvasWrap.grabbing { cursor: grabbing; }
+.canvasSurf { position: absolute; top: 0; left: 0; transform-origin: 0 0; }
+.gridBg { position: absolute; inset: 0; background-image: radial-gradient(circle, #1a1a1e 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; }
+.miniMenu { position: absolute; background: var(--pan); border: 1px solid var(--bd); border-radius: var(--r8); box-shadow: 0 4px 16px rgba(0,0,0,.4); user-select: none; min-width: 120px; z-index: 2; }
+.miniMenu:hover { border-color: var(--bd2); }
+.mmHeader { padding: 4px 8px; font-size: 11px; font-weight: 600; color: var(--tx1); cursor: grab; border-bottom: 1px solid var(--bd); display: flex; align-items: center; justify-content: space-between; gap: 4px; border-radius: var(--r8) var(--r8) 0 0; }
+.mmHeader:active { cursor: grabbing; }
+.mmGrid { display: grid; grid-template-columns: repeat(9, 20px); gap: 1px; padding: 3px; background: var(--srf); border-radius: 0 0 var(--r8) var(--r8); }
+.mmSlot { width: 20px; height: 20px; background: #8B8B8B; border: 1px solid; border-color: #555 #aaa #aaa #555; display: flex; align-items: center; justify-content: center; position: relative; cursor: pointer; }
+.mmSlot:hover { outline: 1px solid var(--ac); z-index: 1; }
+.mmSlotConn { outline: 2px solid #4ade80; z-index: 2; }
+.mmSlot .itemTex { width: 16px; height: 16px; image-rendering: pixelated; }
+.canvasTb { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); display: flex; gap: 4px; z-index: 10; align-items: center; }
+.connLine { stroke: var(--ac); stroke-width: 2; fill: none; marker-end: url(#arrowhead); }
+.connLine:hover { stroke: #f87171; stroke-width: 3; cursor: pointer; }
+.connHint { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); background: var(--ac); color: #0f0f11; padding: 4px 12px; border-radius: var(--r8); font-size: 11px; font-weight: 600; z-index: 10; }
