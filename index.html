@@ -1491,6 +1491,52 @@ function Palette({selItem,onSelect,recent}){
   </div>);
 }
 
+// Color Picker Modal
+function ColorPickerModal({onClose,onApply}){
+  const[hue,setHue]=useState(0);const[sat,setSat]=useState(100);const[val,setVal]=useState(100);
+  const[hex,setHex]=useState("#FF0000");const[copied,setCopied]=useState(false);
+  const sqRef=useRef(null);const hueRef=useRef(null);
+  const hsv2hex=(h,s,v)=>{s/=100;v/=100;const c=v*s,x=c*(1-Math.abs((h/60)%2-1)),m=v-c;let r=0,g=0,b=0;
+    if(h<60){r=c;g=x;}else if(h<120){r=x;g=c;}else if(h<180){g=c;b=x;}else if(h<240){g=x;b=c;}else if(h<300){r=x;b=c;}else{r=c;b=x;}
+    return rgbToHex(Math.round((r+m)*255),Math.round((g+m)*255),Math.round((b+m)*255));};
+  useEffect(()=>{setHex(hsv2hex(hue,sat,val));},[hue,sat,val]);
+  useEffect(()=>{const c=sqRef.current;if(!c)return;const ctx=c.getContext("2d");const w=c.width,h=c.height;
+    const base=hsv2hex(hue,100,100);const gh=ctx.createLinearGradient(0,0,w,0);gh.addColorStop(0,"#FFFFFF");gh.addColorStop(1,base);ctx.fillStyle=gh;ctx.fillRect(0,0,w,h);
+    const gv=ctx.createLinearGradient(0,0,0,h);gv.addColorStop(0,"rgba(0,0,0,0)");gv.addColorStop(1,"#000000");ctx.fillStyle=gv;ctx.fillRect(0,0,w,h);},[hue]);
+  useEffect(()=>{const c=hueRef.current;if(!c)return;const ctx=c.getContext("2d");
+    const g=ctx.createLinearGradient(0,0,0,c.height);["#FF0000","#FFFF00","#00FF00","#00FFFF","#0000FF","#FF00FF","#FF0000"].forEach((c,i)=>g.addColorStop(i/6,c));
+    ctx.fillStyle=g;ctx.fillRect(0,0,c.width,c.height);},[]);
+  const drag=(ref,fn)=>e=>{const handle=ev=>{const r=ref.current.getBoundingClientRect();fn(Math.max(0,Math.min(1,(ev.clientX-r.left)/r.width)),Math.max(0,Math.min(1,(ev.clientY-r.top)/r.height)));};
+    handle(e);const up=()=>{window.removeEventListener("mousemove",handle);window.removeEventListener("mouseup",up);};window.addEventListener("mousemove",handle);window.addEventListener("mouseup",up);};
+  const fromHex=h=>{const r=parseInt(h.slice(1,3),16),g=parseInt(h.slice(3,5),16),b=parseInt(h.slice(5,7),16);
+    const mx=Math.max(r,g,b),mn=Math.min(r,g,b),d=mx-mn;let hh=0;if(d>0){if(mx===r)hh=60*(((g-b)/d)%6);else if(mx===g)hh=60*((b-r)/d+2);else hh=60*((r-g)/d+4);}
+    if(hh<0)hh+=360;setHue(Math.round(hh));setSat(Math.round(mx?d/mx*100:0));setVal(Math.round(mx/255*100));setHex(h);};
+  const copyHex=()=>{navigator.clipboard.writeText("<"+hex+">");setCopied(true);setTimeout(()=>setCopied(false),1500);};
+  return(<div className="mo" onClick={e=>{if(e.target===e.currentTarget)onClose();}}>
+    <div className="md" onClick={e=>e.stopPropagation()} style={{maxWidth:420}}>
+      <div className="md-t">{"Палитра цветов"}</div>
+      <div style={{display:"flex",gap:12,alignItems:"flex-start"}}>
+        <div style={{position:"relative"}}><canvas ref={sqRef} width={200} height={200} style={{borderRadius:4,cursor:"crosshair"}} onMouseDown={drag(sqRef,(x,y)=>{setSat(Math.round(x*100));setVal(Math.round((1-y)*100));})}/>
+          <div style={{position:"absolute",width:12,height:12,border:"2px solid #fff",borderRadius:"50%",boxShadow:"0 0 3px rgba(0,0,0,.5)",pointerEvents:"none",transform:"translate(-50%,-50%)",left:sat*2,top:(100-val)*2}}/></div>
+        <div style={{position:"relative"}}><canvas ref={hueRef} width={20} height={200} style={{borderRadius:4,cursor:"pointer"}} onMouseDown={drag(hueRef,(_,y)=>{setHue(Math.round(y*360));})}/>
+          <div style={{position:"absolute",width:24,height:6,border:"2px solid #fff",borderRadius:3,boxShadow:"0 0 3px rgba(0,0,0,.5)",pointerEvents:"none",left:-2,top:hue/360*200-3}}/></div>
+        <div style={{display:"flex",flexDirection:"column",gap:8,flex:1}}>
+          <div style={{width:"100%",height:48,borderRadius:4,border:"1px solid var(--bd)",background:hex}}/>
+          <input value={hex} onChange={e=>{const v=e.target.value;setHex(v);if(/^#[0-9A-Fa-f]{6}$/.test(v))fromHex(v.toUpperCase());}} style={{fontFamily:"'JetBrains Mono',monospace",fontSize:13}}/>
+          <button className="b bp" onClick={copyHex}>{copied?"Скопировано!":"Копировать <#>"}</button>
+          {onApply&&<button className="b" onClick={()=>{onApply(hex);onClose();}}>{"Применить"}</button>}
+        </div>
+      </div>
+      <div style={{marginTop:10}}>
+        <div style={{fontSize:10,color:"var(--tx2)",marginBottom:4}}>{"MC ЦВЕТА"}</div>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(8,1fr)",gap:3}}>
+          {MC_COLORS.map((c,i)=><div key={i} style={{width:24,height:24,borderRadius:3,cursor:"pointer",background:c.h,border:"2px solid transparent"}} onClick={()=>fromHex(c.h)} title={c.m}/>)}
+        </div>
+      </div>
+    </div>
+  </div>);
+}
+
 // Export Modal
 function ExportModal({project,onClose}){
   const[tab,setTab]=useState("json");const[copied,setCopied]=useState(false);
@@ -1643,6 +1689,7 @@ function App(){
   const[palPreset,setPalPreset]=useState(null);
   const[showExport,setShowExport]=useState(false);
   const[showGrad,setShowGrad]=useState(false);
+  const[showColorPicker,setShowColorPicker]=useState(false);
   const[showTpls,setShowTpls]=useState(false);
   const[showProjs,setShowProjs]=useState(false);
   const[showNums,setShowNums]=useState(false);
@@ -1744,6 +1791,7 @@ function App(){
       </div><div style={{flex:1}}/>
       <div className="tg">
         <button className="b" onClick={()=>setShowGrad(true)} style={{borderImage:"linear-gradient(90deg,var(--ac),#22d3ee) 1",borderWidth:1,borderStyle:"solid"}}>{"Градиент"}</button>
+        <button className="b" onClick={()=>setShowColorPicker(true)}><span style={{display:"inline-block",width:10,height:10,borderRadius:2,background:"linear-gradient(135deg,#ff0000,#00ff00,#0000ff)",marginRight:3}}/>{"Цвета"}</button>
         <button className="b bp" onClick={()=>setShowExport(true)}>{"Экспорт"}</button>
         <div className="tsep"/>
         <div className="burger" ref={menuRef}>
@@ -1792,6 +1840,7 @@ if(d.projects){
     {htt&&<HoverTT data={htt.data} x={htt.x} y={htt.y}/>}
     {showExport&&<ExportModal project={proj} onClose={()=>setShowExport(false)}/>}
     {showGrad&&<GradientModal onClose={()=>setShowGrad(false)} onApply={selSlot&&proj.slots[selSlot]?(segs)=>{dispatch({type:'SS',key:selSlot,data:{...proj.slots[selSlot],displayName:segs}});}:null}/>}
+    {showColorPicker&&<ColorPickerModal onClose={()=>setShowColorPicker(false)}/>}
     {showTpls&&<TemplateModal onApply={applyTpl} onClose={()=>setShowTpls(false)} uTpls={uTpls} onDelTpl={delTpl}/>}
     {showProjs&&<ProjModal list={loadProjList()} onOpen={p=>{dispatch({type:'LP',project:p});setSelSlot(null);setMultiSel(new Set());setShowProjs(false);}} onDel={id=>{delProj(id);setShowProjs(false);}} onClose={()=>setShowProjs(false)}/>}
     {ctxMenu&&<CtxMenu x={ctxMenu.x} y={ctxMenu.y} items={ctxMenu.items} onClose={()=>setCtxMenu(null)}/>}
