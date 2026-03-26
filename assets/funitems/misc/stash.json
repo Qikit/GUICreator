@@ -1,0 +1,145 @@
+{
+  "categoryId": "stash",
+  "items": [
+    {
+      "item": "TRIPWIRE_HOOK{don-item:\"stash-global\",stashType:\"global\",Enchantments:[{id:mending,lvl:1}],HideFlags:1}",
+      "components": "minecraft:tripwire_hook",
+      "properties": {
+        "display": "<color:#55FFFF>[★]</color><color:#00AAAA> Отмычка к Ресурсам</color>",
+        "enchantments": {
+          "mending": 1
+        },
+        "flags": [
+          "HIDE_ENCHANTS"
+        ],
+        "lores": [
+          "<color:#5555FF>Этой отмычкой можно</color>",
+          "<color:#5555FF>Открыть хранилище</color>",
+          "<color:#5555FF>С Ресурсами</color>"
+        ],
+        "identifier": "stash-global",
+        "tags": {
+          "don-item": {
+            "STRING": "stash-global"
+          },
+          "stash_type": {
+            "STRING": "global"
+          }
+        },
+        "count": 1
+      }
+    },
+    {
+      "item": "TRIPWIRE_HOOK{don-item:\"stash-spheres\",stashType:\"spheres\",Enchantments:[{id:mending,lvl:1}],HideFlags:1}",
+      "components": "minecraft:tripwire_hook",
+      "properties": {
+        "display": "<color:#55FFFF>[★]</color><color:#00AAAA> Отмычка к Сферам</color>",
+        "enchantments": {
+          "mending": 1
+        },
+        "flags": [
+          "HIDE_ENCHANTS"
+        ],
+        "lores": [
+          "<color:#5555FF>Этой отмычкой можно</color>",
+          "<color:#5555FF>Открыть хранилище</color>",
+          "<color:#5555FF>С Сферами</color>"
+        ],
+        "identifier": "stash-spheres",
+        "tags": {
+          "don-item": {
+            "STRING": "stash-spheres"
+          },
+          "stash_type": {
+            "STRING": "spheres"
+          }
+        },
+        "count": 1
+      }
+    },
+    {
+      "item": "TRIPWIRE_HOOK{don-item:\"stash-armour\",stashType:\"armour\",Enchantments:[{id:mending,lvl:1}],HideFlags:1}",
+      "components": "minecraft:tripwire_hook",
+      "properties": {
+        "display": "<color:#55FFFF>[★]</color><color:#00AAAA> Отмычка к Броне</color>",
+        "enchantments": {
+          "mending": 1
+        },
+        "flags": [
+          "HIDE_ENCHANTS"
+        ],
+        "lores": [
+          "<color:#5555FF>Этой отмычкой можно</color>",
+          "<color:#5555FF>Открыть хранилище</color>",
+          "<color:#5555FF>С Броней</color>"
+        ],
+        "identifier": "stash-armour",
+        "tags": {
+          "don-item": {
+            "STRING": "stash-armour"
+          },
+          "stash_type": {
+            "STRING": "armour"
+          }
+        },
+        "count": 1
+      }
+    },
+    {
+      "item": "TRIPWIRE_HOOK{don-item:\"stash-weapons\",stashType:\"weapons\",Enchantments:[{id:mending,lvl:1}],HideFlags:1}",
+      "components": "minecraft:tripwire_hook",
+      "properties": {
+        "display": "<color:#55FFFF>[★]</color><color:#00AAAA> Отмычка к Оружию</color>",
+        "enchantments": {
+          "mending": 1
+        },
+        "flags": [
+          "HIDE_ENCHANTS"
+        ],
+        "lores": [
+          "<color:#5555FF>Этой отмычкой можно</color>",
+          "<color:#5555FF>Открыть хранилище</color>",
+          "<color:#5555FF>С Оружием</color>"
+        ],
+        "identifier": "stash-weapons",
+        "tags": {
+          "don-item": {
+            "STRING": "stash-weapons"
+          },
+          "stash_type": {
+            "STRING": "weapons"
+          }
+        },
+        "count": 1
+      }
+    },
+    {
+      "item": "TRIPWIRE_HOOK{don-item:\"stash-tools\",stashType:\"tools\",Enchantments:[{id:mending,lvl:1}],HideFlags:1}",
+      "components": "minecraft:tripwire_hook",
+      "properties": {
+        "display": "<color:#55FFFF>[★]</color><color:#00AAAA> Отмычка к Инструментам</color>",
+        "enchantments": {
+          "mending": 1
+        },
+        "flags": [
+          "HIDE_ENCHANTS"
+        ],
+        "lores": [
+          "<color:#5555FF>Этой отмычкой можно</color>",
+          "<color:#5555FF>Открыть хранилище</color>",
+          "<color:#5555FF>С Инструментами</color>"
+        ],
+        "identifier": "stash-tools",
+        "tags": {
+          "don-item": {
+            "STRING": "stash-tools"
+          },
+          "stash_type": {
+            "STRING": "tools"
+          }
+        },
+        "count": 1
+      }
+    }
+  ]
+}

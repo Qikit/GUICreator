@@ -495,6 +495,44 @@ fetch("assets/minecraft/lang/ru_ru.json").then(r=>r.ok?r.json():null).then(data=
   if(window._forceUpdate)window._forceUpdate();
 }).catch(e=>{console.warn("ru_ru.json error:",e);});
 
+// ========== FUNITEMS LOADER ==========
+function parseFunMaterial(item){
+  if(item.components){const m=item.components.match(/^minecraft:([a-z_]+)/);if(m)return m[1];}
+  if(item.item){const m=item.item.match(/^([A-Z_]+)/);if(m)return m[1].toLowerCase();}
+  return"stone";
+}
+function loadFunItems(){
+  fetch("assets/funitems/index.json").then(r=>r.ok?r.json():[]).then(files=>{
+    const promises=files.map(f=>fetch("assets/funitems/"+f).then(r=>r.ok?r.json():null).catch(()=>null));
+    Promise.all(promises).then(results=>{
+      let total=0;
+      for(const data of results){
+        if(!data||!data.items)continue;
+        const catId="ft_"+(data.categoryId||"misc").replace(/[^a-z0-9]/g,"_");
+        const catLabel="FT: "+(data.categoryId||"misc").replace(/[-_]/g," ").replace(/\b\w/g,c=>c.toUpperCase());
+        const items=[];
+        for(const entry of data.items){
+          const props=entry.properties;if(!props)continue;
+          const mat=parseFunMaterial(entry);
+          const display=props.display||props.identifier||mat;
+          const lores=props.lores||[];
+          const ench=props.enchantments&&Object.keys(props.enchantments).length>0;
+          items.push({id:mat,name:(props.identifier||mat).replace(/[-_]/g," "),preset:{
+            displayName:parseMM(display),
+            lore:lores.map(l=>parseMM(l)),
+            enchanted:ench,
+          }});
+          total++;
+        }
+        if(items.length)ITEM_DB[catId]={label:catLabel,preset:true,items};
+      }
+      console.log("FunItems loaded:",total,"items");
+      if(window._forceUpdate)window._forceUpdate();
+    });
+  }).catch(e=>{console.warn("FunItems error:",e);});
+}
+loadFunItems();
+
 function ruName(id){
   if(RU_LOADED[id])return RU_LOADED[id];
   return id.replace(/_/g," ").replace(/\b\w/g,c=>c.toUpperCase());
@@ -536,6 +574,7 @@ const BUILT_TPLS=[
 function findItem(id){for(const cat of Object.values(ITEM_DB)){const f=cat.items.find(i=>i.id===id);if(f)return f;}return null;}
 function itemName(id){return ruName(id);}
 function defSlot(id){return{itemId:id,displayName:[ds(itemName(id),"#FFFFFF")],lore:[],amount:1,enchanted:false,customModelData:null,hideFlags:0};}
+function makeSlot(id,preset){if(preset)return{itemId:id,displayName:JSON.parse(JSON.stringify(preset.displayName||[ds(itemName(id))])),lore:JSON.parse(JSON.stringify(preset.lore||[])),amount:preset.amount||1,enchanted:preset.enchanted||false,customModelData:preset.customModelData||null,hideFlags:preset.hideFlags||0};return defSlot(id);}
 
 function closestMC(hex){hex=hex.toUpperCase();const m=MC_COLORS.find(c=>c.h.toUpperCase()===hex);if(m)return m.c;let b=MC_COLORS[15],bd=Infinity;const r1=parseInt(hex.slice(1,3),16),g1=parseInt(hex.slice(3,5),16),b1=parseInt(hex.slice(5,7),16);for(const c of MC_COLORS){const r2=parseInt(c.h.slice(1,3),16),g2=parseInt(c.h.slice(3,5),16),b2=parseInt(c.h.slice(5,7),16);const d=(r1-r2)**2+(g1-g2)**2+(b1-b2)**2;if(d<bd){bd=d;b=c;}}return b.c;}
 function mcName(hex){hex=hex.toUpperCase();const m=MC_COLORS.find(c=>c.h.toUpperCase()===hex);return m?m.m:null;}
@@ -1341,15 +1380,17 @@ function Grid({project,selSlot,multiSel,onSlotMD,onSlotCtx,dispatch,showNums,set
 }
 
 // Palette
-function PalItem({id,sel,onSelect}){
+function PalItem({id,sel,onSelect,preset}){
   const[hover,setHover]=useState(null);
   const ref=useRef(null);
-  return(<div ref={ref} className={"pi"+(sel?" sel":"")} onClick={()=>onSelect(id)}
+  return(<div ref={ref} className={"pi"+(sel?" sel":"")} onClick={()=>onSelect(id,preset)}
     onMouseEnter={e=>{const r=e.currentTarget.getBoundingClientRect();setHover({x:r.right+4,y:r.top});}}
     onMouseLeave={()=>setHover(null)}>
     <ItemTexture itemId={id} size={28}/>
     {hover&&ReactDOM.createPortal(<div className="htt" style={{left:hover.x,top:hover.y}}>
-      <div className="prev-box" style={{padding:"4px 7px"}}><div className="line" style={{fontSize:13,whiteSpace:"nowrap"}}><span className="mc-tx mc-b" style={{color:"#FFFFFF"}}>{ruName(id)}</span></div>
+      <div className="prev-box" style={{padding:"4px 7px"}}>
+        {preset?<>{preset.displayName&&<McText segs={preset.displayName}/>}{preset.lore&&preset.lore.map((l,i)=><McText key={i} segs={l}/>)}</>
+        :<div className="line" style={{fontSize:13,whiteSpace:"nowrap"}}><span className="mc-tx mc-b" style={{color:"#FFFFFF"}}>{ruName(id)}</span></div>}
       <div style={{color:"#555",fontSize:9,fontFamily:"'Minecraft','Courier New',monospace"}}>minecraft:{id}</div></div>
     </div>,document.body)}
   </div>);
@@ -1371,7 +1412,7 @@ function Palette({selItem,onSelect,recent}){
       </div>}
       {Object.entries(filtered).map(([k,cat])=>(<div key={k} className="pal-cat">
         <div className="pal-ch" onClick={()=>tog(k)}><span className={"ar"+((openCats[k]||search)?" op":"")}>{"▶"}</span>{cat.label} <span style={{color:"var(--tx3)",fontSize:9,marginLeft:3}}>({cat.items.length})</span></div>
-        {(openCats[k]||search)&&<div className="pi-grid">{cat.items.map(it=><PalItem key={it.id} id={it.id} sel={selItem===it.id} onSelect={onSelect}/>)}</div>}
+        {(openCats[k]||search)&&<div className="pi-grid">{cat.items.map((it,i)=><PalItem key={it.id+"-"+i} id={it.id} sel={selItem===it.id&&!it.preset} onSelect={onSelect} preset={it.preset}/>)}</div>}
       </div>))}
     </div>
     <div className="pal-c"><input value={customId} onChange={e=>setCustomId(e.target.value)} placeholder="custom_id" onKeyDown={e=>{if(e.key==="Enter"&&customId){onSelect(customId);setCustomId("");}}}/>
@@ -1508,6 +1549,7 @@ function App(){
   const[selSlot,setSelSlot]=useState(null);
   const[multiSel,setMultiSel]=useState(new Set());
   const[palItem,setPalItem]=useState(null);
+  const[palPreset,setPalPreset]=useState(null);
   const[showExport,setShowExport]=useState(false);
   const[showGrad,setShowGrad]=useState(false);
   const[showTpls,setShowTpls]=useState(false);
@@ -1556,10 +1598,10 @@ function App(){
       return;}
     if(e.button!==0)return;setHTT(null);
     // Alt+Click = brush mode
-    if(e.altKey&&palItem){e.preventDefault();painting.current=true;dispatch({type:'SS',key,data:defSlot(palItem)});setRecent(prev=>[palItem,...prev.filter(x=>x!==palItem)].slice(0,8));return;}
-    if(e.ctrlKey){setMultiSel(prev=>{const n=new Set(prev);if(n.has(key))n.delete(key);else n.add(key);return n;});setSelSlot(key);lastClick.current=key;if(palItem&&!multiSel.has(key)){dispatch({type:'SS',key,data:defSlot(palItem)});setRecent(prev=>[palItem,...prev.filter(x=>x!==palItem)].slice(0,8));}return;}
+    if(e.altKey&&palItem){e.preventDefault();painting.current=true;dispatch({type:'SS',key,data:makeSlot(palItem,palPreset)});setRecent(prev=>[palItem,...prev.filter(x=>x!==palItem)].slice(0,8));return;}
+    if(e.ctrlKey){setMultiSel(prev=>{const n=new Set(prev);if(n.has(key))n.delete(key);else n.add(key);return n;});setSelSlot(key);lastClick.current=key;if(palItem&&!multiSel.has(key)){dispatch({type:'SS',key,data:makeSlot(palItem,palPreset)});setRecent(prev=>[palItem,...prev.filter(x=>x!==palItem)].slice(0,8));}return;}
     if(e.shiftKey&&lastClick.current){const[r1,c1]=lastClick.current.split("-").map(Number);const[r2,c2]=key.split("-").map(Number);const n=new Set(multiSel);for(let r=Math.min(r1,r2);r<=Math.max(r1,r2);r++)for(let c=Math.min(c1,c2);c<=Math.max(c1,c2);c++)n.add(`${r}-${c}`);setMultiSel(n);setSelSlot(key);return;}
-    if(palItem){if(multiSel.size>1){const slots={};for(const k of multiSel)slots[k]=defSlot(palItem);slots[key]=defSlot(palItem);dispatch({type:'SM',slots});setRecent(prev=>[palItem,...prev.filter(x=>x!==palItem)].slice(0,8));setMultiSel(new Set());setSelSlot(key);}else{dispatch({type:'SS',key,data:defSlot(palItem)});setRecent(prev=>[palItem,...prev.filter(x=>x!==palItem)].slice(0,8));setSelSlot(key);setMultiSel(new Set());}}
+    if(palItem){if(multiSel.size>1){const slots={};for(const k of multiSel)slots[k]=makeSlot(palItem,palPreset);slots[key]=makeSlot(palItem,palPreset);dispatch({type:'SM',slots});setRecent(prev=>[palItem,...prev.filter(x=>x!==palItem)].slice(0,8));setMultiSel(new Set());setSelSlot(key);}else{dispatch({type:'SS',key,data:makeSlot(palItem,palPreset)});setRecent(prev=>[palItem,...prev.filter(x=>x!==palItem)].slice(0,8));setSelSlot(key);setMultiSel(new Set());}}
     else{setSelSlot(key===selSlot?null:key);setMultiSel(new Set());}lastClick.current=key;};
 
   const onSlotCtx=(e,key)=>{e.preventDefault();
@@ -1568,7 +1610,7 @@ function App(){
     setHTT(null);const items=[];
     if(proj.slots[key]){items.push({l:"Редактировать",fn:()=>{setSelSlot(key);setMultiSel(new Set());}});items.push({l:"Копировать",fn:()=>setClipboard({m:false,d:JSON.parse(JSON.stringify(proj.slots[key]))})});}
     if(clipboard)items.push({l:"Вставить",fn:()=>dispatch({type:'SS',key,data:JSON.parse(JSON.stringify(clipboard.m?Object.values(clipboard.d)[0]:clipboard.d))})});
-    if(palItem){items.push({sep:true});if(multiSel.size>0)items.push({l:`Fill ${multiSel.size} sel`,fn:()=>{const slots={};for(const k of multiSel)slots[k]=defSlot(palItem);dispatch({type:'SM',slots});setMultiSel(new Set());}});items.push({l:"Залить пустые",fn:()=>dispatch({type:'FE',data:defSlot(palItem)})});}
+    if(palItem){items.push({sep:true});if(multiSel.size>0)items.push({l:`Fill ${multiSel.size} sel`,fn:()=>{const slots={};for(const k of multiSel)slots[k]=makeSlot(palItem,palPreset);dispatch({type:'SM',slots});setMultiSel(new Set());}});items.push({l:"Залить пустые",fn:()=>dispatch({type:'FE',data:makeSlot(palItem,palPreset)})});}
     if(proj.slots[key]){items.push({sep:true});items.push({l:"Удалить",d:true,fn:()=>{dispatch({type:'RS',key});if(selSlot===key)setSelSlot(null);}});}
     if(multiSel.size>0){items.push({sep:true});items.push({l:`Remove ${multiSel.size} sel`,d:true,fn:()=>{dispatch({type:'RM',keys:[...multiSel]});setMultiSel(new Set());setSelSlot(null);}});}
     const[r]=key.split("-").map(Number);items.push({sep:true});items.push({l:"Очистить ряд",d:true,fn:()=>{const ks=[];for(let c=0;c<9;c++)ks.push(`${r}-${c}`);dispatch({type:'RM',keys:ks});}});
@@ -1577,13 +1619,13 @@ function App(){
   const applyTpl=t=>{const np=newProj(t.name||proj.name,t.rows);np.slots=JSON.parse(JSON.stringify(t.slots||{}));dispatch({type:'LP',project:np});setSelSlot(null);setMultiSel(new Set());setShowTpls(false);};
   const saveTpl=()=>{const name=prompt("Название шаблона:",proj.name);if(!name)return;const desc=prompt("Описание:","");const tpl={name,desc:desc||"",rows:proj.rows,slots:JSON.parse(JSON.stringify(proj.slots))};const upd=[...uTpls,tpl];setUTpls(upd);saveUTpls(upd);};
   const delTpl=i=>{const upd=uTpls.filter((_,j)=>j!==i);setUTpls(upd);saveUTpls(upd);};
-  const fillSel=()=>{if(!palItem||multiSel.size===0)return;const slots={};for(const k of multiSel)slots[k]=defSlot(palItem);dispatch({type:'SM',slots});setRecent(prev=>[palItem,...prev.filter(x=>x!==palItem)].slice(0,8));};
+  const fillSel=()=>{if(!palItem||multiSel.size===0)return;const slots={};for(const k of multiSel)slots[k]=makeSlot(palItem,palPreset);dispatch({type:'SM',slots});setRecent(prev=>[palItem,...prev.filter(x=>x!==palItem)].slice(0,8));};
   const onPaint=(key)=>{
-    if(painting.current&&palItem){dispatch({type:'SS',key,data:defSlot(palItem)});return;}
+    if(painting.current&&palItem){dispatch({type:'SS',key,data:makeSlot(palItem,palPreset)});return;}
     if(rmbDown.current&&key!==rmbStart.current){
-      if(!rmbDragged.current&&palItem&&rmbStart.current){dispatch({type:'SS',key:rmbStart.current,data:defSlot(palItem)});}
+      if(!rmbDragged.current&&palItem&&rmbStart.current){dispatch({type:'SS',key:rmbStart.current,data:makeSlot(palItem,palPreset)});}
       rmbDragged.current=true;
-      if(palItem){dispatch({type:'SS',key,data:defSlot(palItem)});setRecent(prev=>[palItem,...prev.filter(x=>x!==palItem)].slice(0,8));}
+      if(palItem){dispatch({type:'SS',key,data:makeSlot(palItem,palPreset)});setRecent(prev=>[palItem,...prev.filter(x=>x!==palItem)].slice(0,8));}
       else{setMultiSel(prev=>{const n=new Set(prev);n.add(key);return n;});setSelSlot(key);}
     }
   };
@@ -1611,7 +1653,7 @@ function App(){
           {showMenu&&<div className="burger-dd">
             <button className="b" onClick={()=>{setShowMenu(false);setShowTpls(true);}}>{"Шаблоны"}</button>
             <button className="b" onClick={()=>{setShowMenu(false);saveTpl();}}>{"Сохранить шаблон"}</button>
-            <button className="b" onClick={()=>{setShowMenu(false);if(!palItem){alert("Сначала выберите предмет");return;}dispatch({type:'FE',data:defSlot(palItem)});}}>{"Залить пустые"}</button>
+            <button className="b" onClick={()=>{setShowMenu(false);if(!palItem){alert("Сначала выберите предмет");return;}dispatch({type:'FE',data:makeSlot(palItem,palPreset)});}}>{"Залить пустые"}</button>
             <div style={{height:1,background:"var(--bd)",margin:"2px 0"}}/>
             <button className="b" onClick={()=>{setShowMenu(false);if(!confirm("Новый проект?"))return;saveProj(proj);dispatch({type:'LP',project:newProj()});setSelSlot(null);setMultiSel(new Set());}}>{"Новый проект"}</button>
             <button className="b" onClick={()=>{setShowMenu(false);setShowProjs(true);}}>{"Открыть проект"}</button>
@@ -1640,7 +1682,7 @@ if(d.projects){
       </div>
     </div>
     <div className="workspace">
-      <Palette selItem={palItem} onSelect={id=>setPalItem(id===palItem?null:id)} recent={recent}/>
+      <Palette selItem={palItem} onSelect={(id,preset)=>{if(id===palItem&&!preset){setPalItem(null);setPalPreset(null);}else{setPalItem(id);setPalPreset(preset||null);}}} recent={recent}/>
       <Grid project={proj} selSlot={selSlot} multiSel={multiSel} onSlotMD={onSlotMD} onSlotCtx={onSlotCtx} dispatch={dispatch} showNums={showNums} setHTT={setHTT} onPaint={onPaint} onBgClick={()=>{setPalItem(null);setSelSlot(null);setMultiSel(new Set());}}/>
       <ItemEditor data={selSlot?proj.slots[selSlot]:null} slotKey={selSlot} dispatch={dispatch}/>
     </div>

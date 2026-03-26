@@ -1,0 +1,23 @@
+{
+  "categoryId": "altar-undead",
+  "items": [
+    {
+      "item": "END_PORTAL_FRAME",
+      "components": "minecraft:end_portal_frame",
+      "properties": {
+        "identifier": "altar_undead_activator",
+        "display": "<gradient:#aa0000:#75aa91:#aa0000>[★] Алтарь нежити</gradient>",
+        "lores": [
+          "<white>Алтарь нежити установит временный</white>",
+          "<white>ивент, откроется портал в преисподню"
+        ],
+        "count": 1,
+        "tags": {
+          "don-item": {
+            "STRING": "altar_undead_activator"
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,124 @@
+{
+  "categoryId": "common",
+  "items": [
+    {
+      "item": "ELYTRA{Unbreakable:1}",
+      "components": "minecraft:elytra[unbreakable={}]",
+      "feature": "WIPE_OCTOBER_2025",
+      "properties": {
+        "display": "<color:#ff0000>[⚒]</color><color:#ff6600> Нерушимые элитры</color>",
+        "identifier": "elytra-unbreak",
+        "enchantments": {
+          "vanishing_curse": 1
+        }
+      }
+    },
+    {
+      "item": "WIND_CHARGE",
+      "components": "minecraft:wind_charge",
+      "feature": "ONLY_NEW_VERSION",
+      "properties": {
+        "identifier": "wind_charge",
+        "uniqueItem": false
+      }
+    },
+    {
+      "item": "SILENCE_ARMOR_TRIM_SMITHING_TEMPLATE",
+      "components": "minecraft:silence_armor_trim_smithing_template",
+      "feature": "ONLY_NEW_VERSION",
+      "properties": {
+        "identifier": "silence_armor_trim_smithing_template",
+        "uniqueItem": false
+      }
+    },
+    {
+      "item": "RIB_ARMOR_TRIM_SMITHING_TEMPLATE",
+      "components": "minecraft:rib_armor_trim_smithing_template",
+      "feature": "ONLY_NEW_VERSION",
+      "properties": {
+        "identifier": "rib_armor_trim_smithing_template",
+        "uniqueItem": false
+      }
+    },
+    {
+      "item": "EYE_ARMOR_TRIM_SMITHING_TEMPLATE",
+      "components": "minecraft:eye_armor_trim_smithing_template",
+      "feature": "ONLY_NEW_VERSION",
+      "properties": {
+        "identifier": "eye_armor_trim_smithing_template",
+        "uniqueItem": false
+      }
+    },
+    {
+      "item": "RAISER_ARMOR_TRIM_SMITHING_TEMPLATE",
+      "components": "minecraft:raiser_armor_trim_smithing_template",
+      "feature": "ONLY_NEW_VERSION",
+      "properties": {
+        "identifier": "raiser_armor_trim_smithing_template",
+        "uniqueItem": false
+      }
+    },
+    {
+      "item": "IRON_NUGGET",
+      "components": "minecraft:iron_nugget",
+      "properties": {
+        "identifier": "silver",
+        "display": "<color:#0099ff>[★]</color> <gradient:#2E88FF:#42DBFF>Серебро</gradient>",
+        "lores": [
+          "<blue>Это валюта для покупки</blue>",
+          "<blue>отмычек к тайникам</blue>",
+          "<blue>у Знахаря (/warp stash)</blue>"
+        ],
+        "disable": [
+          "place"
+        ],
+        "count": 1,
+        "tags": {
+          "don-item": {
+            "STRING": "silver"
+          }
+        }
+      }
+    },
+    {
+      "item": "CREEPER_SPAWN_EGG{EntityTag:{ExplosionRadius:5b,powered:15b}}",
+      "components": "minecraft:creeper_spawn_egg[minecraft:entity_data={ExplosionRadius: 5b, id: \"minecraft:creeper\", powered: 1b}]",
+      "properties": {
+        "identifier": "creeper-egg",
+        "display": "<gradient:#FFEC71:#6EFF67><b>⚡</b> Заряженный крипер <b>⚡</b></gradient>",
+        "lores": [
+          "<blue>Спавнит заряженного крипера,</blue>",
+          "<blue>способного разрушать</blue>",
+          "<blue>регионы игроков</blue>"
+        ],
+        "count": 1
+      }
+    },
+    {
+      "item": "CREEPER_SPAWN_EGG",
+      "components": "minecraft:creeper_spawn_egg",
+      "properties": {
+        "identifier": "creeper-egg-spawner",
+        "lores": [
+          "<#00ff00>[100% шанс в спавнере]"
+        ],
+        "tags": {
+          "ignore-chance": {
+            "BOOLEAN": true
+          }
+        }
+      }
+    },
+    {
+      "item": "GOLDEN_HELMET",
+      "components": "minecraft:golden_helmet[minecraft:equippable={\"equip_sound\":\"minecraft:item.armor.equip_gold\", \"slot\":\"head\"},minecraft:custom_model_data={floats:[1]}]",
+      "properties": {
+        "identifier": "pancakes",
+        "display": "<gradient:#FF5A00:#FFCB00>[☻] Тарелка блинов</gradient>",
+        "lores": [
+          "<gray>Можно надеть ☻"
+        ]
+      }
+    }
+  ]
+}
