@@ -501,6 +501,11 @@ function parseFunMaterial(item){
   if(item.item){const m=item.item.match(/^([A-Z_]+)/);if(m)return m[1].toLowerCase();}
   return"stone";
 }
+function parseFunPotionColor(entry){
+  if(entry.components){const m=entry.components.match(/custom_color:\s*(\d+)/);if(m){const v=parseInt(m[1]);return"#"+((v>>16)&0xFF).toString(16).padStart(2,"0")+((v>>8)&0xFF).toString(16).padStart(2,"0")+(v&0xFF).toString(16).padStart(2,"0");}}
+  if(entry.item){const m=entry.item.match(/CustomPotionColor:\s*(\d+)/);if(m){const v=parseInt(m[1]);return"#"+((v>>16)&0xFF).toString(16).padStart(2,"0")+((v>>8)&0xFF).toString(16).padStart(2,"0")+(v&0xFF).toString(16).padStart(2,"0");}}
+  return null;
+}
 function loadFunItems(){
   fetch("assets/funitems/index.json").then(r=>r.ok?r.json():[]).then(files=>{
     const promises=files.map(f=>fetch("assets/funitems/"+f).then(r=>r.ok?r.json():null).catch(()=>null));
@@ -517,10 +522,12 @@ function loadFunItems(){
           const display=props.display||props.identifier||mat;
           const lores=props.lores||[];
           const ench=props.enchantments&&Object.keys(props.enchantments).length>0;
+          const pc=parseFunPotionColor(entry);
           items.push({id:mat,name:(props.identifier||mat).replace(/[-_]/g," "),preset:{
             displayName:parseMM(display),
             lore:lores.map(l=>parseMM(l)),
             enchanted:ench,
+            potionColor:pc,
           }});
           total++;
         }
