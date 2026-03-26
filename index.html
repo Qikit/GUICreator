@@ -168,6 +168,7 @@ textarea{resize:vertical;min-height:60px}
 .burger{position:relative}
 .burger-dd{position:absolute;top:100%;right:0;margin-top:4px;background:var(--pan);border:1px solid var(--bd2);border-radius:var(--r8);padding:4px;min-width:160px;box-shadow:0 8px 24px rgba(0,0,0,.5);z-index:100;display:flex;flex-direction:column;gap:1px}
 .burger-dd .b{justify-content:flex-start;width:100%;border:none;border-radius:4px}
+.pi.eraser{background:rgba(248,113,113,.1);border-color:rgba(248,113,113,.3)}.pi.eraser:hover{background:rgba(248,113,113,.2);border-color:var(--er)}.pi.eraser.sel{background:rgba(248,113,113,.25);border-color:var(--er)}
 </style>
 </head>
 <body>
@@ -561,6 +562,7 @@ const MC_SYMBOLS=[
 ];
 
 const gid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+const ERASER_ID="__eraser__";
 const ds=(text="",color="#FFFFFF",bold=false)=>({text,color,bold,italic:false,underlined:false,strikethrough:false,obfuscated:false});
 
 const BUILT_TPLS=[
@@ -1407,6 +1409,7 @@ function Palette({selItem,onSelect,recent}){
     <div className="pal-h">{"Предметы"}</div>
     <div className="pal-s"><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Поиск..."/></div>
     <div className="pal-b">
+      <div style={{padding:"3px 5px 0"}}><div className={"pi eraser"+(selItem===ERASER_ID?" sel":"")} onClick={()=>onSelect(ERASER_ID)} title="Ластик" style={{width:"100%",height:30,display:"flex",alignItems:"center",justifyContent:"center",gap:4,fontSize:11,color:"var(--er)"}}><span>{"🚫"}</span><span>{"Ластик"}</span></div></div>
       {recent.length>0&&<div className="pal-cat"><div className="pal-ch" onClick={()=>tog("__r")}><span className={"ar"+(openCats.__r!==false?" op":"")}>{"▶"}</span>{"Недавние"}</div>
         {openCats.__r!==false&&<div className="pi-grid">{recent.map(id=><PalItem key={id} id={id} sel={selItem===id} onSelect={onSelect}/>)}</div>}
       </div>}
@@ -1598,8 +1601,11 @@ function App(){
       if(!palItem){setMultiSel(prev=>{const n=new Set(prev);n.add(key);return n;});setSelSlot(key);}
       return;}
     if(e.button!==0)return;setHTT(null);
+    // Eraser mode
+    if(palItem===ERASER_ID){if(multiSel.size>0){const ks=[...multiSel];if(!ks.includes(key))ks.push(key);dispatch({type:'RM',keys:ks.filter(k=>proj.slots[k])});setMultiSel(new Set());setSelSlot(null);}else if(proj.slots[key]){dispatch({type:'RS',key});}lastClick.current=key;return;}
     // Alt+Click = brush mode
-    if(e.altKey&&palItem){e.preventDefault();painting.current=true;dispatch({type:'SS',key,data:makeSlot(palItem,palPreset)});setRecent(prev=>[palItem,...prev.filter(x=>x!==palItem)].slice(0,8));return;}
+    if(e.altKey&&palItem&&palItem!==ERASER_ID){e.preventDefault();painting.current=true;dispatch({type:'SS',key,data:makeSlot(palItem,palPreset)});setRecent(prev=>[palItem,...prev.filter(x=>x!==palItem)].slice(0,8));return;}
+    if(e.altKey&&palItem===ERASER_ID){e.preventDefault();painting.current=true;if(proj.slots[key])dispatch({type:'RS',key});return;}
     if(e.ctrlKey){setMultiSel(prev=>{const n=new Set(prev);if(n.has(key))n.delete(key);else n.add(key);return n;});setSelSlot(key);lastClick.current=key;if(palItem&&!multiSel.has(key)){dispatch({type:'SS',key,data:makeSlot(palItem,palPreset)});setRecent(prev=>[palItem,...prev.filter(x=>x!==palItem)].slice(0,8));}return;}
     if(e.shiftKey&&lastClick.current){const[r1,c1]=lastClick.current.split("-").map(Number);const[r2,c2]=key.split("-").map(Number);const n=new Set(multiSel);for(let r=Math.min(r1,r2);r<=Math.max(r1,r2);r++)for(let c=Math.min(c1,c2);c<=Math.max(c1,c2);c++)n.add(`${r}-${c}`);setMultiSel(n);setSelSlot(key);return;}
     if(palItem){if(multiSel.size>1){const slots={};for(const k of multiSel)slots[k]=makeSlot(palItem,palPreset);slots[key]=makeSlot(palItem,palPreset);dispatch({type:'SM',slots});setRecent(prev=>[palItem,...prev.filter(x=>x!==palItem)].slice(0,8));setMultiSel(new Set());setSelSlot(key);}else{dispatch({type:'SS',key,data:makeSlot(palItem,palPreset)});setRecent(prev=>[palItem,...prev.filter(x=>x!==palItem)].slice(0,8));setSelSlot(key);setMultiSel(new Set());}}
@@ -1623,11 +1629,13 @@ function App(){
   const delTpl=i=>{const upd=uTpls.filter((_,j)=>j!==i);setUTpls(upd);saveUTpls(upd);};
   const fillSel=()=>{if(!palItem||multiSel.size===0)return;const slots={};for(const k of multiSel)slots[k]=makeSlot(palItem,palPreset);dispatch({type:'SM',slots});setRecent(prev=>[palItem,...prev.filter(x=>x!==palItem)].slice(0,8));};
   const onPaint=(key)=>{
-    if(painting.current&&palItem){dispatch({type:'SS',key,data:makeSlot(palItem,palPreset)});return;}
+    if(painting.current&&palItem){if(palItem===ERASER_ID){if(proj.slots[key])dispatch({type:'RS',key});}else{dispatch({type:'SS',key,data:makeSlot(palItem,palPreset)});}return;}
     if(rmbDown.current&&key!==rmbStart.current){
-      if(!rmbDragged.current&&palItem&&rmbStart.current){dispatch({type:'SS',key:rmbStart.current,data:makeSlot(palItem,palPreset)});}
+      if(!rmbDragged.current&&palItem&&palItem!==ERASER_ID&&rmbStart.current){dispatch({type:'SS',key:rmbStart.current,data:makeSlot(palItem,palPreset)});}
+      if(!rmbDragged.current&&palItem===ERASER_ID&&rmbStart.current&&proj.slots[rmbStart.current]){dispatch({type:'RS',key:rmbStart.current});}
       rmbDragged.current=true;
-      if(palItem){dispatch({type:'SS',key,data:makeSlot(palItem,palPreset)});setRecent(prev=>[palItem,...prev.filter(x=>x!==palItem)].slice(0,8));}
+      if(palItem===ERASER_ID){if(proj.slots[key])dispatch({type:'RS',key});}
+      else if(palItem){dispatch({type:'SS',key,data:makeSlot(palItem,palPreset)});setRecent(prev=>[palItem,...prev.filter(x=>x!==palItem)].slice(0,8));}
       else{setMultiSel(prev=>{const n=new Set(prev);n.add(key);return n;});setSelSlot(key);}
     }
   };
