@@ -1,0 +1,129 @@
+import type { SlotData } from '@/types'
+import { ItemTexture, Preview } from '@/components/shared'
+import { SkullFace } from '@/components/shared/SkullFace'
+import { TINTABLE } from '@/utils/slot'
+import { itemName } from '@/utils/slot'
+import { defaultSegment } from '@/utils/slot'
+import { TextEditor } from './TextEditor'
+import { LoreEditor } from './LoreEditor'
+import s from '@/styles/editor.module.css'
+import ss from '@/styles/shared.module.css'
+
+interface Props {
+  data: SlotData | null
+  slotKey: string | null
+  dispatch: (action: { type: string; [k: string]: unknown }) => void
+}
+
+export function ItemEditor({ data, slotKey, dispatch }: Props) {
+  if (!data || !slotKey) {
+    return <div className={s.editor}><div className={s.empty}>Выберите слот для редактирования</div></div>
+  }
+
+  const upd = (ch: Partial<SlotData>) => dispatch({ type: 'SS', key: slotKey, data: { ...data, ...ch } })
+
+  return (
+    <div className={s.editor}>
+      <div className={s.body}>
+        <div className={s.header}>
+          <ItemTexture itemId={data.itemId} size={32} potionColor={data.potionColor} skullTexture={data.skullTexture} rpTexture={data.rpTexture} />
+          <div><div className={s.itemId}>{data.itemId}</div></div>
+        </div>
+
+        <TextEditor label="Название" segs={data.displayName} onChange={segs => upd({ displayName: segs })} />
+        <LoreEditor lore={data.lore} onChange={lore => upd({ lore })} />
+
+        <div className={s.section}>
+          <div className={s.sectionTitle}>Свойства</div>
+          <div className={s.props}>
+            <label>Количество</label>
+            <div className={s.amount}>
+              <button onClick={() => upd({ amount: Math.max(1, data.amount - 1) })}>-</button>
+              <input
+                type="number"
+                value={data.amount}
+                min={1} max={64}
+                onChange={e => upd({ amount: Math.max(1, Math.min(64, parseInt(e.target.value) || 1)) })}
+              />
+              <button onClick={() => upd({ amount: Math.min(64, data.amount + 1) })}>+</button>
+            </div>
+
+            <label>Зачарование</label>
+            <div
+              className={`${s.toggle} ${data.enchanted ? s.toggleOn : ''}`}
+              onClick={() => upd({ enchanted: !data.enchanted })}
+            />
+
+            <label>CMD</label>
+            <input
+              type="number"
+              value={data.customModelData || ''}
+              placeholder="Custom Model Data"
+              onChange={e => upd({ customModelData: e.target.value ? parseInt(e.target.value) : null })}
+              style={{ width: 100, fontSize: 11 }}
+            />
+
+            {TINTABLE.has(data.itemId) && (
+              <>
+                <label>Цвет зелья</label>
+                <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+                  <input
+                    type="color"
+                    value={data.potionColor || '#FF0000'}
+                    onChange={e => upd({ potionColor: e.target.value.toUpperCase() })}
+                    style={{ width: 28, height: 28, padding: 0, border: '1px solid var(--bd)', borderRadius: 3, cursor: 'pointer' }}
+                  />
+                  <input
+                    value={data.potionColor || ''}
+                    placeholder="#FF0000"
+                    onChange={e => {
+                      const v = e.target.value
+                      if (/^#[0-9A-Fa-f]{6}$/.test(v)) upd({ potionColor: v.toUpperCase() })
+                      else if (!v) upd({ potionColor: null })
+                    }}
+                    style={{ width: 80, fontSize: 11 }}
+                  />
+                  {data.potionColor && <button className={ss.btn} style={{ padding: '2px 5px', fontSize: 10 }} onClick={() => upd({ potionColor: null })}>✕</button>}
+                </div>
+              </>
+            )}
+
+            {data.itemId === 'player_head' && (
+              <>
+                <label>Текстура головы</label>
+                <div style={{ display: 'flex', gap: 4, alignItems: 'center', flexWrap: 'wrap' }}>
+                  {data.skullTexture && <SkullFace url={data.skullTexture} size={24} />}
+                  <button className={ss.btn} style={{ padding: '2px 5px', fontSize: 10 }} onClick={() => {
+                    const v = prompt('Вставьте base64 текстуру или URL скина:')
+                    if (!v) return
+                    if (v.startsWith('http')) { upd({ skullTexture: v }); return }
+                    try {
+                      const j = JSON.parse(atob(v))
+                      const u = j.textures?.SKIN?.url
+                      if (u) upd({ skullTexture: u })
+                      else alert('Не найден URL скина')
+                    } catch (e) { alert('Ошибка парсинга') }
+                  }}>{data.skullTexture ? 'Заменить' : 'Вставить'}</button>
+                  {data.skullTexture && <button className={ss.btn} style={{ padding: '2px 5px', fontSize: 10 }} onClick={() => upd({ skullTexture: null })}>✕</button>}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+
+        <div className={s.section}>
+          <div className={s.sectionTitle}>Превью</div>
+          <Preview name={data.displayName} lore={data.lore} itemId={data.itemId} />
+        </div>
+
+        <div className={s.actions}>
+          <button className={ss.btn} onClick={() => upd({
+            displayName: [defaultSegment(itemName(data.itemId), '#FFFFFF')],
+            lore: [], amount: 1, enchanted: false, customModelData: null, potionColor: null, skullTexture: null,
+          })}>Сбросить</button>
+          <button className={`${ss.btn} ${ss.btnDanger}`} onClick={() => dispatch({ type: 'RS', key: slotKey })}>Удалить</button>
+        </div>
+      </div>
+    </div>
+  )
+}
