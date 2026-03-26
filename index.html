@@ -248,29 +248,6 @@ materials:{label:"Материалы",items:[
 potions:{label:"Зелья и зельеварение",items:[
   "glass_bottle","dragon_breath","brewing_stand","cauldron",
 ].map(id=>({id,name:id.replace(/_/g," ")}))},
-potion_colors:{label:"Цветные зелья",items:(()=>{
-  const pots=[
-    {name:"Исцеление",color:"#F82423"},{name:"Отравление",color:"#4E9331"},{name:"Регенерация",color:"#CD5CAB"},
-    {name:"Сила",color:"#932423"},{name:"Скорость",color:"#7CAFC6"},{name:"Замедление",color:"#5A6C81"},
-    {name:"Урон",color:"#430A09"},{name:"Слабость",color:"#484D48"},{name:"Огнестойкость",color:"#E49A3A"},
-    {name:"Ночное зрение",color:"#1F1FA1"},{name:"Невидимость",color:"#7F8392"},{name:"Подв. дыхание",color:"#2E5299"},
-    {name:"Прыгучесть",color:"#22FF4C"},{name:"Медл. падение",color:"#F7F8E0"},{name:"Удача",color:"#339900"},
-    {name:"Черепаший мастер",color:"#735E91"},
-  ];
-  const r=[];for(const p of pots){
-    r.push({id:"potion",name:"Зелье: "+p.name,preset:{displayName:[ds("Зелье "+p.name,p.color)],lore:[],enchanted:false,potionColor:p.color}});
-    r.push({id:"splash_potion",name:"Взрывное: "+p.name,preset:{displayName:[ds("Взрывное зелье "+p.name,p.color)],lore:[],enchanted:false,potionColor:p.color}});
-    r.push({id:"lingering_potion",name:"Туманное: "+p.name,preset:{displayName:[ds("Туманное зелье "+p.name,p.color)],lore:[],enchanted:false,potionColor:p.color}});
-  }return r;})()},
-tipped_arrows:{label:"Цветные стрелы",items:(()=>{
-  const arr=[
-    {name:"Исцеление",color:"#F82423"},{name:"Отравление",color:"#4E9331"},{name:"Регенерация",color:"#CD5CAB"},
-    {name:"Сила",color:"#932423"},{name:"Скорость",color:"#7CAFC6"},{name:"Замедление",color:"#5A6C81"},
-    {name:"Урон",color:"#430A09"},{name:"Слабость",color:"#484D48"},{name:"Огнестойкость",color:"#E49A3A"},
-    {name:"Ночное зрение",color:"#1F1FA1"},{name:"Невидимость",color:"#7F8392"},{name:"Подв. дыхание",color:"#2E5299"},
-    {name:"Прыгучесть",color:"#22FF4C"},{name:"Медл. падение",color:"#F7F8E0"},
-  ];
-  return arr.map(a=>({id:"tipped_arrow",name:"Стрела: "+a.name,preset:{displayName:[ds("Стрела "+a.name,a.color)],lore:[],enchanted:false,potionColor:a.color}}));})()},
 functional:{label:"Функциональные",items:[
   "barrier","structure_void","light","command_block","chain_command_block","repeating_command_block","structure_block","jigsaw",
   "paper","book","written_book","writable_book","enchanted_book","knowledge_book","name_tag","lead",
@@ -587,6 +564,27 @@ const MC_SYMBOLS=[
 const gid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
 const ERASER_ID="__eraser__";
 const ds=(text="",color="#FFFFFF",bold=false)=>({text,color,bold,italic:false,underlined:false,strikethrough:false,obfuscated:false});
+
+// Potion/arrow presets (needs ds)
+(()=>{const pots=[
+  {name:"Исцеление",color:"#F82423"},{name:"Отравление",color:"#4E9331"},{name:"Регенерация",color:"#CD5CAB"},
+  {name:"Сила",color:"#932423"},{name:"Скорость",color:"#7CAFC6"},{name:"Замедление",color:"#5A6C81"},
+  {name:"Урон",color:"#430A09"},{name:"Слабость",color:"#484D48"},{name:"Огнестойкость",color:"#E49A3A"},
+  {name:"Ночное зрение",color:"#1F1FA1"},{name:"Невидимость",color:"#7F8392"},{name:"Подв. дыхание",color:"#2E5299"},
+  {name:"Прыгучесть",color:"#22FF4C"},{name:"Медл. падение",color:"#F7F8E0"},{name:"Удача",color:"#339900"},
+  {name:"Черепаший мастер",color:"#735E91"},
+];const r=[];for(const p of pots){
+  r.push({id:"potion",name:"Зелье: "+p.name,preset:{displayName:[ds("Зелье "+p.name,p.color)],lore:[],enchanted:false,potionColor:p.color}});
+  r.push({id:"splash_potion",name:"Взрывное: "+p.name,preset:{displayName:[ds("Взрывное зелье "+p.name,p.color)],lore:[],enchanted:false,potionColor:p.color}});
+  r.push({id:"lingering_potion",name:"Туманное: "+p.name,preset:{displayName:[ds("Туманное зелье "+p.name,p.color)],lore:[],enchanted:false,potionColor:p.color}});
+}ITEM_DB.potion_colors={label:"Цветные зелья",items:r};
+const arr=[
+  {name:"Исцеление",color:"#F82423"},{name:"Отравление",color:"#4E9331"},{name:"Регенерация",color:"#CD5CAB"},
+  {name:"Сила",color:"#932423"},{name:"Скорость",color:"#7CAFC6"},{name:"Замедление",color:"#5A6C81"},
+  {name:"Урон",color:"#430A09"},{name:"Слабость",color:"#484D48"},{name:"Огнестойкость",color:"#E49A3A"},
+  {name:"Ночное зрение",color:"#1F1FA1"},{name:"Невидимость",color:"#7F8392"},{name:"Подв. дыхание",color:"#2E5299"},
+  {name:"Прыгучесть",color:"#22FF4C"},{name:"Медл. падение",color:"#F7F8E0"},
+];ITEM_DB.tipped_arrows={label:"Цветные стрелы",items:arr.map(a=>({id:"tipped_arrow",name:"Стрела: "+a.name,preset:{displayName:[ds("Стрела "+a.name,a.color)],lore:[],enchanted:false,potionColor:a.color}}))};})();
 
 const BUILT_TPLS=[
   {name:"Shop 6×9",desc:"Бордеры + навигация",rows:6,slots:(()=>{const s={},g=id=>({itemId:id,displayName:[ds(" ","#000000")],lore:[],amount:1,enchanted:false,customModelData:null,hideFlags:0});for(let c=0;c<9;c++)s["0-"+c]=g("black_stained_glass_pane");for(let r=1;r<5;r++){s[r+"-0"]=g("black_stained_glass_pane");s[r+"-8"]=g("black_stained_glass_pane");}for(let c=0;c<9;c++)s["5-"+c]=g("black_stained_glass_pane");s["5-0"]={itemId:"arrow",displayName:[ds("◀ Назад","#55FF55")],lore:[[ds("Предыдущая страница","#AAAAAA")]],amount:1,enchanted:false,customModelData:null,hideFlags:0};s["5-4"]={itemId:"barrier",displayName:[ds("✕ Закрыть","#FF5555")],lore:[[ds("Закрыть меню","#AAAAAA")]],amount:1,enchanted:false,customModelData:null,hideFlags:0};s["5-8"]={itemId:"arrow",displayName:[ds("Вперёд ▶","#55FF55")],lore:[[ds("Следующая страница","#AAAAAA")]],amount:1,enchanted:false,customModelData:null,hideFlags:0};return s;})()},
