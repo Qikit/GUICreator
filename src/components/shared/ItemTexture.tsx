@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react'
 import { TintedTexture, POTION_LAYERS } from './TintedTexture'
 import { SkullFace } from './SkullFace'
+import { TEX_MAP } from '@/data/texMap'
 import s from '@/styles/shared.module.css'
 
 const RENDERS = '/assets/minecraft/renders/'
 const TEX = '/assets/minecraft/textures/'
 
-// TEX_MAP will be imported from data in Phase 3 completion
-// For now, inline minimal version
 function getTexPath(id: string): string | null {
+  if (TEX_MAP[id]) return TEX + TEX_MAP[id]
   return null
 }
 

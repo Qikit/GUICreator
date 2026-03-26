@@ -1,4 +1,5 @@
 import type { ItemDatabase } from '@/types'
+import { getPotionPresets } from './potionPresets'
 
 const _c = ['white', 'orange', 'magenta', 'light_blue', 'yellow', 'lime', 'pink', 'gray', 'light_gray', 'cyan', 'purple', 'blue', 'brown', 'green', 'red', 'black']
 const _w = ['oak', 'spruce', 'birch', 'jungle', 'acacia', 'dark_oak', 'cherry', 'mangrove', 'bamboo', 'crimson', 'warped', 'pale_oak']
@@ -73,3 +74,7 @@ misc_extra:{label:'Разное (доп.)',items:m(['rotten_flesh','glistering_m
 harnesses:{label:'Упряжь',items:_c.map(c=>({id:c+'_harness',name:c.replace(/_/g,' ')+' Harness'}))},
 shelves:{label:'Полки',items:_w.map(w=>({id:w+'_shelf',name:w.replace(/_/g,' ')+' Shelf'}))},
 }
+
+const { potions: potionPresets, arrows: arrowPresets } = getPotionPresets()
+ITEM_DB.potion_colors = { label: 'Цветные зелья', items: potionPresets as never }
+ITEM_DB.tipped_arrows = { label: 'Цветные стрелы', items: arrowPresets as never }
