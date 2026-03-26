@@ -1,0 +1,58 @@
+@font-face {
+  font-family: 'Minecraft';
+  src: url('/assets/fonts/Mojangles.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--tx1);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+:root {
+  --bg: #0f0f11;
+  --bg2: #141416;
+  --pan: #18181b;
+  --srf: #1e1e22;
+  --hov: #27272b;
+  --tx1: #e4e4e7;
+  --tx2: #8b8b96;
+  --tx3: #5a5a64;
+  --ac: #a78bfa;
+  --ac2: #7c5cbf;
+  --ac-g: rgba(167, 139, 250, .12);
+  --ok: #4ade80;
+  --er: #f87171;
+  --inf: #60a5fa;
+  --bd: #2a2a2e;
+  --bd2: #3a3a40;
+  --r8: 8px;
+}
+
+input, select, button, textarea { font-family: inherit; font-size: inherit; color: inherit; }
+button { cursor: pointer; border: none; background: none; }
+
+input, textarea, select {
+  background: var(--srf);
+  border: 1px solid var(--bd);
+  border-radius: 4px;
+  padding: 4px 8px;
+  color: var(--tx1);
+  outline: none;
+}
+input:focus, textarea:focus, select:focus { border-color: var(--ac); }
+textarea { resize: vertical; min-height: 60px; }
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--bd2); border-radius: 3px; }
+
+#root { height: 100vh; display: flex; flex-direction: column; }
