@@ -245,9 +245,20 @@ materials:{label:"Материалы",items:[
   "sugar","cocoa_beans","nether_wart","resin_clump","resin_brick","armadillo_scute","turtle_scute",
 ].map(id=>({id,name:id.replace(/_/g," ")}))},
 potions:{label:"Зелья и зельеварение",items:[
-  "potion","splash_potion","lingering_potion","glass_bottle","dragon_breath",
-  "brewing_stand","cauldron",
+  "glass_bottle","dragon_breath","brewing_stand","cauldron",
 ].map(id=>({id,name:id.replace(/_/g," ")}))},
+potion_types:{label:"Зелья (по эффектам)",items:(()=>{
+  const fx=["healing","harming","regeneration","strength","swiftness","slowness","poison","weakness",
+    "fire_resistance","night_vision","invisibility","water_breathing","leaping","slow_falling",
+    "luck","turtle_master","infested","oozing","weaving","wind_charged"];
+  const r=[];for(const e of fx){r.push({id:"potion",name:"Potion of "+e.replace(/_/g," ")});
+    r.push({id:"splash_potion",name:"Splash "+e.replace(/_/g," ")});
+    r.push({id:"lingering_potion",name:"Lingering "+e.replace(/_/g," ")});}return r;})()},
+tipped_arrows:{label:"Цветные стрелы",items:(()=>{
+  const fx=["healing","harming","regeneration","strength","swiftness","slowness","poison","weakness",
+    "fire_resistance","night_vision","invisibility","water_breathing","leaping","slow_falling",
+    "luck","turtle_master","infested","oozing","weaving","wind_charged"];
+  return fx.map(e=>({id:"tipped_arrow",name:"Arrow of "+e.replace(/_/g," ")}));})()},
 functional:{label:"Функциональные",items:[
   "barrier","structure_void","light","command_block","chain_command_block","repeating_command_block","structure_block","jigsaw",
   "paper","book","written_book","writable_book","enchanted_book","knowledge_book","name_tag","lead",
