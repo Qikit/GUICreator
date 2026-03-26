@@ -1,0 +1,13 @@
+.toolbar { display: flex; align-items: center; gap: 8px; padding: 6px 14px; background: var(--bg2); border-bottom: 1px solid var(--bd); min-height: 44px; flex-shrink: 0; flex-wrap: wrap; backdrop-filter: blur(8px); }
+.group { display: flex; align-items: center; gap: 4px; }
+.sep { width: 1px; height: 20px; background: var(--bd); margin: 0 2px; }
+.projName { background: transparent; border: 1px solid transparent; padding: 2px 6px; font-size: 14px; font-weight: 600; min-width: 140px; color: var(--tx1); }
+.projName:hover { border-color: var(--bd); }
+.projName:focus { border-color: var(--ac); background: var(--srf); }
+.label { color: var(--tx2); font-size: 10px; text-transform: uppercase; letter-spacing: .5px; }
+.spacer { flex: 1; }
+.burger { position: relative; }
+.burgerDd { position: absolute; top: 100%; right: 0; margin-top: 4px; background: var(--pan); border: 1px solid var(--bd2); border-radius: var(--r8); padding: 4px; min-width: 160px; box-shadow: 0 8px 24px rgba(0,0,0,.5); z-index: 100; display: flex; flex-direction: column; gap: 1px; }
+.burgerDd button { justify-content: flex-start; width: 100%; border: none; border-radius: 4px; }
+
+.statusBar { display: flex; align-items: center; justify-content: space-between; padding: 2px 12px; background: var(--pan); border-top: 1px solid var(--bd); font-size: 10px; color: var(--tx3); flex-shrink: 0; }
