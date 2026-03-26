@@ -1,0 +1,40 @@
+{
+  "categoryId": "airdrop",
+  "items": [
+    {
+      "item": "REDSTONE_TORCH",
+      "components": "minecraft:redstone_torch",
+      "properties": {
+        "identifier": "airdrop_activator",
+        "display": "<gradient:#6ee619:#27e6d2:#6ee619>[★] Аир-дроп</gradient>",
+        "lores": [
+          "<white>Аир-дроп установит временный</white>",
+          "<white>ивент, прилетит бочка с горячей начинкой",
+          "",
+          "<color:#ffff00>⚠</color><white> ОСТОРОЖНО, ГОРЯЧО! </white>"
+        ],
+        "count": 1,
+        "tags": {
+          "don-item": {
+            "STRING": "airdrop_activator"
+          }
+        }
+      }
+    },
+    {
+      "item": "BLAZE_POWDER",
+      "components": "minecraft:blaze_powder",
+      "properties": {
+        "identifier": "airdrop_hotitem",
+        "display": "<gradient:#ffa200:#ff0400:#ffa200>[★] предмет еще не остыл</gradient>",
+        "count": 1,
+        "maxStackSize": 1,
+        "tags": {
+          "don-item": {
+            "STRING": "airdrop_hotitem"
+          }
+        }
+      }
+    }
+  ]
+}

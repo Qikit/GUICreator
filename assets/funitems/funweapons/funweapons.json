@@ -1,0 +1,189 @@
+{
+  "categoryId": "funweapons",
+  "items": [
+    {
+      "item": "ENDER_EYE{desorientation: 1b, don-item: \"desorientation\"}",
+      "components": "minecraft:ender_eye",
+      "properties": {
+        "display": "<gradient:#00E45D:#008AFF:#A100C2>[★] Дезориентация</gradient>",
+        "identifier": "desorientation",
+        "lores": [
+          "<dark_gray>●</dark_gray> <gray>Каст:</gray> <blue>Звуковая волна</blue>",
+          "<dark_gray>●</dark_gray> <gray>Радиус:</gray> <blue>10 блоков</blue>",
+          "",
+          "<dark_gray>●</dark_gray> <gray>Эффекты для противников:</gray>",
+          " <dark_gray>-</dark_gray> <red>Иссушение III (00:10)</red>",
+          " <dark_gray>-</dark_gray> <red>Замедление V (00:05)</red>",
+          " <dark_gray>-</dark_gray> <red>Утомление V (00:05)</red>",
+          " <dark_gray>-</dark_gray> <red>Слепота (00:03)</red>",
+          " <dark_gray>-</dark_gray> <red>Тошнота (00:03)</red>",
+          "",
+          "<gray>Чем ближе цель, тем дольше</gray>",
+          "<gray>длительность эффектов</gray>"
+        ],
+        "tags": {
+          "don-item": {
+            "STRING": "desorientation"
+          },
+          "desorientation": {
+            "BOOLEAN": true
+          }
+        },
+        "count": 1
+      }
+    },
+    {
+      "item": "SUGAR{sheerdust: 1b, don-item: \"sheerdust\"}",
+      "components": "minecraft:sugar",
+      "properties": {
+        "display": "<gradient:#55FFFF:#55FF82>[★] Явная пыль</gradient>",
+        "identifier": "sheerdust",
+        "lores": [
+          "<dark_gray>●</dark_gray> <gray>Каст:</gray> <blue>Световая вспышка</blue>",
+          "<dark_gray>●</dark_gray> <gray>Радиус:</gray> <blue>10 блоков</blue>",
+          "",
+          "<dark_gray>●</dark_gray> <gray>Эффекты для противников:</gray>",
+          " <dark_gray>-</dark_gray> <red>Свечение (00:30)</red>",
+          " <dark_gray>-</dark_gray> <red>Слепота (00:01)</red>",
+          "",
+          "<gray>Чем ближе цель, тем дольше</gray>",
+          "<gray>длительность эффектов</gray>"
+        ],
+        "tags": {
+          "don-item": {
+            "STRING": "sheerdust"
+          },
+          "sheerdust": {
+            "BOOLEAN": true
+          }
+        },
+        "count": 1
+      }
+    },
+    {
+      "item": "PHANTOM_MEMBRANE{don-item: \"godsaura\", godsaura: 1b}",
+      "components": "minecraft:phantom_membrane",
+      "properties": {
+        "display": "<gradient:#FFFF55:#FF9255:#E55B94>[★] Божья аура</gradient>",
+        "identifier": "godsaura",
+        "lores": [
+          "<dark_gray>●</dark_gray> <gray>Каст:</gray> <blue>Божественная аура</blue>",
+          "<dark_gray>●</dark_gray> <gray>Радиус:</gray> <blue>2 блока</blue>",
+          "",
+          "<dark_gray>●</dark_gray> <gray>Эффекты для союзников:</gray>",
+          " <dark_gray>-</dark_gray> <blue>Снятие всех эффектов</blue>",
+          " <dark_gray>-</dark_gray> <blue>Невидимость (04:00)</blue>",
+          " <dark_gray>-</dark_gray> <blue>Сила II (03:00)</blue>",
+          " <dark_gray>-</dark_gray> <blue>Скорость II (03:00)</blue>"
+        ],
+        "tags": {
+          "don-item": {
+            "STRING": "godsaura"
+          },
+          "godsaura": {
+            "BOOLEAN": true
+          }
+        },
+        "count": 1
+      }
+    },
+    {
+      "item": "DRIED_KELP{don-item: \"stratum\", stratum: 1b}",
+      "components": "minecraft:dried_kelp",
+      "properties": {
+        "display": "<gradient:#3D0072:#7E00FF>[★] Пласт</gradient>",
+        "identifier": "stratum",
+        "lores": [
+          "<dark_gray>●</dark_gray> <gray>Каст:</gray> <blue>Нерушимая стена</blue>",
+          "<dark_gray>●</dark_gray> <gray>Длительность:</gray>",
+          " <dark_gray>-</dark_gray> <gray>Вертикальный:</gray> <blue>20 секунд</blue>",
+          " <dark_gray>-</dark_gray> <gray>Горизонтальный:</gray> <blue>60 секунд</blue>"
+        ],
+        "tags": {
+          "don-item": {
+            "STRING": "stratum"
+          },
+          "stratum": {
+            "BOOLEAN": true
+          }
+        },
+        "count": 1
+      }
+    },
+    {
+      "item": "NETHERITE_SCRAP{trap: 1b, don-item: \"trap\"}",
+      "components": "minecraft:netherite_scrap",
+      "properties": {
+        "display": "<gradient:#5B0000:#FF0000>[★] Трапка</gradient>",
+        "identifier": "trap",
+        "lores": [
+          "<dark_gray>●</dark_gray> <gray>Каст:</gray> <blue>Нерушимая клетка</blue>",
+          "<dark_gray>●</dark_gray> <gray>Длительность:</gray> <blue>15 секунд</blue>",
+          "",
+          "<dark_gray>●</dark_gray> <gray>Используйте скины:</gray> <blue>/tskins</blue>"
+        ],
+        "tags": {
+          "don-item": {
+            "STRING": "trap"
+          },
+          "trap": {
+            "BOOLEAN": true
+          }
+        },
+        "count": 1
+      }
+    },
+    {
+      "item": "FIRE_CHARGE{don-item: \"fierytornado\", fierytornado: 1b}",
+      "components": "minecraft:fire_charge",
+      "properties": {
+        "display": "<gradient:#A50000:#FF0000:#FF7000>[★] Огненный смерч</gradient>",
+        "identifier": "fierytornado",
+        "lores": [
+          "<dark_gray>●</dark_gray> <gray>Каст:</gray> <blue>Огненная волна</blue>",
+          "<dark_gray>●</dark_gray> <gray>Радиус:</gray> <blue>10 блоков</blue>",
+          "",
+          "<dark_gray>●</dark_gray> <gray>Эффекты для противников:</gray>",
+          " <dark_gray>-</dark_gray> <red>Поджог (00:03)</red>",
+          "",
+          "<gray>Чем ближе цель, тем дольше</gray>",
+          "<gray>длительность эффектов</gray>"
+        ],
+        "tags": {
+          "don-item": {
+            "STRING": "fierytornado"
+          },
+          "fierytornado": {
+            "BOOLEAN": true
+          }
+        },
+        "count": 1
+      }
+    },
+    {
+      "item": "SNOWBALL{freezeball: 1b, don-item: \"freezeball\"}",
+      "components": "minecraft:snowball",
+      "properties": {
+        "display": "<gradient:#00FFC1:#01ddc3>[★] Снежок заморозка</gradient>",
+        "identifier": "freezeball",
+        "lores": [
+          "<dark_gray>●</dark_gray> <gray>Каст:</gray> <blue>Ледяная сфера</blue>",
+          "<dark_gray>●</dark_gray> <gray>Радиус:</gray> <blue>7 блоков</blue>",
+          "",
+          "<dark_gray>●</dark_gray> <gray>Эффекты для противников:</gray>",
+          " <dark_gray>-</dark_gray> <red>Заморозка (00:01)</red>",
+          " <dark_gray>-</dark_gray> <red>Слабость (00:05)</red>"
+        ],
+        "tags": {
+          "don-item": {
+            "STRING": "freezeball"
+          },
+          "freezeball": {
+            "BOOLEAN": true
+          }
+        },
+        "count": 1
+      }
+    }
+  ]
+}

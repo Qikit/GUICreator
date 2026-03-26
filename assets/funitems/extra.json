@@ -1,0 +1,223 @@
+{
+  "categoryId": "extra",
+  "items": [
+    {
+      "item": "NETHERITE_SWORD",
+      "components": "minecraft:netherite_sword",
+      "properties": {
+        "identifier": "extra-sword-sharp8",
+        "display": "<color:#FF0000>[★]</color> <gradient:#FF0000:#8B0000>Заострённый меч</gradient>",
+        "enchantments": {
+          "sharpness": 8,
+          "unbreaking": 5,
+          "fire_aspect": 3,
+          "sweeping": 3,
+          "bane_of_arthropods": 7,
+          "smite": 7,
+          "looting": 5,
+          "vanishing_curse": 1
+        },
+        "tags": {
+          "don-item": {
+            "STRING": "extra-sword-sharp8"
+          }
+        },
+        "count": 1
+      }
+    },
+    {
+      "item": "PLAYER_HEAD{Enchantments:[{id:\"minecraft:vanishing_curse\",lvl:1s}],HideFlags:1,don-item:\"sphere-athena\",tslevel:3}",
+      "components": "minecraft:player_head",
+      "properties": {
+        "identifier": "sphere-athena",
+        "display": "<color:#9B00FF>[★] <gradient:#9B00FF:#3699FF:#36FF60>Сфера Афины</gradient>",
+        "enchantments": {
+          "vanishing_curse": 1
+        },
+        "flags": [
+          "HIDE_ENCHANTS"
+        ],
+        "attributeModifiers": [
+          {
+            "type": "attack_speed",
+            "amount": 0.15,
+            "operation": "add_scalar",
+            "slot": "offhand"
+          },
+          {
+            "type": "max_health",
+            "amount": -2.0,
+            "operation": "add_number",
+            "slot": "offhand"
+          },
+          {
+            "type": "movement_speed",
+            "amount": 0.15,
+            "operation": "add_scalar",
+            "slot": "offhand"
+          },
+          {
+            "type": "attack_damage",
+            "amount": 3.0,
+            "operation": "add_number",
+            "slot": "offhand"
+          }
+        ],
+        "disable": "all",
+        "tags": {
+          "don-item": {
+            "STRING": "sphere-athena"
+          },
+          "tslevel": {
+            "INTEGER": 3
+          }
+        },
+        "maxStackSize": 1,
+        "skull": {
+          "texture": "ewogICJ0aW1lc3RhbXAiIDogMTc1MDM0Mzg2MTE4NywKICAicHJvZmlsZUlkIiA6ICJlZGUyYzdhMGFjNjM0MTNiYjA5ZDNmMGJlZTllYzhlYyIsCiAgInByb2ZpbGVOYW1lIiA6ICJTcGhlcmVBdGhlbmEiLAogICJzaWduYXR1cmVSZXF1aXJlZCIgOiB0cnVlLAogICJ0ZXh0dXJlcyIgOiB7CiAgICAiU0tJTiIgOiB7CiAgICAgICJ1cmwiIDogImh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOTNmOWVlZGEzYmEyM2ZlMTQyM2M0MDM2ZTdkZDBhNzQ0NjFkZmY5NmJhZGM1YjJmMmI5ZmFhN2NjMTZmMzgyZiIsCiAgICAgICJtZXRhZGF0YSIgOiB7CiAgICAgICAgIm1vZGVsIiA6ICJzbGltIgogICAgICB9CiAgICB9CiAgfQp9"
+        }
+      }
+    },
+    {
+      "item": "POTION{don-item: \"extra-potion-buff\", CustomPotionColor: 16777215, Potion: \"minecraft:empty\"}",
+      "components": "minecraft:potion[minecraft:potion_contents={custom_color: 16777215}]",
+      "properties": {
+        "identifier": "extra-potion-buff",
+        "display": "<bold><color:#FFFFFF>[★]</color> <gradient:#FFFFFF:#F0F8FF>Сверх-Зелье</gradient></bold>",
+        "tags": {
+          "don-item": {
+            "STRING": "extra-potion-buff"
+          }
+        },
+        "maxStackSize": 1,
+        "effects": [
+          {
+            "potion": "INVISIBILITY",
+            "level": 1,
+            "time": 36000
+          },
+          {
+            "potion": "INCREASE_DAMAGE",
+            "level": 2,
+            "time": 36000
+          },
+          {
+            "potion": "SPEED",
+            "level": 2,
+            "time": 36000
+          }
+        ]
+      }
+    },
+    {
+      "item": "IRON_PICKAXE",
+      "components": "minecraft:iron_pickaxe",
+      "properties": {
+        "identifier": "extra-pickaxe-fortune7",
+        "display": "<color:#FBFF8C>[★]</color> <gradient:#FBFF8C:#E6E6E6>Счастливая кирка</gradient>",
+        "enchantments": {
+          "fortune": 7
+        },
+        "tags": {
+          "don-item": {
+            "STRING": "extra-pickaxe-fortune7"
+          }
+        },
+        "count": 1
+      }
+    },
+    {
+      "item": "CHAINMAIL_BOOTS{custom-enchantments: [{type: \"jumping\", level: 2}], don-item: \"extra-boots-jump\"}",
+      "components": "minecraft:chainmail_boots",
+      "properties": {
+        "identifier": "extra-boots-jump",
+        "display": "<color:#32CD32>[★]</color> <gradient:#32CD32:#ADFF2F>Ботинки Попрыгуна</gradient>",
+        "lores": [
+          "<color:#AAAAAA>Попрыгун II</color>"
+        ],
+        "tags": {
+          "don-item": {
+            "STRING": "extra-boots-jump"
+          },
+          "custom-enchantments": {
+            "TAG_CONTAINER_ARRAY": [
+              {
+                "type": {
+                  "STRING": "jumping"
+                },
+                "level": {
+                  "INTEGER": 2
+                }
+              }
+            ]
+          }
+        },
+        "count": 1
+      }
+    },
+    {
+      "item": "ENDER_PEARL{custom-enchantments: [{type: \"sniper\", level: 2}], don-item: \"extra-pearl-sniper\"}",
+      "components": "minecraft:ender_pearl",
+      "properties": {
+        "identifier": "extra-pearl-sniper",
+        "display": "<color:#008080>[★]</color> <gradient:#008080:#20B2AA>Снайперская жемчужина</gradient>",
+        "lores": [
+          "<color:#AAAAAA>Снайпер II</color>"
+        ],
+        "tags": {
+          "don-item": {
+            "STRING": "extra-pearl-sniper"
+          },
+          "custom-enchantments": {
+            "TAG_CONTAINER_ARRAY": [
+              {
+                "type": {
+                  "STRING": "sniper"
+                },
+                "level": {
+                  "INTEGER": 2
+                }
+              }
+            ]
+          }
+        },
+        "count": 1
+      }
+    },
+    {
+      "item": "SILENCE_ARMOR_TRIM_SMITHING_TEMPLATE{don-item: \"extra-trim-silence\"}",
+      "components": "minecraft:silence_armor_trim_smithing_template",
+      "feature": "ONLY_NEW_VERSION",
+      "properties": {
+        "identifier": "extra-trim-silence",
+        "tags": {
+          "don-item": {
+            "STRING": "extra-trim-silence"
+          }
+        },
+        "count": 4
+      }
+    },
+    {
+      "item": "SPLASH_POTION{don-item: \"extra-potion-levitation\", CustomPotionColor: 16777215, Potion: \"minecraft:empty\"}",
+      "components": "minecraft:splash_potion[minecraft:potion_contents={custom_color: 16777215}]",
+      "properties": {
+        "identifier": "extra-potion-levitation",
+        "display": "<color:#D8BFD8>[★]</color> <gradient:#D8BFD8:#EE82EE>Зелье Левитации</gradient>",
+        "tags": {
+          "don-item": {
+            "STRING": "extra-potion-levitation"
+          }
+        },
+        "maxStackSize": 1,
+        "effects": [
+          {
+            "potion": "LEVITATION",
+            "level": 2,
+            "time": 100
+          }
+        ]
+      }
+    }
+  ]
+}

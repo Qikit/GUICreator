@@ -1,0 +1,1069 @@
+{
+  "categoryId": "christmas",
+  "items": [
+    {
+      "item": "COOKIE",
+      "components": "minecraft:cookie[minecraft:custom_model_data={floats:[2]}]",
+      "properties": {
+        "identifier": "gingerbread",
+        "display": "<gradient:#FF6600:#D57514:#E7CD2E>[❄] Имбирный пряник</gradient>",
+        "lores": [
+          "<blue>Это новогодний артефакт",
+          "<blue>для прохождении карты",
+          "<blue>подарков — вводи /presentsmap",
+          "",
+          "<blue>Либо отдай деду морозу",
+          "<blue>в обмен на подарки",
+          "<blue>вводи — /warp dedmoroz",
+          "",
+          "<dark_gray>●</dark_gray> <gray>Очков:</gray> <blue>+10</blue>"
+        ]
+      }
+    },
+    {
+      "item": "COOKIE",
+      "components": "minecraft:cookie[minecraft:custom_model_data={floats:[3]}]",
+      "properties": {
+        "identifier": "gingerbread2",
+        "display": "<gradient:#FF6600:#D57514:#E7CD2E>[❄] Имбирный пряник</gradient>",
+        "lores": [
+          "<blue>Это новогодний артефакт",
+          "<blue>для прохождении карты",
+          "<blue>подарков — вводи /presentsmap",
+          "",
+          "<blue>Либо отдай деду морозу",
+          "<blue>в обмен на подарки",
+          "<blue>вводи — /warp dedmoroz",
+          "",
+          "<dark_gray>●</dark_gray> <gray>Очков:</gray> <blue>+10</blue>"
+        ]
+      }
+    },
+    {
+      "item": "COOKIE",
+      "components": "minecraft:cookie[minecraft:custom_model_data={floats:[4]}]",
+      "properties": {
+        "identifier": "gingerbread3",
+        "display": "<gradient:#FF6600:#D57514:#E7CD2E>[❄] Имбирный пряник</gradient>",
+        "lores": [
+          "<blue>Это новогодний артефакт",
+          "<blue>для прохождении карты",
+          "<blue>подарков — вводи /presentsmap",
+          "",
+          "<blue>Либо отдай деду морозу",
+          "<blue>в обмен на подарки",
+          "<blue>вводи — /warp dedmoroz",
+          "",
+          "<dark_gray>●</dark_gray> <gray>Очков:</gray> <blue>+10</blue>"
+        ]
+      }
+    },
+    {
+      "item": "NAUTILUS_SHELL",
+      "components": "minecraft:nautilus_shell[minecraft:custom_model_data={floats:[1]}]",
+      "properties": {
+        "identifier": "christmas_candy",
+        "display": "<gradient:#FF0000:#FFFFFF:#FF0000:#FFFFFF:#FF0000:#FFFFFF>[❄] Рождественский леденец</gradient>",
+        "lores": [
+          "<blue>Это новогодний артефакт",
+          "<blue>для прохождении карты",
+          "<blue>подарков — вводи /presentsmap",
+          "",
+          "<blue>Либо отдай деду морозу",
+          "<blue>в обмен на подарки",
+          "<blue>вводи — /warp dedmoroz",
+          "",
+          "<dark_gray>●</dark_gray> <gray>Очков:</gray> <blue>+20</blue>"
+        ]
+      }
+    },
+    {
+      "item": "NAUTILUS_SHELL",
+      "components": "minecraft:nautilus_shell[minecraft:custom_model_data={floats:[2]}]",
+      "properties": {
+        "identifier": "christmas_candy2",
+        "display": "<gradient:#00FF00:#FFFFFF:#00FF00:#FFFFFF:#00FF00:#FFFFFF>[❄] Рождественский леденец</gradient>",
+        "lores": [
+          "<blue>Это новогодний артефакт",
+          "<blue>для прохождении карты",
+          "<blue>подарков — вводи /presentsmap",
+          "",
+          "<blue>Либо отдай деду морозу",
+          "<blue>в обмен на подарки",
+          "<blue>вводи — /warp dedmoroz",
+          "",
+          "<dark_gray>●</dark_gray> <gray>Очков:</gray> <blue>+20</blue>"
+        ]
+      }
+    },
+    {
+      "item": "NAUTILUS_SHELL",
+      "components": "minecraft:nautilus_shell[minecraft:custom_model_data={floats:[3]}]",
+      "properties": {
+        "identifier": "christmas_candy3",
+        "display": "<gradient:#00CFFF:#FFFFFF:#00CFFF:#FFFFFF:#00CFFF:#FFFFFF>[❄] Рождественский леденец</gradient>",
+        "lores": [
+          "<blue>Это новогодний артефакт",
+          "<blue>для прохождении карты",
+          "<blue>подарков — вводи /presentsmap",
+          "",
+          "<blue>Либо отдай деду морозу",
+          "<blue>в обмен на подарки",
+          "<blue>вводи — /warp dedmoroz",
+          "",
+          "<dark_gray>●</dark_gray> <gray>Очков:</gray> <blue>+20</blue>"
+        ]
+      }
+    },
+    {
+      "item": "NAUTILUS_SHELL",
+      "components": "minecraft:nautilus_shell[minecraft:custom_model_data={floats:[4]}]",
+      "properties": {
+        "identifier": "christmas_candy4",
+        "display": "<gradient:#FFC100:#FFFFFF:#FFC100:#FFFFFF:#FFC100:#FFFFFF>[❄] Рождественский леденец</gradient>",
+        "lores": [
+          "<blue>Это новогодний артефакт",
+          "<blue>для прохождении карты",
+          "<blue>подарков — вводи /presentsmap",
+          "",
+          "<blue>Либо отдай деду морозу",
+          "<blue>в обмен на подарки",
+          "<blue>вводи — /warp dedmoroz",
+          "",
+          "<dark_gray>●</dark_gray> <gray>Очков:</gray> <blue>+20</blue>"
+        ]
+      }
+    },
+    {
+      "item": "GOLDEN_APPLE",
+      "components": "minecraft:glow_berries[minecraft:custom_model_data={floats:[1]}]",
+      "feature": "ONLY_OLD_VERSION",
+      "properties": {
+        "identifier": "tangerine",
+        "display": "<gradient:#23AA19:#FF6D00:#FF8100:#FFC800>[❄] Мандарин</gradient>",
+        "lores": [
+          "<blue>Это новогодний артефакт",
+          "<blue>для прохождении карты",
+          "<blue>подарков — вводи /presentsmap",
+          "",
+          "<blue>Либо отдай деду морозу",
+          "<blue>в обмен на подарки",
+          "<blue>вводи — /warp dedmoroz",
+          "",
+          "<dark_gray>●</dark_gray> <gray>Очков:</gray> <blue>+35</blue>"
+        ]
+      }
+    },
+    {
+      "item": "GLOW_BERRIES",
+      "components": "minecraft:glow_berries[minecraft:custom_model_data={floats:[1]}]",
+      "feature": "ONLY_NEW_VERSION",
+      "properties": {
+        "identifier": "tangerine",
+        "display": "<gradient:#FF6D00:#FF8100:#FFC800>[❄] Мандарин</gradient>",
+        "lores": [
+          "<blue>Это новогодний артефакт",
+          "<blue>для прохождении карты",
+          "<blue>подарков — вводи /presentsmap",
+          "",
+          "<blue>Либо отдай деду морозу",
+          "<blue>в обмен на подарки",
+          "<blue>вводи — /warp dedmoroz",
+          "",
+          "<dark_gray>●</dark_gray> <gray>Очков:</gray> <blue>+35</blue>"
+        ]
+      }
+    },
+    {
+      "item": "FIREWORK_ROCKET",
+      "components": "minecraft:firework_rocket[minecraft:custom_model_data={floats:[1]}]",
+      "properties": {
+        "identifier": "nuclear_firecracker",
+        "display": "<gradient:#FF0000:#FF0059:#383838>[☢] Ядерная петарда</gradient>",
+        "lores": [
+          "<blue>Это новогодний артефакт",
+          "<blue>для прохождении карты",
+          "<blue>подарков — вводи /presentsmap",
+          "",
+          "<blue>Либо отдай деду морозу",
+          "<blue>в обмен на подарки",
+          "<blue>вводи — /warp dedmoroz",
+          "",
+          "<dark_gray>●</dark_gray> <gray>Очков:</gray> <blue>+50</blue>"
+        ]
+      }
+    },
+    {
+      "item": "MUSIC_DISC_WAIT",
+      "components": "minecraft:music_disc_wait",
+      "feature": "ONLY_OLD_VERSION",
+      "properties": {
+        "identifier": "christmas_record",
+        "display": "<gradient:#00B0FF:#FFFFFF:#46FCFF>[♫] Новогодняя пластинка</gradient>",
+        "lores": [
+          "<blue>Это новогодний артефакт",
+          "<blue>для прохождении карты",
+          "<blue>подарков — вводи /presentsmap",
+          "",
+          "<blue>Либо отдай деду морозу",
+          "<blue>в обмен на подарки",
+          "<blue>вводи — /warp dedmoroz",
+          "",
+          "<dark_gray>●</dark_gray> <gray>Очков:</gray> <blue>+100</blue>"
+        ]
+      }
+    },
+    {
+      "item": "MUSIC_DISC_CREATOR",
+      "components": "minecraft:music_disc_creator",
+      "feature": "ONLY_NEW_VERSION",
+      "properties": {
+        "identifier": "christmas_record",
+        "display": "<gradient:#FF0000:#FFFFFF:#FF0000>[♫] Новогодняя пластинка</gradient>",
+        "lores": [
+          "<blue>Это новогодний артефакт",
+          "<blue>для прохождении карты",
+          "<blue>подарков — вводи /presentsmap",
+          "",
+          "<blue>Либо отдай деду морозу",
+          "<blue>в обмен на подарки",
+          "<blue>вводи — /warp dedmoroz",
+          "",
+          "<dark_gray>●</dark_gray> <gray>Очков:</gray> <blue>+100</blue>"
+        ]
+      }
+    },
+    {
+      "item": "PLAYER_HEAD{Enchantments:[{id:\"minecraft:vanishing_curse\",lvl:1s}],HideFlags:1,don-item:\"sphere-frost\",tslevel:3}",
+      "components": "minecraft:player_head",
+      "feature": "ONLY_NEW_VERSION",
+      "properties": {
+        "display": "<gradient:#E0FFFF:#00FFFF:#1E90FF>[❄] Сфера Мороза</gradient>",
+        "lores": [
+          "<gray>Вечная мерзлота сковывает,",
+          "<gray>Даруя твердость льда,",
+          "<gray>Но лишая гибкости"
+        ],
+        "enchantments": {
+          "vanishing_curse": 1
+        },
+        "flags": [
+          "HIDE_ENCHANTS"
+        ],
+        "attributeModifiers": [
+          {
+            "type": "armor",
+            "amount": 2.0,
+            "operation": "add_number",
+            "slot": "offhand"
+          },
+          {
+            "type": "knockback_resistance",
+            "amount": 0.5,
+            "operation": "add_number",
+            "slot": "offhand"
+          },
+          {
+            "type": "submerged_mining_speed",
+            "amount": 1.0,
+            "operation": "add_number",
+            "slot": "offhand"
+          },
+          {
+            "type": "burning_time",
+            "amount": -0.5,
+            "operation": "add_scalar",
+            "slot": "offhand"
+          },
+          {
+            "type": "movement_speed",
+            "amount": -0.1,
+            "operation": "add_scalar",
+            "slot": "offhand"
+          },
+          {
+            "type": "attack_speed",
+            "amount": -0.15,
+            "operation": "add_scalar",
+            "slot": "offhand"
+          },
+          {
+            "type": "step_height",
+            "amount": -0.3,
+            "operation": "add_number",
+            "slot": "offhand"
+          }
+        ],
+        "identifier": "sphere-frost",
+        "disable": "all",
+        "tags": {
+          "don-item": {
+            "STRING": "sphere-frost"
+          },
+          "tslevel": {
+            "INTEGER": 3
+          }
+        },
+        "maxStackSize": 1,
+        "skull": {
+          "texture": "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZjNmZDM4MTQxMDhkZDA0MmM4NzU1NWYwMjNkNTcwY2UyNmI4M2MwZTM1YjIxYTdiMTI4MWE3ZTA1NDVjZjllMCJ9fX0="
+        }
+      }
+    },
+    {
+      "item": "PLAYER_HEAD{Enchantments:[{id:\"minecraft:vanishing_curse\",lvl:1s},{id:\"minecraft:aqua_affinity\",lvl:1s}],HideFlags:1,don-item:\"sphere-frost\",tslevel:3}",
+      "components": "minecraft:player_head",
+      "feature": "ONLY_OLD_VERSION",
+      "properties": {
+        "display": "<gradient:#E0FFFF:#00FFFF:#1E90FF>[❄] Сфера Мороза</gradient>",
+        "lores": [
+          "<gray>Вечная мерзлота сковывает,",
+          "<gray>Даруя твердость льда,",
+          "<gray>Но лишая гибкости"
+        ],
+        "enchantments": {
+          "vanishing_curse": 1,
+          "aqua_affinity": 1
+        },
+        "flags": [
+          "HIDE_ENCHANTS"
+        ],
+        "attributeModifiers": [
+          {
+            "type": "armor",
+            "amount": 2.0,
+            "operation": "add_number",
+            "slot": "offhand"
+          },
+          {
+            "type": "knockback_resistance",
+            "amount": 0.5,
+            "operation": "add_number",
+            "slot": "offhand"
+          },
+          {
+            "type": "movement_speed",
+            "amount": -0.1,
+            "operation": "add_scalar",
+            "slot": "offhand"
+          },
+          {
+            "type": "attack_speed",
+            "amount": -0.15,
+            "operation": "add_scalar",
+            "slot": "offhand"
+          }
+        ],
+        "identifier": "sphere-frost",
+        "disable": "all",
+        "tags": {
+          "don-item": {
+            "STRING": "sphere-frost"
+          },
+          "tslevel": {
+            "INTEGER": 3
+          }
+        },
+        "maxStackSize": 1,
+        "skull": {
+          "texture": "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZjNmZDM4MTQxMDhkZDA0MmM4NzU1NWYwMjNkNTcwY2UyNmI4M2MwZTM1YjIxYTdiMTI4MWE3ZTA1NDVjZjllMCJ9fX0="
+        }
+      }
+    },
+    {
+      "item": "TOTEM_OF_UNDYING{Enchantments:[{id:\"minecraft:unbreaking\",lvl:3s}],don-item:\"tal-grinch\",HideFlags:1,tslevel:3}",
+      "components": "minecraft:totem_of_undying[minecraft:custom_model_data={floats:[11]}]",
+      "feature": "ONLY_NEW_VERSION",
+      "properties": {
+        "display": "<gradient:#008000:#32CD32:#00FF00>[❄] Талисман Гринча</gradient>",
+        "lores": [
+          "<gray>Похититель праздника легок,</gray>",
+          "<gray>Его карманы полны удачи,</gray>",
+          "<gray>Но сердце слишком мало</gray>"
+        ],
+        "enchantments": {
+          "unbreaking": 3
+        },
+        "flags": [
+          "HIDE_ENCHANTS"
+        ],
+        "attributeModifiers": [
+          {
+            "type": "luck",
+            "amount": 2.0,
+            "operation": "add_number",
+            "slot": "offhand"
+          },
+          {
+            "type": "movement_speed",
+            "amount": 0.1,
+            "operation": "add_scalar",
+            "slot": "offhand"
+          },
+          {
+            "type": "sneaking_speed",
+            "amount": 0.3,
+            "operation": "add_scalar",
+            "slot": "offhand"
+          },
+          {
+            "type": "gravity",
+            "amount": -0.05,
+            "operation": "add_scalar",
+            "slot": "offhand"
+          },
+          {
+            "type": "max_health",
+            "amount": -4.0,
+            "operation": "add_number",
+            "slot": "offhand"
+          },
+          {
+            "type": "armor_toughness",
+            "amount": -2.0,
+            "operation": "add_number",
+            "slot": "offhand"
+          }
+        ],
+        "identifier": "tal-grinch",
+        "tags": {
+          "don-item": {
+            "STRING": "tal-grinch"
+          },
+          "tslevel": {
+            "INTEGER": 3
+          }
+        },
+        "maxStackSize": 1
+      }
+    },
+    {
+      "item": "TOTEM_OF_UNDYING{Enchantments:[{id:\"minecraft:unbreaking\",lvl:3s}],don-item:\"tal-grinch\",HideFlags:1,tslevel:3}",
+      "components": "minecraft:totem_of_undying[minecraft:custom_model_data={floats:[11]}]",
+      "feature": "ONLY_OLD_VERSION",
+      "properties": {
+        "display": "<gradient:#008000:#32CD32:#00FF00>[❄] Талисман Гринча</gradient>",
+        "lores": [
+          "<gray>Похититель праздника легок,</gray>",
+          "<gray>Его карманы полны удачи,</gray>",
+          "<gray>Но сердце слишком мало</gray>"
+        ],
+        "enchantments": {
+          "unbreaking": 3
+        },
+        "flags": [
+          "HIDE_ENCHANTS"
+        ],
+        "attributeModifiers": [
+          {
+            "type": "luck",
+            "amount": 2.0,
+            "operation": "add_number",
+            "slot": "offhand"
+          },
+          {
+            "type": "movement_speed",
+            "amount": 0.1,
+            "operation": "add_scalar",
+            "slot": "offhand"
+          },
+          {
+            "type": "max_health",
+            "amount": -4.0,
+            "operation": "add_number",
+            "slot": "offhand"
+          },
+          {
+            "type": "armor_toughness",
+            "amount": -2.0,
+            "operation": "add_number",
+            "slot": "offhand"
+          }
+        ],
+        "identifier": "tal-grinch",
+        "tags": {
+          "don-item": {
+            "STRING": "tal-grinch"
+          },
+          "tslevel": {
+            "INTEGER": 3
+          }
+        },
+        "maxStackSize": 1
+      }
+    },
+    {
+      "item": "LEATHER_HELMET{display:{color:16711680}}",
+      "components": "minecraft:leather_helmet[minecraft:custom_model_data={floats:[3]}, equippable={\"slot\":\"head\"}]",
+      "properties": {
+        "identifier": "santa_hat",
+        "display": "<gradient:#FF0000:#FFFFFF>[❄] Колпак Деда Мороза</gradient>"
+      }
+    },
+    {
+      "item": "LEATHER_HELMET{display:{color:38400}}",
+      "components": "minecraft:leather_helmet[minecraft:dyed_color=38400, minecraft:custom_model_data={floats:[1]}, minecraft:equippable={slot:\"head\", asset_id:\"grinch\"}]",
+      "properties": {
+        "identifier": "grinch_helmet",
+        "display": "<gradient:#006400:#32CD32>[❄] Шапка Гринча</gradient>",
+        "enchantments": {
+          "protection": 3,
+          "thorns": 2,
+          "unbreaking": 3
+        }
+      }
+    },
+    {
+      "item": "LEATHER_CHESTPLATE{display:{color:38400}}",
+      "components": "minecraft:leather_chestplate[minecraft:dyed_color=38400, minecraft:custom_model_data={floats:[1]}, minecraft:equippable={slot:\"chest\", asset_id:\"grinch\"}]",
+      "properties": {
+        "identifier": "grinch_chestplate",
+        "display": "<gradient:#006400:#32CD32>[❄] Куртка Гринча</gradient>",
+        "enchantments": {
+          "protection": 3,
+          "thorns": 2,
+          "unbreaking": 3
+        }
+      }
+    },
+    {
+      "item": "LEATHER_LEGGINGS{display:{color:38400}}",
+      "components": "minecraft:leather_leggings[minecraft:dyed_color=38400, minecraft:custom_model_data={floats:[1]}, minecraft:equippable={slot:\"legs\", asset_id:\"grinch\"}]",
+      "properties": {
+        "identifier": "grinch_leggings",
+        "display": "<gradient:#006400:#32CD32>[❄] Штаны Гринча</gradient>",
+        "enchantments": {
+          "protection": 3,
+          "thorns": 2,
+          "unbreaking": 3
+        }
+      }
+    },
+    {
+      "item": "LEATHER_BOOTS{display:{color:38400}}",
+      "components": "minecraft:leather_boots[minecraft:dyed_color=38400, minecraft:custom_model_data={floats:[1]}, minecraft:equippable={slot:\"feet\", asset_id:\"grinch\"}]",
+      "properties": {
+        "identifier": "grinch_boots",
+        "display": "<gradient:#006400:#32CD32>[❄] Ботинки Гринча</gradient>",
+        "enchantments": {
+          "protection": 3,
+          "feather_falling": 3,
+          "unbreaking": 3
+        }
+      }
+    },
+    {
+      "item": "NETHERITE_SWORD",
+      "components": "minecraft:netherite_sword[minecraft:custom_model_data={floats:[1]}]",
+      "properties": {
+        "identifier": "midnight_sword",
+        "display": "<gradient:#252525:#6400B6:#8C00FF:#DCDCDC>[☾] Полночный клинок</gradient>",
+        "enchantments": {
+          "sharpness": 7,
+          "fire_aspect": 2,
+          "looting": 5,
+          "unbreaking": 5,
+          "mending": 1
+        },
+        "lores": [
+          "<gradient:#483D8B:#000000>[☾] Оружие тьмы</gradient>"
+        ]
+      }
+    },
+    {
+      "item": "NETHERITE_HELMET",
+      "components": "minecraft:netherite_helmet",
+      "properties": {
+        "identifier": "midnight_helmet",
+        "display": "<gradient:#252525:#6400B6:#8C00FF:#DCDCDC>[☾] Полночный шлем</gradient>",
+        "enchantments": {
+          "protection": 5,
+          "respiration": 3,
+          "aqua_affinity": 1,
+          "unbreaking": 5
+        }
+      }
+    },
+    {
+      "item": "NETHERITE_CHESTPLATE",
+      "components": "minecraft:netherite_chestplate",
+      "properties": {
+        "identifier": "midnight_chestplate",
+        "display": "<gradient:#252525:#6400B6:#8C00FF:#DCDCDC>[☾] Полночный нагрудник</gradient>",
+        "enchantments": {
+          "protection": 5,
+          "unbreaking": 5,
+          "mending": 1
+        }
+      }
+    },
+    {
+      "item": "NETHERITE_LEGGINGS",
+      "components": "minecraft:netherite_leggings",
+      "properties": {
+        "identifier": "midnight_leggings",
+        "display": "<gradient:#252525:#6400B6:#8C00FF:#DCDCDC>[☾] Полночные поножи</gradient>",
+        "enchantments": {
+          "protection": 5,
+          "unbreaking": 5,
+          "mending": 1
+        }
+      }
+    },
+    {
+      "item": "NETHERITE_BOOTS",
+      "components": "minecraft:netherite_boots",
+      "properties": {
+        "identifier": "midnight_boots",
+        "display": "<gradient:#252525:#6400B6:#8C00FF:#DCDCDC>[☾] Полночные ботинки</gradient>",
+        "enchantments": {
+          "protection": 5,
+          "feather_falling": 4,
+          "soul_speed": 3,
+          "unbreaking": 5
+        }
+      }
+    },
+    {
+      "item": "BOW",
+      "components": "minecraft:bow[minecraft:custom_model_data={floats:[2]}]",
+      "properties": {
+        "identifier": "midnight_bow",
+        "display": "<gradient:#252525:#6400B6:#8C00FF:#DCDCDC>[☾] Полночный лук</gradient>",
+        "enchantments": {
+          "power": 5,
+          "punch": 2,
+          "flame": 1
+        }
+      }
+    },
+    {
+      "item": "NETHERITE_AXE",
+      "components": "minecraft:netherite_axe[minecraft:custom_model_data={floats:[1]}]",
+      "properties": {
+        "identifier": "elven_axe",
+        "display": "<gradient:#228B22:#32CD32:#FFD700>[☘] Эльфийская секира</gradient>",
+        "enchantments": {
+          "efficiency": 5,
+          "sharpness": 5,
+          "unbreaking": 5
+        }
+      }
+    },
+    {
+      "item": "NETHERITE_PICKAXE",
+      "components": "minecraft:netherite_pickaxe[minecraft:custom_model_data={floats:[1]}]",
+      "properties": {
+        "identifier": "elven_pickaxe",
+        "display": "<gradient:#228B22:#32CD32:#FFD700>[☘] Эльфийская кирка</gradient>",
+        "enchantments": {
+          "efficiency": 5,
+          "fortune": 3,
+          "unbreaking": 5
+        }
+      }
+    },
+    {
+      "item": "BOW",
+      "components": "minecraft:bow[minecraft:custom_model_data={floats:[1]}]",
+      "properties": {
+        "identifier": "elven_bow",
+        "display": "<gradient:#228B22:#32CD32:#FFD700>[☘] Эльфийский лук</gradient>",
+        "enchantments": {
+          "power": 5,
+          "punch": 2,
+          "unbreaking": 5,
+          "mending": 1
+        }
+      }
+    },
+    {
+      "item": "CROSSBOW",
+      "components": "minecraft:crossbow[minecraft:custom_model_data={floats:[1]}]",
+      "properties": {
+        "identifier": "explosive_slingshot",
+        "display": "<gradient:#FF4500:#FF8C00:#FFD700>[☢] Взрывная рогатка</gradient>",
+        "enchantments": {
+          "multishot": 1,
+          "quick_charge": 3,
+          "unbreaking": 3
+        },
+        "lores": [
+          "<gray>Идеальна для запуска фейерверков"
+        ]
+      }
+    },
+    {
+      "item": "POTION{Potion:\"minecraft:empty\"}",
+      "components": "minecraft:potion[minecraft:custom_model_data={floats:[4]}, minecraft:potion_contents={}]",
+      "properties": {
+        "identifier": "elven_elixir",
+        "display": "<gradient:#00FF00:#FFFF00>[⚡] Эльфийский эликсир</gradient>",
+        "lores": [
+          "<gray>Легкость и сила лесного народа"
+        ],
+        "effects": [
+          {
+            "potion": "SPEED",
+            "level": 1,
+            "time": 3600
+          },
+          {
+            "potion": "JUMP",
+            "level": 1,
+            "time": 3600
+          },
+          {
+            "potion": "INCREASE_DAMAGE",
+            "level": 0,
+            "time": 3600
+          }
+        ]
+      }
+    },
+    {
+      "item": "POTION{Potion:\"minecraft:empty\"}",
+      "components": "minecraft:potion[minecraft:custom_model_data={floats:[2]}, minecraft:potion_contents={}]",
+      "properties": {
+        "identifier": "glintwein",
+        "display": "<gradient:#8B0000:#FF4500>[♨] Глинтвейн</gradient>",
+        "lores": [
+          "<gray>Согревает и укрепляет дух"
+        ],
+        "effects": [
+          {
+            "potion": "INCREASE_DAMAGE",
+            "level": 0,
+            "time": 3600
+          },
+          {
+            "potion": "FIRE_RESISTANCE",
+            "level": 0,
+            "time": 3600
+          },
+          {
+            "potion": "DAMAGE_RESISTANCE",
+            "level": 0,
+            "time": 3600
+          },
+          {
+            "potion": "REGENERATION",
+            "level": 0,
+            "time": 600
+          }
+        ]
+      }
+    },
+    {
+      "item": "POTION{Potion:\"minecraft:empty\"}",
+      "components": "minecraft:potion[minecraft:custom_model_data={floats:[3]}, minecraft:potion_contents={}]",
+      "properties": {
+        "identifier": "spruce_sbiten",
+        "display": "<gradient:#556B2F:#8B4513>[🌲] Еловый сбитень</gradient>",
+        "lores": [
+          "<gray>Целебный отвар"
+        ],
+        "effects": [
+          {
+            "potion": "HEAL",
+            "level": 1,
+            "time": 0
+          },
+          {
+            "potion": "REGENERATION",
+            "level": 1,
+            "time": 1200
+          }
+        ]
+      }
+    },
+    {
+      "item": "POTION{Potion:\"minecraft:empty\"}",
+      "components": "minecraft:potion[minecraft:custom_model_data={floats:[1]}, minecraft:potion_contents={}]",
+      "properties": {
+        "identifier": "tangerine_juice",
+        "display": "<gradient:#FFA500:#FF8C00>[🍹] Мандариновый сок</gradient>",
+        "lores": [
+          "<gray>Заряд витаминов и удачи"
+        ],
+        "effects": [
+          {
+            "potion": "FIRE_RESISTANCE",
+            "level": 0,
+            "time": 3600
+          },
+          {
+            "potion": "JUMP",
+            "level": 1,
+            "time": 3600
+          },
+          {
+            "potion": "LUCK",
+            "level": 0,
+            "time": 3600
+          },
+          {
+            "potion": "FAST_DIGGING",
+            "level": 1,
+            "time": 3600
+          }
+        ]
+      }
+    },
+    {
+      "item": "SPLASH_POTION{Potion:\"minecraft:empty\"}",
+      "components": "minecraft:splash_potion[minecraft:custom_model_data={floats:[1]}, minecraft:potion_contents={}]",
+      "properties": {
+        "identifier": "freezing_infusion",
+        "display": "<gradient:#E0FFFF:#4682B4>[❄] Леденящий настой</gradient>",
+        "lores": [
+          "<gray>Замораживает врагов на месте"
+        ],
+        "effects": [
+          {
+            "potion": "SLOW",
+            "level": 3,
+            "time": 1200
+          }
+        ]
+      }
+    },
+    {
+      "item": "SPLASH_POTION{Potion:\"minecraft:empty\"}",
+      "components": "minecraft:splash_potion[minecraft:custom_model_data={floats:[2]}, minecraft:potion_contents={}]",
+      "properties": {
+        "identifier": "intoxicating_extract",
+        "display": "<gradient:#800080:#4B0082>[😵] Пьянящий экстракт</gradient>",
+        "lores": [
+          "<gray>Голова идет кругом"
+        ],
+        "effects": [
+          {
+            "potion": "CONFUSION",
+            "level": 0,
+            "time": 600
+          },
+          {
+            "potion": "SLOW",
+            "level": 1,
+            "time": 600
+          }
+        ]
+      }
+    },
+    {
+      "item": "SPLASH_POTION{Potion:\"minecraft:empty\"}",
+      "components": "minecraft:splash_potion[minecraft:custom_model_data={floats:[3]}, minecraft:potion_contents={}]",
+      "properties": {
+        "identifier": "explosive_tangerine",
+        "display": "<gradient:#FF4500:#FFFF00>[💥] Взрывной мандарин</gradient>",
+        "lores": [
+          "<gray>Ослепительный вкус"
+        ],
+        "effects": [
+          {
+            "potion": "BLINDNESS",
+            "level": 0,
+            "time": 200
+          },
+          {
+            "potion": "GLOWING",
+            "level": 0,
+            "time": 600
+          }
+        ]
+      }
+    },
+    {
+      "item": "TIPPED_ARROW{Potion:\"minecraft:empty\"}",
+      "components": "minecraft:tipped_arrow[minecraft:custom_model_data={floats:[4]}, minecraft:potion_contents={}]",
+      "properties": {
+        "identifier": "elven_arrow",
+        "display": "<color:#228B22>[★]</color> <gradient:#32CD32:#00FF00>Эльфийская стрела</gradient>",
+        "effects": [
+          {
+            "potion": "POISON",
+            "level": 1,
+            "time": 200
+          }
+        ]
+      }
+    },
+    {
+      "item": "TIPPED_ARROW{Potion:\"minecraft:empty\"}",
+      "components": "minecraft:tipped_arrow[minecraft:custom_model_data={floats:[3]}, minecraft:potion_contents={}]",
+      "properties": {
+        "identifier": "ny_ice_arrow",
+        "display": "<color:#E0FFFF>[★]</color> <gradient:#00FFFF:#4682B4>Ледяная стрела</gradient>",
+        "effects": [
+          {
+            "potion": "SLOW",
+            "level": 2,
+            "time": 200
+          }
+        ]
+      }
+    },
+    {
+      "item": "TIPPED_ARROW{Potion:\"minecraft:empty\"}",
+      "components": "minecraft:tipped_arrow[minecraft:custom_model_data={floats:[5]}, minecraft:potion_contents={}]",
+      "properties": {
+        "identifier": "intoxicating_arrow",
+        "display": "<color:#800080>[★]</color> <gradient:#9400D3:#4B0082>Пьянящая стрела</gradient>",
+        "effects": [
+          {
+            "potion": "BLINDNESS",
+            "level": 0,
+            "time": 100
+          },
+          {
+            "potion": "CONFUSION",
+            "level": 0,
+            "time": 200
+          }
+        ]
+      }
+    },
+    {
+      "item": "TIPPED_ARROW{Potion:\"minecraft:empty\"}",
+      "components": "minecraft:tipped_arrow[minecraft:custom_model_data={floats:[2]}, minecraft:potion_contents={}]",
+      "properties": {
+        "identifier": "firecracker_arrow",
+        "display": "<color:#FF0000>[★]</color> <gradient:#FFFF00:#FF4500>Петардная стрела</gradient>",
+        "effects": [
+          {
+            "potion": "BLINDNESS",
+            "level": 0,
+            "time": 100
+          },
+          {
+            "potion": "HARM",
+            "level": 0,
+            "time": 0
+          },
+          {
+            "potion": "GLOWING",
+            "level": 0,
+            "time": 200
+          }
+        ]
+      }
+    },
+    {
+      "item": "TIPPED_ARROW{Potion:\"minecraft:empty\"}",
+      "components": "minecraft:tipped_arrow[minecraft:custom_model_data={floats:[1]}, minecraft:potion_contents={}]",
+      "properties": {
+        "identifier": "coniferous_arrow",
+        "display": "<color:#006400>[★]</color> <gradient:#228B22:#556B2F>Хвойная стрела</gradient>",
+        "effects": [
+          {
+            "potion": "REGENERATION",
+            "level": 0,
+            "time": 200
+          },
+          {
+            "potion": "SLOW",
+            "level": 1,
+            "time": 200
+          },
+          {
+            "potion": "SLOW_DIGGING",
+            "level": 0,
+            "time": 200
+          }
+        ]
+      }
+    },
+    {
+      "item": "FIREWORK_ROCKET{Fireworks:{Flight:2b,Explosions:[{Type:1b,Flicker:1b,Trail:1b,Colors:[I;16753920,16776960,16731136],FadeColors:[I;16711680,16766720]},{Type:4b,Flicker:1b,Trail:1b,Colors:[I;16744192,16761088],FadeColors:[I;16777215]}]}}",
+      "components": "minecraft:firework_rocket[minecraft:custom_model_data={floats:[8]}, minecraft:fireworks={flight_duration:2,explosions:[{shape:\"large_ball\",has_twinkle:1b,has_trail:1b,colors:[16753920,16776960,16731136],fade_colors:[16711680,16766720]},{shape:\"burst\",has_twinkle:1b,has_trail:1b,colors:[16744192,16761088],fade_colors:[16777215]}]}]",
+      "properties": {
+        "identifier": "fw_tangerine",
+        "display": "<gradient:#FFA500:#FFFF00>[🎆] Фейерверк «Мандариновый»</gradient>",
+        "lores": [
+          "<gray>Массивный двойной взрыв",
+          "<gray>насыщенных цитрусовых огней"
+        ],
+        "count": 1
+      }
+    },
+    {
+      "item": "FIREWORK_ROCKET{Fireworks:{Flight:2b,Explosions:[{Type:4b,Flicker:1b,Trail:1b,Colors:[I;65535,11534335,8388863],FadeColors:[I;16711935]},{Type:2b,Flicker:1b,Trail:1b,Colors:[I;255,16711935],FadeColors:[I;65535,16777215]}]}}",
+      "components": "minecraft:firework_rocket[minecraft:custom_model_data={floats:[6]}, minecraft:fireworks={flight_duration:2,explosions:[{shape:\"burst\",has_twinkle:1b,has_trail:1b,colors:[65535,11534335,8388863],fade_colors:[16711935]},{shape:\"star\",has_twinkle:1b,has_trail:1b,colors:[255,16711935],fade_colors:[65535,16777215]}]}]",
+      "properties": {
+        "identifier": "fw_magic",
+        "display": "<gradient:#00FFFF:#9932CC>[🎆] Фейерверк «Магическое сияние»</gradient>",
+        "lores": [
+          "<gray>Двойной мистический взрыв",
+          "<gray>с неоновым мерцанием"
+        ],
+        "count": 1
+      }
+    },
+    {
+      "item": "FIREWORK_ROCKET{Fireworks:{Flight:2b,Explosions:[{Type:1b,Flicker:1b,Trail:1b,Colors:[I;16777215,15790320],FadeColors:[I;12303291]},{Type:0b,Flicker:1b,Trail:1b,Colors:[I;16777215],FadeColors:[I;16766720,13547519]}]}}",
+      "components": "minecraft:firework_rocket[minecraft:custom_model_data={floats:[7]}, minecraft:fireworks={flight_duration:2,explosions:[{shape:\"large_ball\",has_twinkle:1b,has_trail:1b,colors:[16777215,15790320],fade_colors:[12303291]},{shape:\"small_ball\",has_twinkle:1b,has_trail:1b,colors:[16777215],fade_colors:[16766720,13547519]}]}]",
+      "properties": {
+        "identifier": "fw_harmony",
+        "display": "<gradient:#FFFFFF:#D3D3D3>[🎆] Фейерверк «Гармония»</gradient>",
+        "lores": [
+          "<gray>Огромная сфера чистого света",
+          "<gray>с переливом в пастельные тона"
+        ],
+        "count": 1
+      }
+    },
+    {
+      "item": "FIREWORK_ROCKET{Fireworks:{Flight:2b,Explosions:[{Type:2b,Flicker:1b,Trail:1b,Colors:[I;25600,65280,4325120],FadeColors:[I;5635925]},{Type:4b,Flicker:0b,Trail:1b,Colors:[I;65280,16776960],FadeColors:[I;25600]}]}}",
+      "components": "minecraft:firework_rocket[minecraft:custom_model_data={floats:[2]}, minecraft:fireworks={flight_duration:2,explosions:[{shape:\"star\",has_twinkle:1b,has_trail:1b,colors:[25600,65280,4325120],fade_colors:[5635925]},{shape:\"burst\",has_twinkle:0b,has_trail:1b,colors:[65280,16776960],fade_colors:[25600]}]}]",
+      "properties": {
+        "identifier": "fw_pine",
+        "display": "<gradient:#006400:#228B22>[🎆] Фейерверк «Хвойный»</gradient>",
+        "lores": [
+          "<gray>Яркая изумрудная звезда",
+          "<gray>с лаймовым ореолом"
+        ],
+        "count": 1
+      }
+    },
+    {
+      "item": "FIREWORK_ROCKET{Fireworks:{Flight:2b,Explosions:[{Type:1b,Flicker:1b,Trail:1b,Colors:[I;16711680,65280,16777215],FadeColors:[I;16766720]},{Type:2b,Flicker:1b,Trail:1b,Colors:[I;16766720,16711680],FadeColors:[I;16777215]}]}}",
+      "components": "minecraft:firework_rocket[minecraft:custom_model_data={floats:[5]}, minecraft:fireworks={flight_duration:2,explosions:[{shape:\"large_ball\",has_twinkle:1b,has_trail:1b,colors:[16711680,65280,16777215],fade_colors:[16766720]},{shape:\"star\",has_twinkle:1b,has_trail:1b,colors:[16766720,16711680],fade_colors:[16777215]}]}]",
+      "properties": {
+        "identifier": "fw_christmas",
+        "display": "<gradient:#FF0000:#FFD700:#FFFFFF>[🎆] Фейерверк «Рождественский»</gradient>",
+        "lores": [
+          "<gray>Грандиозный праздник цветов:",
+          "<gray>Красный, Золотой, Зеленый"
+        ],
+        "count": 1
+      }
+    },
+    {
+      "item": "FIREWORK_ROCKET{Fireworks:{Flight:2b,Explosions:[{Type:4b,Flicker:1b,Trail:1b,Colors:[I;255,65535,16777215],FadeColors:[I;3394815]},{Type:0b,Flicker:1b,Trail:1b,Colors:[I;65535,8900346],FadeColors:[I;16777215]}]}}",
+      "components": "minecraft:firework_rocket[minecraft:custom_model_data={floats:[4]}, minecraft:fireworks={flight_duration:2,explosions:[{shape:\"burst\",has_twinkle:1b,has_trail:1b,colors:[255,65535,16777215],fade_colors:[3394815]},{shape:\"small_ball\",has_twinkle:1b,has_trail:1b,colors:[65535,8900346],fade_colors:[16777215]}]}]",
+      "properties": {
+        "identifier": "fw_ice",
+        "display": "<gradient:#0000FF:#00FFFF:#FFFFFF>[🎆] Фейерверк «Ледниковый»</gradient>",
+        "lores": [
+          "<gray>Морозный взрыв глубокого синего",
+          "<gray>и яркого циана"
+        ],
+        "count": 1
+      }
+    },
+    {
+      "item": "FIREWORK_ROCKET{Fireworks:{Flight:2b,Explosions:[{Type:2b,Flicker:1b,Trail:1b,Colors:[I;16711935,16777215],FadeColors:[I;16777215]},{Type:1b,Flicker:1b,Trail:1b,Colors:[I;16777215,16711935],FadeColors:[I;16711935]}]}}",
+      "components": "minecraft:firework_rocket[minecraft:custom_model_data={floats:[3]}, minecraft:fireworks={flight_duration:2,explosions:[{shape:\"star\",has_twinkle:1b,has_trail:1b,colors:[16711935,16777215],fade_colors:[16777215]},{shape:\"large_ball\",has_twinkle:1b,has_trail:1b,colors:[16777215,16711935],fade_colors:[16711935]}]}]",
+      "properties": {
+        "identifier": "fw_cotton_candy",
+        "display": "<gradient:#FF00FF:#FFFFFF>[🎆] Фейерверк «Сладкая вата»</gradient>",
+        "lores": [
+          "<gray>Контрастный взрыв насыщенной",
+          "<gray>фуксии и белого сияния"
+        ],
+        "count": 1
+      }
+    }
+  ]
+}

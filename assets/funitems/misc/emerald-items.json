@@ -1,0 +1,104 @@
+{
+  "categoryId": "emerald-items",
+  "items": [
+    {
+      "item": "DIAMOND_HELMET",
+      "components": "minecraft:diamond_helmet[minecraft:trim={material: \"minecraft:emerald\", pattern: \"minecraft:dune\"}]",
+      "properties": {
+        "identifier": "emerald-helmet",
+        "display": "<gradient:#00FF80:#00FF0F:#A0FF00>Изумрудный шлем</gradient>",
+        "enchantments": {
+          "protection": 3
+        }
+      }
+    },
+    {
+      "item": "DIAMOND_CHESTPLATE",
+      "components": "minecraft:diamond_chestplate[minecraft:trim={material: \"minecraft:emerald\", pattern: \"minecraft:dune\"}]",
+      "properties": {
+        "identifier": "emerald-chestplate",
+        "display": "<gradient:#00FF80:#00FF0F:#A0FF00>Изумрудный нагрудник</gradient>",
+        "enchantments": {
+          "protection": 3
+        }
+      }
+    },
+    {
+      "item": "DIAMOND_LEGGINGS",
+      "components": "minecraft:diamond_leggings[minecraft:trim={material: \"minecraft:emerald\", pattern: \"minecraft:dune\"}]",
+      "properties": {
+        "identifier": "emerald-leggings",
+        "display": "<gradient:#00FF80:#00FF0F:#A0FF00>Изумрудные поножи</gradient>",
+        "enchantments": {
+          "protection": 3
+        }
+      }
+    },
+    {
+      "item": "DIAMOND_BOOTS",
+      "components": "minecraft:diamond_boots[minecraft:trim={material: \"minecraft:emerald\", pattern: \"minecraft:dune\"}]",
+      "properties": {
+        "identifier": "emerald-boots",
+        "display": "<gradient:#00FF80:#00FF0F:#A0FF00>Изумрудные ботинки</gradient>",
+        "enchantments": {
+          "protection": 3
+        }
+      }
+    },
+    {
+      "item": "DIAMOND_SWORD",
+      "components": "minecraft:diamond_sword",
+      "properties": {
+        "identifier": "emerald-sword",
+        "display": "<gradient:#00FF80:#00FF0F:#A0FF00>Изумрудный меч</gradient>",
+        "enchantments": {
+          "sharpness": 3
+        }
+      }
+    },
+    {
+      "item": "DIAMOND_PICKAXE",
+      "components": "minecraft:diamond_pickaxe",
+      "properties": {
+        "identifier": "emerald-pickaxe",
+        "display": "<gradient:#00FF80:#00FF0F:#A0FF00>Изумрудная кирка</gradient>",
+        "enchantments": {
+          "efficiency": 3
+        }
+      }
+    },
+    {
+      "item": "DIAMOND_AXE",
+      "components": "minecraft:diamond_axe",
+      "properties": {
+        "identifier": "emerald-axe",
+        "display": "<gradient:#00FF80:#00FF0F:#A0FF00>Изумрудный топор</gradient>",
+        "enchantments": {
+          "efficiency": 3
+        }
+      }
+    },
+    {
+      "item": "DIAMOND_HOE",
+      "components": "minecraft:diamond_hoe",
+      "properties": {
+        "identifier": "emerald-hoe",
+        "display": "<gradient:#00FF80:#00FF0F:#A0FF00>Изумрудная мотыга</gradient>",
+        "enchantments": {
+          "efficiency": 3
+        }
+      }
+    },
+    {
+      "item": "DIAMOND_SHOVEL",
+      "components": "minecraft:diamond_shovel",
+      "properties": {
+        "identifier": "emerald-shovel",
+        "display": "<gradient:#00FF80:#00FF0F:#A0FF00>Изумрудная лопата</gradient>",
+        "enchantments": {
+          "efficiency": 3
+        }
+      }
+    }
+  ]
+}

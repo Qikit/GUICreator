@@ -1,0 +1,26 @@
+{
+  "categoryId": "funreports",
+  "items": [
+    {
+      "item": "NETHER_STAR",
+      "components": "minecraft:nether_star",
+      "properties": {
+        "identifier": "cheats-check-reward",
+        "display": "<color:red>[★]<color:yellow> Трофей<color:gold> $suspect",
+        "lores": [
+          "<color:red>╔<color:white> Получен от <color:red>Администрации<color:white>,",
+          "<color:red>╠<color:white> за честную игру на <color:gold>FunTime",
+          "<color:red>╠<color:white> Ведь после проверки на читы,",
+          "<color:red>╠<color:white> игрок оказался <color:green><u>чистым</u><color:white>!",
+          "<color:red>╠<color:white> ",
+          "<color:red>╠<color:white> Ник:<color:gold> $suspect",
+          "<color:red>╚<color:white> Дата:<color:gold> $date"
+        ],
+        "disable": [
+          "all"
+        ],
+        "maxStackSize": 1
+      }
+    }
+  ]
+}

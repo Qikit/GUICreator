@@ -1,0 +1,75 @@
+{
+  "categoryId": "top-tools",
+  "items": [
+    {
+      "item": "NETHERITE_AXE{Damage: 0, Enchantments: [{id: \"minecraft:efficiency\", lvl: 10s}, {id: \"minecraft:fortune\", lvl: 3s}, {id: \"minecraft:unbreaking\", lvl: 5s}]}",
+      "components": "minecraft:netherite_axe",
+      "properties": {
+        "display": "<gradient:#FF4F00:#FFA100>[★] Топ-Топор</gradient>",
+        "enchantments": {
+          "efficiency": 10,
+          "fortune": 3,
+          "unbreaking": 5
+        },
+        "identifier": "top-axe",
+        "count": 1
+      }
+    },
+    {
+      "item": "NETHERITE_PICKAXE{Damage: 0, Enchantments: [{id: \"minecraft:efficiency\", lvl: 7s}, {id: \"minecraft:fortune\", lvl: 3s}, {id: \"minecraft:unbreaking\", lvl: 3s}]}",
+      "components": "minecraft:netherite_pickaxe",
+      "properties": {
+        "display": "<gradient:#FF4F00:#FFA100>[★] Топ-Кирка</gradient>",
+        "enchantments": {
+          "efficiency": 7,
+          "fortune": 3,
+          "unbreaking": 3
+        },
+        "identifier": "top-pickaxe",
+        "count": 1
+      }
+    },
+    {
+      "item": "NETHERITE_PICKAXE{Damage: 0, Enchantments: [{id: \"minecraft:efficiency\", lvl: 7s}, {id: \"minecraft:silk_touch\", lvl: 1s}, {id: \"minecraft:unbreaking\", lvl: 3s}]}",
+      "components": "minecraft:netherite_pickaxe",
+      "properties": {
+        "display": "<gradient:#FF4F00:#FFA100>[★] Топ-Кирка</gradient>",
+        "enchantments": {
+          "efficiency": 7,
+          "silk_touch": 1,
+          "unbreaking": 3
+        },
+        "identifier": "top-silktouch",
+        "count": 1
+      }
+    },
+    {
+      "item": "NETHERITE_HOE{Damage: 0, Enchantments: [{id: \"minecraft:efficiency\", lvl: 10s}, {id: \"minecraft:fortune\", lvl: 3s}, {id: \"minecraft:unbreaking\", lvl: 5s}]}",
+      "components": "minecraft:netherite_hoe",
+      "properties": {
+        "display": "<gradient:#FF4F00:#FFA100>[★] Топ-Мотыга</gradient>",
+        "enchantments": {
+          "efficiency": 10,
+          "fortune": 3,
+          "unbreaking": 5
+        },
+        "identifier": "top-hoe",
+        "count": 1
+      }
+    },
+    {
+      "item": "NETHERITE_SHOVEL{Damage: 0, Enchantments: [{id: \"minecraft:efficiency\", lvl: 10s}, {id: \"minecraft:fortune\", lvl: 3s}, {id: \"minecraft:unbreaking\", lvl: 5s}]}",
+      "components": "minecraft:netherite_shovel",
+      "properties": {
+        "display": "<gradient:#FF4F00:#FFA100>[★] Топ-Лопата</gradient>",
+        "enchantments": {
+          "efficiency": 10,
+          "fortune": 3,
+          "unbreaking": 5
+        },
+        "identifier": "top-shovel",
+        "count": 1
+      }
+    }
+  ]
+}

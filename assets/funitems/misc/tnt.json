@@ -1,0 +1,69 @@
+{
+  "categoryId": "tnt",
+  "items": [
+    {
+      "item": "REPEATING_COMMAND_BLOCK{don-item:\"processor\",processor:1b}",
+      "components": "minecraft:repeating_command_block",
+      "properties": {
+        "identifier": "processor",
+        "display": "<color:#cc00ff>[★] Процессор </color>",
+        "lores": [
+          "<blue>Это ингредиент для</blue>",
+          "<blue>крафта TNT-TIER BLACK</blue>"
+        ],
+        "tags": {
+          "don-item": {
+            "STRING": "processor"
+          },
+          "processor": {
+            "BOOLEAN": true
+          }
+        },
+        "count": 1
+      }
+    },
+    {
+      "item": "TNT{tier1:1b,don-item:\"twhite\"}",
+      "components": "minecraft:tnt",
+      "properties": {
+        "identifier": "tnt-tier-white",
+        "display": "<color:#AA0000>[★]</color><color:#FF5555> TNT - TIER </color><color:#AAAAAA>WHITE</color>",
+        "lores": [
+          "<blue>Этот динамит взрывается</blue>",
+          "<blue>в 10 раз сильнее обычного</blue>"
+        ],
+        "tags": {
+          "don-item": {
+            "STRING": "twhite"
+          },
+          "tier1": {
+            "BOOLEAN": true
+          }
+        },
+        "count": 1
+      }
+    },
+    {
+      "item": "TNT{tier2: 1b, don-item: \"tblack\"}",
+      "components": "minecraft:tnt",
+      "properties": {
+        "identifier": "tnt-tier-black",
+        "display": "<color:#AA0000>[★]</color><color:#FF5555> TNT - TIER </color><color:#555555>BLACK</color>",
+        "lores": [
+          "<blue>Этот динамит взрывается</blue>",
+          "<blue>в 10 раз сильнее обычного</blue>",
+          "<blue>и способен взорвать обсидиан</blue>"
+        ],
+        "tags": {
+          "don-item": {
+            "STRING": "tblack"
+          },
+          "tier2": {
+            "BOOLEAN": true
+          }
+        },
+        "count": 1
+      }
+    }
+  ]
+}

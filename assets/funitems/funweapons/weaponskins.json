@@ -1,0 +1,517 @@
+{
+  "categoryId": "weaponskins",
+  "items": [
+    {
+      "item": "paper{weaponskin: \"nightmare-trap\", Enchantments: [{id: \"minecraft:channeling\", lvl: 1s}], don-item: \"weaponskin\", HideFlags: 1}",
+      "components": "minecraft:paper",
+      "properties": {
+        "display": "<color:#FF6C00>[★] Кошмарный скин</color>",
+        "enchantments": {
+          "channeling": 1
+        },
+        "flags": [
+          "HIDE_ENCHANTS"
+        ],
+        "lores": [
+          "<color:#FFCF00>Используя </color><color:#FFFFFF>этот предмет</color>",
+          "<color:#FFFFFF>Вы его </color><color:#FBBD02>расходуете</color>",
+          "<color:#FFFFFF>и получаете </color><color:#FB3E3E>Кошмарный </color><color:#FFFFFF>скин взамен</color>",
+          "",
+          "<color:#FF6C00>[ПКМ]</color><color:#FFFFFF>, чтобы использовать </color><color:#FBBD02>x1 </color><color:#FFFFFF>скин</color>",
+          "<color:#FF6C00>[SHIFT+ПКМ]</color><color:#FFFFFF>, чтобы использовать </color><color:#FBBD02>все </color><color:#FFFFFF>скины</color>",
+          "<color:#FFFFFF>Предмет нужно держать в <color:#FF6C00>руке"
+        ],
+        "identifier": "weaponskin-nightmare",
+        "tags": {
+          "don-item": {
+            "STRING": "weaponskin"
+          },
+          "weaponskin": {
+            "STRING": "nightmare-trap"
+          }
+        },
+        "count": 1
+      }
+    },
+    {
+      "item": "paper{weaponskin: \"ominous-trap\", Enchantments: [{id: \"minecraft:channeling\", lvl: 1s}], don-item: \"weaponskin\", HideFlags: 1}",
+      "components": "minecraft:paper",
+      "properties": {
+        "display": "<color:#FF6C00>[★] Зловещий скин</color>",
+        "enchantments": {
+          "channeling": 1
+        },
+        "flags": [
+          "HIDE_ENCHANTS"
+        ],
+        "lores": [
+          "<color:#FFCF00>Используя </color><color:#FFFFFF>этот предмет</color>",
+          "<color:#FFFFFF>Вы его </color><color:#FBBD02>расходуете</color>",
+          "<color:#FFFFFF>и получаете </color><color:#FB3E3E>Зловещий </color><color:#FFFFFF>скин взамен</color>",
+          "",
+          "<color:#FF6C00>[ПКМ]</color><color:#FFFFFF>, чтобы использовать </color><color:#FBBD02>x1 </color><color:#FFFFFF>скин</color>",
+          "<color:#FF6C00>[SHIFT+ПКМ]</color><color:#FFFFFF>, чтобы использовать </color><color:#FBBD02>все </color><color:#FFFFFF>скины</color>",
+          "<color:#FFFFFF>Предмет нужно держать в <color:#FF6C00>руке"
+        ],
+        "identifier": "weaponskin-ominous",
+        "tags": {
+          "don-item": {
+            "STRING": "weaponskin"
+          },
+          "weaponskin": {
+            "STRING": "ominous-trap"
+          }
+        },
+        "count": 1
+      }
+    },
+    {
+      "item": "paper{weaponskin: \"mystic-trap\", Enchantments: [{id: \"minecraft:channeling\", lvl: 1s}], don-item: \"weaponskin\", HideFlags: 1}",
+      "components": "minecraft:paper",
+      "properties": {
+        "display": "<color:#FF6C00>[★] Мистический скин</color>",
+        "enchantments": {
+          "channeling": 1
+        },
+        "flags": [
+          "HIDE_ENCHANTS"
+        ],
+        "lores": [
+          "<color:#FFCF00>Используя </color><color:#FFFFFF>этот предмет</color>",
+          "<color:#FFFFFF>Вы его </color><color:#FBBD02>расходуете</color>",
+          "<color:#FFFFFF>и получаете </color><color:#FB3E3E>Мистический </color><color:#FFFFFF>скин взамен</color>",
+          "",
+          "<color:#FF6C00>[ПКМ]</color><color:#FFFFFF>, чтобы использовать </color><color:#FBBD02>x1 </color><color:#FFFFFF>скин</color>",
+          "<color:#FF6C00>[SHIFT+ПКМ]</color><color:#FFFFFF>, чтобы использовать </color><color:#FBBD02>все </color><color:#FFFFFF>скины</color>",
+          "<color:#FFFFFF>Предмет нужно держать в <color:#FF6C00>руке"
+        ],
+        "identifier": "weaponskin-mystic",
+        "tags": {
+          "don-item": {
+            "STRING": "weaponskin"
+          },
+          "weaponskin": {
+            "STRING": "mystic-trap"
+          }
+        },
+        "count": 1
+      }
+    },
+    {
+      "item": "paper{weaponskin: \"deadly-trap\", Enchantments: [{id: \"minecraft:channeling\", lvl: 1s}], don-item: \"weaponskin\", HideFlags: 1}",
+      "components": "minecraft:paper",
+      "properties": {
+        "display": "<color:#FF6C00>[★] Смертельный скин</color>",
+        "enchantments": {
+          "channeling": 1
+        },
+        "flags": [
+          "HIDE_ENCHANTS"
+        ],
+        "lores": [
+          "<color:#FFCF00>Используя </color><color:#FFFFFF>этот предмет</color>",
+          "<color:#FFFFFF>Вы его </color><color:#FBBD02>расходуете</color>",
+          "<color:#FFFFFF>и получаете </color><color:#FB3E3E>Смертельный </color><color:#FFFFFF>скин взамен</color>",
+          "",
+          "<color:#FF6C00>[ПКМ]</color><color:#FFFFFF>, чтобы использовать </color><color:#FBBD02>x1 </color><color:#FFFFFF>скин</color>",
+          "<color:#FF6C00>[SHIFT+ПКМ]</color><color:#FFFFFF>, чтобы использовать </color><color:#FBBD02>все </color><color:#FFFFFF>скины</color>",
+          "<color:#FFFFFF>Предмет нужно держать в <color:#FF6C00>руке"
+        ],
+        "identifier": "weaponskin-deadly",
+        "tags": {
+          "don-item": {
+            "STRING": "weaponskin"
+          },
+          "weaponskin": {
+            "STRING": "deadly-trap"
+          }
+        },
+        "count": 1
+      }
+    },
+    {
+      "item": "paper{weaponskin: \"cruel-trap\", Enchantments: [{id: \"minecraft:channeling\", lvl: 1s}], don-item: \"weaponskin\", HideFlags: 1}",
+      "components": "minecraft:paper",
+      "properties": {
+        "display": "<color:#FF6C00>[★] Жестокий скин</color>",
+        "enchantments": {
+          "channeling": 1
+        },
+        "flags": [
+          "HIDE_ENCHANTS"
+        ],
+        "lores": [
+          "<color:#FFCF00>Используя </color><color:#FFFFFF>этот предмет</color>",
+          "<color:#FFFFFF>Вы его </color><color:#FBBD02>расходуете</color>",
+          "<color:#FFFFFF>и получаете </color><color:#FB3E3E>Жестокий </color><color:#FFFFFF>скин взамен</color>",
+          "",
+          "<color:#FF6C00>[ПКМ]</color><color:#FFFFFF>, чтобы использовать </color><color:#FBBD02>x1 </color><color:#FFFFFF>скин</color>",
+          "<color:#FF6C00>[SHIFT+ПКМ]</color><color:#FFFFFF>, чтобы использовать </color><color:#FBBD02>все </color><color:#FFFFFF>скины</color>",
+          "<color:#FFFFFF>Предмет нужно держать в <color:#FF6C00>руке"
+        ],
+        "identifier": "weaponskin-cruel",
+        "tags": {
+          "don-item": {
+            "STRING": "weaponskin"
+          },
+          "weaponskin": {
+            "STRING": "cruel-trap"
+          }
+        },
+        "count": 1
+      }
+    },
+    {
+      "item": "paper{weaponskin: \"pearl-trap\", Enchantments: [{id: \"minecraft:channeling\", lvl: 1s}], don-item: \"weaponskin\", HideFlags: 1}",
+      "components": "minecraft:paper",
+      "properties": {
+        "display": "<color:#FF6C00>[★] Жемчужный скин</color>",
+        "enchantments": {
+          "channeling": 1
+        },
+        "flags": [
+          "HIDE_ENCHANTS"
+        ],
+        "lores": [
+          "<color:#FFCF00>Используя </color><color:#FFFFFF>этот предмет</color>",
+          "<color:#FFFFFF>Вы его </color><color:#FBBD02>расходуете</color>",
+          "<color:#FFFFFF>и получаете </color><color:#FB3E3E>Жемчужный </color><color:#FFFFFF>скин взамен</color>",
+          "",
+          "<color:#FF6C00>[ПКМ]</color><color:#FFFFFF>, чтобы использовать </color><color:#FBBD02>x1 </color><color:#FFFFFF>скин</color>",
+          "<color:#FF6C00>[SHIFT+ПКМ]</color><color:#FFFFFF>, чтобы использовать </color><color:#FBBD02>все </color><color:#FFFFFF>скины</color>",
+          "<color:#FFFFFF>Предмет нужно держать в <color:#FF6C00>руке"
+        ],
+        "identifier": "weaponskin-pearl",
+        "tags": {
+          "don-item": {
+            "STRING": "weaponskin"
+          },
+          "weaponskin": {
+            "STRING": "pearl-trap"
+          }
+        },
+        "count": 1
+      }
+    },
+    {
+      "item": "paper{weaponskin: \"ice-trap\", Enchantments: [{id: \"minecraft:channeling\", lvl: 1s}], don-item: \"weaponskin\", HideFlags: 1}",
+      "components": "minecraft:paper",
+      "properties": {
+        "display": "<color:#FF6C00>[★] Ледяной скин</color>",
+        "enchantments": {
+          "channeling": 1
+        },
+        "flags": [
+          "HIDE_ENCHANTS"
+        ],
+        "lores": [
+          "<color:#FFCF00>Используя </color><color:#FFFFFF>этот предмет</color>",
+          "<color:#FFFFFF>Вы его </color><color:#FBBD02>расходуете</color>",
+          "<color:#FFFFFF>и получаете </color><color:#FB3E3E>Ледяной </color><color:#FFFFFF>скин взамен</color>",
+          "",
+          "<color:#FF6C00>[ПКМ]</color><color:#FFFFFF>, чтобы использовать </color><color:#FBBD02>x1 </color><color:#FFFFFF>скин</color>",
+          "<color:#FF6C00>[SHIFT+ПКМ]</color><color:#FFFFFF>, чтобы использовать </color><color:#FBBD02>все </color><color:#FFFFFF>скины</color>",
+          "<color:#FFFFFF>Предмет нужно держать в <color:#FF6C00>руке"
+        ],
+        "identifier": "weaponskin-ice",
+        "tags": {
+          "don-item": {
+            "STRING": "weaponskin"
+          },
+          "weaponskin": {
+            "STRING": "ice-trap"
+          }
+        },
+        "count": 1
+      }
+    },
+    {
+      "item": "paper{weaponskin: \"insidious-trap\", Enchantments: [{id: \"minecraft:channeling\", lvl: 1s}], don-item: \"weaponskin\", HideFlags: 1}",
+      "components": "minecraft:paper",
+      "properties": {
+        "display": "<color:#FF6C00>[★] Коварный скин</color>",
+        "enchantments": {
+          "channeling": 1
+        },
+        "flags": [
+          "HIDE_ENCHANTS"
+        ],
+        "lores": [
+          "<color:#FFCF00>Используя </color><color:#FFFFFF>этот предмет</color>",
+          "<color:#FFFFFF>Вы его </color><color:#FBBD02>расходуете</color>",
+          "<color:#FFFFFF>и получаете </color><color:#FB3E3E>Коварный </color><color:#FFFFFF>скин взамен</color>",
+          "",
+          "<color:#FF6C00>[ПКМ]</color><color:#FFFFFF>, чтобы использовать </color><color:#FBBD02>x1 </color><color:#FFFFFF>скин</color>",
+          "<color:#FF6C00>[SHIFT+ПКМ]</color><color:#FFFFFF>, чтобы использовать </color><color:#FBBD02>все </color><color:#FFFFFF>скины</color>",
+          "<color:#FFFFFF>Предмет нужно держать в <color:#FF6C00>руке"
+        ],
+        "identifier": "weaponskin-insidious",
+        "tags": {
+          "don-item": {
+            "STRING": "weaponskin"
+          },
+          "weaponskin": {
+            "STRING": "insidious-trap"
+          }
+        },
+        "count": 1
+      }
+    },
+    {
+      "item": "paper{weaponskin: \"cursed-trap\", Enchantments: [{id: \"minecraft:channeling\", lvl: 1s}], don-item: \"weaponskin\", HideFlags: 1}",
+      "components": "minecraft:paper",
+      "properties": {
+        "display": "<color:#FF6C00>[★] Проклятый скин</color>",
+        "enchantments": {
+          "channeling": 1
+        },
+        "flags": [
+          "HIDE_ENCHANTS"
+        ],
+        "lores": [
+          "<color:#FFCF00>Используя </color><color:#FFFFFF>этот предмет</color>",
+          "<color:#FFFFFF>Вы его </color><color:#FBBD02>расходуете</color>",
+          "<color:#FFFFFF>и получаете </color><color:#FB3E3E>Проклятый </color><color:#FFFFFF>скин взамен</color>",
+          "",
+          "<color:#FF6C00>[ПКМ]</color><color:#FFFFFF>, чтобы использовать </color><color:#FBBD02>x1 </color><color:#FFFFFF>скин</color>",
+          "<color:#FF6C00>[SHIFT+ПКМ]</color><color:#FFFFFF>, чтобы использовать </color><color:#FBBD02>все </color><color:#FFFFFF>скины</color>",
+          "<color:#FFFFFF>Предмет нужно держать в <color:#FF6C00>руке"
+        ],
+        "identifier": "weaponskin-cursed",
+        "tags": {
+          "don-item": {
+            "STRING": "weaponskin"
+          },
+          "weaponskin": {
+            "STRING": "cursed-trap"
+          }
+        },
+        "count": 1
+      }
+    },
+    {
+      "item": "paper{weaponskin: \"painful-trap\", Enchantments: [{id: \"minecraft:channeling\", lvl: 1s}], don-item: \"weaponskin\", HideFlags: 1}",
+      "components": "minecraft:paper",
+      "properties": {
+        "display": "<color:#FF6C00>[★] Мучительный скин</color>",
+        "enchantments": {
+          "channeling": 1
+        },
+        "flags": [
+          "HIDE_ENCHANTS"
+        ],
+        "lores": [
+          "<color:#FFCF00>Используя </color><color:#FFFFFF>этот предмет</color>",
+          "<color:#FFFFFF>Вы его </color><color:#FBBD02>расходуете</color>",
+          "<color:#FFFFFF>и получаете </color><color:#FB3E3E>Мучительный </color><color:#FFFFFF>скин взамен</color>",
+          "",
+          "<color:#FF6C00>[ПКМ]</color><color:#FFFFFF>, чтобы использовать </color><color:#FBBD02>x1 </color><color:#FFFFFF>скин</color>",
+          "<color:#FF6C00>[SHIFT+ПКМ]</color><color:#FFFFFF>, чтобы использовать </color><color:#FBBD02>все </color><color:#FFFFFF>скины</color>",
+          "<color:#FFFFFF>Предмет нужно держать в <color:#FF6C00>руке"
+        ],
+        "identifier": "weaponskin-painful",
+        "tags": {
+          "don-item": {
+            "STRING": "weaponskin"
+          },
+          "weaponskin": {
+            "STRING": "painful-trap"
+          }
+        },
+        "count": 1
+      }
+    },
+    {
+      "item": "paper{weaponskin: \"royal-trap\", Enchantments: [{id: \"minecraft:channeling\", lvl: 1s}], don-item: \"weaponskin\", HideFlags: 1}",
+      "components": "minecraft:paper",
+      "properties": {
+        "display": "<color:#FF6C00>[★] Царский скин</color>",
+        "enchantments": {
+          "channeling": 1
+        },
+        "flags": [
+          "HIDE_ENCHANTS"
+        ],
+        "lores": [
+          "<color:#FFCF00>Используя </color><color:#FFFFFF>этот предмет</color>",
+          "<color:#FFFFFF>Вы его </color><color:#FBBD02>расходуете</color>",
+          "<color:#FFFFFF>и получаете </color><color:#FB3E3E>Царский </color><color:#FFFFFF>скин взамен</color>",
+          "",
+          "<color:#FF6C00>[ПКМ]</color><color:#FFFFFF>, чтобы использовать </color><color:#FBBD02>x1 </color><color:#FFFFFF>скин</color>",
+          "<color:#FF6C00>[SHIFT+ПКМ]</color><color:#FFFFFF>, чтобы использовать </color><color:#FBBD02>все </color><color:#FFFFFF>скины</color>",
+          "<color:#FFFFFF>Предмет нужно держать в <color:#FF6C00>руке"
+        ],
+        "identifier": "weaponskin-royal",
+        "tags": {
+          "don-item": {
+            "STRING": "weaponskin"
+          },
+          "weaponskin": {
+            "STRING": "royal-trap"
+          }
+        },
+        "count": 1
+      }
+    },
+    {
+      "item": "paper{weaponskin: \"ghost-trap\", Enchantments: [{id: \"minecraft:channeling\", lvl: 1s}], don-item: \"weaponskin\", HideFlags: 1}",
+      "components": "minecraft:paper",
+      "properties": {
+        "display": "<color:#FF6C00>[★] Призрачный скин</color>",
+        "enchantments": {
+          "channeling": 1
+        },
+        "flags": [
+          "HIDE_ENCHANTS"
+        ],
+        "lores": [
+          "<color:#FFCF00>Используя </color><color:#FFFFFF>этот предмет</color>",
+          "<color:#FFFFFF>Вы его </color><color:#FBBD02>расходуете</color>",
+          "<color:#FFFFFF>и получаете </color><color:#FB3E3E>Призрачный </color><color:#FFFFFF>скин взамен</color>",
+          "",
+          "<color:#FF6C00>[ПКМ]</color><color:#FFFFFF>, чтобы использовать </color><color:#FBBD02>x1 </color><color:#FFFFFF>скин</color>",
+          "<color:#FF6C00>[SHIFT+ПКМ]</color><color:#FFFFFF>, чтобы использовать </color><color:#FBBD02>все </color><color:#FFFFFF>скины</color>",
+          "<color:#FFFFFF>Предмет нужно держать в <color:#FF6C00>руке"
+        ],
+        "identifier": "weaponskin-ghost",
+        "tags": {
+          "don-item": {
+            "STRING": "weaponskin"
+          },
+          "weaponskin": {
+            "STRING": "ghost-trap"
+          }
+        },
+        "count": 1
+      }
+    },
+    {
+      "item": "paper{weaponskin: \"singular-trap\", Enchantments: [{id: \"minecraft:channeling\", lvl: 1s}], don-item: \"weaponskin\", HideFlags: 1}",
+      "components": "minecraft:paper",
+      "properties": {
+        "display": "<color:#FF6C00>[★] Сингулярный скин</color>",
+        "enchantments": {
+          "channeling": 1
+        },
+        "flags": [
+          "HIDE_ENCHANTS"
+        ],
+        "lores": [
+          "<color:#FFCF00>Используя </color><color:#FFFFFF>этот предмет</color>",
+          "<color:#FFFFFF>Вы его </color><color:#FBBD02>расходуете</color>",
+          "<color:#FFFFFF>и получаете </color><color:#FB3E3E>Сингулярный </color><color:#FFFFFF>скин взамен</color>",
+          "",
+          "<color:#FF6C00>[ПКМ]</color><color:#FFFFFF>, чтобы использовать </color><color:#FBBD02>x1 </color><color:#FFFFFF>скин</color>",
+          "<color:#FF6C00>[SHIFT+ПКМ]</color><color:#FFFFFF>, чтобы использовать </color><color:#FBBD02>все </color><color:#FFFFFF>скины</color>",
+          "<color:#FFFFFF>Предмет нужно держать в <color:#FF6C00>руке"
+        ],
+        "identifier": "weaponskin-singular",
+        "tags": {
+          "don-item": {
+            "STRING": "weaponskin"
+          },
+          "weaponskin": {
+            "STRING": "singular-trap"
+          }
+        },
+        "count": 1
+      }
+    },
+    {
+      "item": "paper{weaponskin: \"inevitable-trap\", Enchantments: [{id: \"minecraft:channeling\", lvl: 1s}], don-item: \"weaponskin\", HideFlags: 1}",
+      "components": "minecraft:paper",
+      "properties": {
+        "display": "<color:#FF6C00>[★] Неизбежный скин</color>",
+        "enchantments": {
+          "channeling": 1
+        },
+        "flags": [
+          "HIDE_ENCHANTS"
+        ],
+        "lores": [
+          "<color:#FFCF00>Используя </color><color:#FFFFFF>этот предмет</color>",
+          "<color:#FFFFFF>Вы его </color><color:#FBBD02>расходуете</color>",
+          "<color:#FFFFFF>и получаете </color><color:#FB3E3E>Неизбежный </color><color:#FFFFFF>скин взамен</color>",
+          "",
+          "<color:#FF6C00>[ПКМ]</color><color:#FFFFFF>, чтобы использовать </color><color:#FBBD02>x1 </color><color:#FFFFFF>скин</color>",
+          "<color:#FF6C00>[SHIFT+ПКМ]</color><color:#FFFFFF>, чтобы использовать </color><color:#FBBD02>все </color><color:#FFFFFF>скины</color>",
+          "<color:#FFFFFF>Предмет нужно держать в <color:#FF6C00>руке"
+        ],
+        "identifier": "weaponskin-inevitable",
+        "tags": {
+          "don-item": {
+            "STRING": "weaponskin"
+          },
+          "weaponskin": {
+            "STRING": "inevitable-trap"
+          }
+        },
+        "count": 1
+      }
+    },
+    {
+      "item": "paper{weaponskin: \"dragon-trap\", Enchantments: [{id: \"minecraft:channeling\", lvl: 1s}], don-item: \"weaponskin\", HideFlags: 1}",
+      "components": "minecraft:paper",
+      "properties": {
+        "display": "<color:#FF6C00>[★] Драконий скин</color>",
+        "enchantments": {
+          "channeling": 1
+        },
+        "flags": [
+          "HIDE_ENCHANTS"
+        ],
+        "lores": [
+          "<color:#FFCF00>Используя </color><color:#FFFFFF>этот предмет</color>",
+          "<color:#FFFFFF>Вы его </color><color:#FBBD02>расходуете</color>",
+          "<color:#FFFFFF>и получаете </color><color:#FB3E3E>Драконий </color><color:#FFFFFF>скин взамен</color>",
+          "",
+          "<color:#FF6C00>[ПКМ]</color><color:#FFFFFF>, чтобы использовать </color><color:#FBBD02>x1 </color><color:#FFFFFF>скин</color>",
+          "<color:#FF6C00>[SHIFT+ПКМ]</color><color:#FFFFFF>, чтобы использовать </color><color:#FBBD02>все </color><color:#FFFFFF>скины</color>",
+          "<color:#FFFFFF>Предмет нужно держать в <color:#FF6C00>руке"
+        ],
+        "identifier": "weaponskin-dragon",
+        "tags": {
+          "don-item": {
+            "STRING": "weaponskin"
+          },
+          "weaponskin": {
+            "STRING": "dragon-trap"
+          }
+        },
+        "count": 1
+      }
+    },
+    {
+      "item": "paper{weaponskin: \"pumpkin-trap\", Enchantments: [{id: \"minecraft:channeling\", lvl: 1s}], don-item: \"weaponskin\", HideFlags: 1}",
+      "components": "minecraft:paper",
+      "properties": {
+        "display": "<color:#FF6C00>[★] Тыквенный скин</color>",
+        "enchantments": {
+          "channeling": 1
+        },
+        "flags": [
+          "HIDE_ENCHANTS"
+        ],
+        "lores": [
+          "<color:#FFCF00>Используя </color><color:#FFFFFF>этот предмет</color>",
+          "<color:#FFFFFF>Вы его </color><color:#FBBD02>расходуете</color>",
+          "<color:#FFFFFF>и получаете </color><color:#FB3E3E>Тыквенный </color><color:#FFFFFF>скин взамен</color>",
+          "",
+          "<color:#FF6C00>[ПКМ]</color><color:#FFFFFF>, чтобы использовать </color><color:#FBBD02>x1 </color><color:#FFFFFF>скин</color>",
+          "<color:#FF6C00>[SHIFT+ПКМ]</color><color:#FFFFFF>, чтобы использовать </color><color:#FBBD02>все </color><color:#FFFFFF>скины</color>",
+          "<color:#FFFFFF>Предмет нужно держать в <color:#FF6C00>руке"
+        ],
+        "identifier": "weaponskin-pumpkin",
+        "tags": {
+          "don-item": {
+            "STRING": "weaponskin"
+          },
+          "weaponskin": {
+            "STRING": "pumpkin-trap"
+          }
+        },
+        "count": 1
+      }
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "categoryId": "myst-beacon",
+  "items": [
+    {
+      "item": "BEACON",
+      "components": "minecraft:beacon",
+      "properties": {
+        "identifier": "myst-beacon",
+        "display": "<gradient:#FF8800:#ECD82E>[★] Загадочный</gradient><gradient:#ECD82E:#E79120> маяк</gradient>",
+        "lores": [
+          "<white>Маяк установит временный</white>",
+          "<white>ивент, раздающий <color:#FF8800>Монеты</color></white>",
+          "<white>игрокам поблизости.</white>",
+          "",
+          "<color:#ffff00>⚠</color><white> Пирамида не требуется! </white>"
+        ],
+        "count": 1
+      }
+    }
+  ]
+}

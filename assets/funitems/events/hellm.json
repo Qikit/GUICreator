@@ -1,0 +1,30 @@
+{
+  "categoryId": "hellm",
+  "items": [
+    {
+      "item": "SOUL_LANTERN{don-item:soul,Enchantments:[{lvl:1,id:flame}],HideFlags:1}",
+      "components": "minecraft:soul_lantern",
+      "properties": {
+        "identifier": "soul",
+        "display": "<color:#D40202>[★]</color> <gradient:#D40202:#8900C4>Проклятая душа</gradient>",
+        "enchantments": {
+          "flame": 1
+        },
+        "flags": [
+          "HIDE_ENCHANTS"
+        ],
+        "lores": [
+          "<blue>Обменяй души на ценные</blue>",
+          "<blue>ресурсы у Собирателя душ</blue>",
+          "<blue>(/warp soulcollector)</blue>"
+        ],
+        "tags": {
+          "don-item": {
+            "STRING": "soul"
+          }
+        },
+        "count": 1
+      }
+    }
+  ]
+}
