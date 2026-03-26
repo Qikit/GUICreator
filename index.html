@@ -1592,7 +1592,7 @@ function App(){
 
   const onSlotMD=(e,key)=>{
     // Middle click = eyedropper
-    if(e.button===1){e.preventDefault();const d=proj.slots[key];if(d){setPalItem(d.itemId);setRecent(prev=>[d.itemId,...prev.filter(x=>x!==d.itemId)].slice(0,8));}else{setPalItem(null);}return;}
+    if(e.button===1){e.preventDefault();const d=proj.slots[key];if(d){setPalItem(d.itemId);setPalPreset({displayName:JSON.parse(JSON.stringify(d.displayName)),lore:JSON.parse(JSON.stringify(d.lore)),enchanted:d.enchanted,amount:d.amount,customModelData:d.customModelData,hideFlags:d.hideFlags});setRecent(prev=>[d.itemId,...prev.filter(x=>x!==d.itemId)].slice(0,8));}else{setPalItem(null);setPalPreset(null);}return;}
     // RMB hold = brush (with item) or multi-select (without item)
     if(e.button===2){rmbDown.current=true;rmbDragged.current=false;rmbStart.current=key;lastClick.current=key;
       if(!palItem){setMultiSel(prev=>{const n=new Set(prev);n.add(key);return n;});setSelSlot(key);}
