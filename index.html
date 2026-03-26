@@ -1566,12 +1566,13 @@ function App(){
   const painting=useRef(false);
   const rmbDown=useRef(false);
   const rmbDragged=useRef(false);
+  const rmbWasDragged=useRef(false);
   const rmbStart=useRef(null);
   const[,forceRender]=useState(0);
   useEffect(()=>{window._forceUpdate=()=>forceRender(n=>n+1);return()=>{window._forceUpdate=null;};},[]);
 
   useEffect(()=>{const h=e=>{if(htt)setHTT(prev=>prev?{...prev,x:e.clientX,y:e.clientY}:null);};window.addEventListener("mousemove",h);return()=>window.removeEventListener("mousemove",h);},[htt]);
-  useEffect(()=>{const h=()=>{painting.current=false;rmbDown.current=false;rmbDragged.current=false;rmbStart.current=null;};window.addEventListener("mouseup",h);return()=>window.removeEventListener("mouseup",h);},[]);
+  useEffect(()=>{const h=()=>{painting.current=false;rmbWasDragged.current=rmbDragged.current;rmbDown.current=false;rmbDragged.current=false;rmbStart.current=null;};window.addEventListener("mouseup",h);return()=>window.removeEventListener("mouseup",h);},[]);
   useEffect(()=>{setSaveStatus("...");clearTimeout(saveT.current);saveT.current=setTimeout(()=>{saveProj(proj);savePrefs({...loadPrefs(),lastOpenProject:proj.id});setSaveStatus("Saved");},1000);return()=>clearTimeout(saveT.current);},[proj]);
   useEffect(()=>{const h=()=>saveProj(proj);window.addEventListener("beforeunload",h);return()=>window.removeEventListener("beforeunload",h);},[proj]);
 
@@ -1605,7 +1606,8 @@ function App(){
     else{setSelSlot(key===selSlot?null:key);setMultiSel(new Set());}lastClick.current=key;};
 
   const onSlotCtx=(e,key)=>{e.preventDefault();
-    if(rmbDragged.current){rmbDown.current=false;rmbDragged.current=false;rmbStart.current=null;return;}
+    if(rmbDragged.current||rmbWasDragged.current){rmbDown.current=false;rmbDragged.current=false;rmbStart.current=null;rmbWasDragged.current=false;return;}
+    rmbWasDragged.current=false;
     rmbDown.current=false;rmbStart.current=null;
     setHTT(null);const items=[];
     if(proj.slots[key]){items.push({l:"Редактировать",fn:()=>{setSelSlot(key);setMultiSel(new Set());}});items.push({l:"Копировать",fn:()=>setClipboard({m:false,d:JSON.parse(JSON.stringify(proj.slots[key]))})});}
