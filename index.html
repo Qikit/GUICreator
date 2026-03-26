@@ -196,7 +196,7 @@ terracotta:{label:"Терракота",items:[{id:"terracotta",name:"Terracotta"
 carpet:{label:"Ковры",items:_c.map(c=>({id:c+"_carpet",name:c.replace(/_/g," ")+" Carpet"}))},
 dyes:{label:"Красители",items:_c.map(c=>({id:c+"_dye",name:c.replace(/_/g," ")+" Dye"}))},
 planks:{label:"Доски",items:_w.map(w=>({id:w+"_planks",name:w.replace(/_/g," ")+" Planks"}))},
-logs:{label:"Брёвна",items:_w.filter(w=>!["crimson","warped"].includes(w)).map(w=>({id:w+"_log",name:w.replace(/_/g," ")+" Log"})).concat([{id:"crimson_stem",name:"Crimson Stem"},{id:"warped_stem",name:"Warped Stem"}])},
+logs:{label:"Брёвна",items:_w.filter(w=>!["crimson","warped","bamboo"].includes(w)).map(w=>({id:w+"_log",name:w.replace(/_/g," ")+" Log"})).concat([{id:"crimson_stem",name:"Crimson Stem"},{id:"warped_stem",name:"Warped Stem"},{id:"bamboo_block",name:"Bamboo Block"}])},
 building:{label:"Строительные",items:[
   "stone","cobblestone","deepslate","cobbled_deepslate","dirt","grass_block","coarse_dirt","rooted_dirt","mud","sand","red_sand","gravel",
   "bricks","stone_bricks","mossy_stone_bricks","cracked_stone_bricks","chiseled_stone_bricks","deepslate_bricks","deepslate_tiles",
@@ -275,7 +275,7 @@ utility_blocks:{label:"Рабочие блоки",items:[
 heads:{label:"Головы и черепа",items:[{id:"player_head",name:"Player Head"},{id:"skeleton_skull",name:"Skeleton Skull"},{id:"zombie_head",name:"Zombie Head"},{id:"creeper_head",name:"Creeper Head"},{id:"piglin_head",name:"Piglin Head"},{id:"dragon_head",name:"Dragon Head"},{id:"wither_skeleton_skull",name:"Wither Skeleton Skull"}]},
 music_discs:{label:"Пластинки",items:["13","cat","blocks","chirp","far","mall","mellohi","stal","strad","ward","11","wait","otherside","5","pigstep","relic","creator","creator_music_box","precipice","lava_chicken"].map(d=>({id:"music_disc_"+d,name:"Music Disc "+d}))},
 signs:{label:"Таблички и двери",items:_w.flatMap(w=>[{id:w+"_sign",name:w.replace(/_/g," ")+" Sign"},{id:w+"_door",name:w.replace(/_/g," ")+" Door"},{id:w+"_hanging_sign",name:w.replace(/_/g," ")+" Hanging Sign"}]).concat([{id:"iron_door",name:"Iron Door"}])},
-boats:{label:"Лодки",items:_w.filter(w=>!["crimson","warped"].includes(w)).map(w=>({id:w+"_boat",name:w.replace(/_/g," ")+" Boat"}))},
+boats:{label:"Лодки",items:_w.filter(w=>!["crimson","warped","bamboo"].includes(w)).map(w=>({id:w+"_boat",name:w.replace(/_/g," ")+" Boat"})).concat([{id:"bamboo_raft",name:"Bamboo Raft"}])},
 spawn_eggs:{label:"Яйца призыва",items:[
   "allay","axolotl","bat","bee","blaze","bogged","breeze","camel","cat","cave_spider","chicken","cod","cow","creaking","creeper",
   "dolphin","donkey","drowned","elder_guardian","enderman","endermite","ender_dragon","evoker","fox","frog","ghast","glow_squid",
@@ -306,7 +306,8 @@ plants:{label:"Растения и цветы",items:[
   "red_mushroom","brown_mushroom","glow_lichen","moss_carpet","hanging_roots","big_dripleaf","small_dripleaf",
 ].map(id=>({id,name:id.replace(/_/g," ")}))},
 saplings:{label:"Саженцы и листва",items:[
-  ..._w.filter(w=>!["crimson","warped","bamboo"].includes(w)).flatMap(w=>[{id:w+"_sapling",name:w.replace(/_/g," ")+" Sapling"},{id:w+"_leaves",name:w.replace(/_/g," ")+" Leaves"}]),
+  ..._w.filter(w=>!["crimson","warped","bamboo","mangrove"].includes(w)).flatMap(w=>[{id:w+"_sapling",name:w.replace(/_/g," ")+" Sapling"},{id:w+"_leaves",name:w.replace(/_/g," ")+" Leaves"}]),
+  {id:"mangrove_propagule",name:"Mangrove Propagule"},{id:"mangrove_leaves",name:"Mangrove Leaves"},
   {id:"azalea",name:"Azalea"},{id:"flowering_azalea",name:"Flowering Azalea"},
   {id:"azalea_leaves",name:"Azalea Leaves"},{id:"flowering_azalea_leaves",name:"Flowering Azalea Leaves"},
 ]},
@@ -346,7 +347,7 @@ misc_items:{label:"Прочие предметы",items:[
   "shears","flint_and_steel","carrot_on_a_stick","warped_fungus_on_a_stick",
   "glow_item_frame","flower_pot","lantern","soul_lantern","campfire","soul_campfire",
   "chain","hopper","cauldron","brewing_stand","glass_bottle",
-  "turtle_helmet","wolf_armor","horse_armor","totem_of_undying","wind_charge",
+  "turtle_helmet","wolf_armor","totem_of_undying","wind_charge",
   "suspicious_stew","rabbit_stew","mushroom_stew","beetroot_soup","pumpkin_pie",
   "dried_kelp","baked_potato","poisonous_potato","chorus_fruit","honey_bottle","sweet_berries","glow_berries",
   "melon_slice","cooked_chicken","cooked_porkchop","cooked_mutton","cooked_cod","cooked_salmon","cooked_rabbit",
