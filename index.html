@@ -131,7 +131,7 @@ textarea{resize:vertical;min-height:60px}
 
 /* Hover tooltip */
 .htt{position:fixed;z-index:9999;pointer-events:none;filter:drop-shadow(0 2px 6px rgba(0,0,0,.7))}
-.htt .prev-box{max-width:320px}
+.htt .prev-box{max-width:min(420px,80vw);width:max-content}.htt .prev-box .line{white-space:pre-wrap;word-break:break-word}
 
 /* Color picker */
 .cp{position:absolute;z-index:100;background:var(--pan);border:1px solid var(--bd2);border-radius:5px;padding:8px;box-shadow:0 6px 16px rgba(0,0,0,.5);width:200px}
