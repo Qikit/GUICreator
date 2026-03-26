@@ -40,7 +40,7 @@ textarea{resize:vertical;min-height:60px}
 .pal-s{padding:5px 8px}.pal-s input{width:100%;padding:4px 7px;border-radius:5px;font-size:12px}
 .pal-b{flex:1;overflow-y:auto;padding:3px 5px}
 .pal-cat{margin-bottom:1px}
-.pal-ch{display:flex;align-items:center;gap:4px;padding:4px 5px;cursor:pointer;border-radius:3px;font-size:11px;font-weight:500;color:var(--tx2);user-select:none}
+.pal-ch{display:flex;align-items:center;gap:4px;padding:4px 5px;cursor:pointer;border-radius:3px;font-size:11px;font-weight:500;color:var(--tx2);user-select:none}.pal-ch .itx{width:14px;height:14px;flex-shrink:0;image-rendering:pixelated}
 .pal-ch:hover{background:var(--hov)}
 .pal-ch .ar{font-size:8px;transition:transform .15s;display:inline-block}.pal-ch .ar.op{transform:rotate(90deg)}
 .pi-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:1px;padding:2px 0}
@@ -1624,11 +1624,11 @@ function Palette({selItem,onSelect,recent}){
     <div className="pal-s" style={{position:"relative"}}><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Поиск..." style={{paddingRight:search?22:8}}/>{search&&<button onClick={()=>setSearch("")} style={{position:"absolute",right:12,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",color:"var(--tx3)",cursor:"pointer",fontSize:14,padding:0,lineHeight:1}}>{"✕"}</button>}</div>
     <div className="pal-b">
       <div style={{padding:"3px 5px 0"}}><div className={"pi eraser"+(selItem===ERASER_ID?" sel":"")} onClick={()=>onSelect(ERASER_ID)} title="Ластик" style={{width:"100%",height:30,display:"flex",alignItems:"center",justifyContent:"center",gap:4,fontSize:11,color:"var(--er)"}}><span>{"🚫"}</span><span>{"Ластик"}</span></div></div>
-      {recent.length>0&&<div className="pal-cat"><div className="pal-ch" onClick={()=>tog("__r")}><span className={"ar"+(openCats.__r!==false?" op":"")}>{"▶"}</span>{"Недавние"}</div>
+      {recent.length>0&&<div className="pal-cat"><div className="pal-ch" onClick={()=>tog("__r")}><ItemTexture itemId={recent[0]||"clock"} size={14}/>{"Недавние"}</div>
         {openCats.__r!==false&&<div className="pi-grid">{recent.map(id=><PalItem key={id} id={id} sel={selItem===id} onSelect={onSelect}/>)}</div>}
       </div>}
       {Object.entries(filtered).map(([k,cat])=>(<div key={k} className="pal-cat">
-        <div className="pal-ch" onClick={()=>tog(k)}><span className={"ar"+((openCats[k]||search)?" op":"")}>{"▶"}</span>{cat.label} <span style={{color:"var(--tx3)",fontSize:9,marginLeft:3}}>({cat.items.length})</span></div>
+        <div className="pal-ch" onClick={()=>tog(k)}><ItemTexture itemId={cat.items[0]?.id||"stone"} size={14} potionColor={cat.items[0]?.preset?.potionColor} skullTexture={cat.items[0]?.preset?.skullTexture}/>{cat.label} <span style={{color:"var(--tx3)",fontSize:9,marginLeft:3}}>({cat.items.length})</span></div>
         {(openCats[k]||search)&&<div className="pi-grid">{cat.items.map((it,i)=><PalItem key={it.id+"-"+i} id={it.id} sel={selItem===it.id&&!it.preset} onSelect={onSelect} preset={it.preset}/>)}</div>}
       </div>))}
     </div>
