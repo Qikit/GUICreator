@@ -59,7 +59,7 @@ textarea{resize:vertical;min-height:60px}
 .sl:hover .sl-hv{opacity:1}
 .sl.sel{outline:2px solid #4A9EFF;outline-offset:-1px;z-index:2}
 .sl.msel{outline:2px solid #4AFF9E;outline-offset:-1px;z-index:2}
-.sl.drop{outline:2px solid #55FF55;outline-offset:-1px;z-index:2}
+.sl.drop{outline:2px solid #55FF55;outline-offset:-1px;z-index:2}.sl[draggable=true]{cursor:grab}.sl[draggable=true]:active{cursor:grabbing}
 .sl-hv{position:absolute;inset:0;background:rgba(255,255,255,.22);pointer-events:none;opacity:0;transition:opacity .05s;z-index:1}
 .sl-c{position:absolute;inset:1px;display:flex;align-items:center;justify-content:center;z-index:0}
 .sl-c .itx{width:100%;height:100%;image-rendering:pixelated;pointer-events:none}
@@ -1354,10 +1354,11 @@ function ItemEditor({data,slotKey,dispatch}){
 }
 
 // Slot
-function Slot({row,col,data,selected,multiSel,onMouseDown,onContextMenu,onDrop,onMouseEnter,onMouseLeave,showNums}){
+function Slot({row,col,data,selected,multiSel,onMouseDown,onContextMenu,onDrop,onMouseEnter,onMouseLeave,showNums,onDragEnd}){
   return(<div className={"sl"+(selected?" sel":"")+(multiSel?" msel":"")}
     onMouseDown={e=>{if(e.button===1)e.preventDefault();onMouseDown(e);}} onAuxClick={e=>{if(e.button===1)e.preventDefault();}} onContextMenu={onContextMenu}
-    draggable={!!data} onDragStart={e=>{if(data)e.dataTransfer.setData("text/plain",`${row}-${col}`);}}
+    draggable={!!data} onDragStart={e=>{if(data){e.dataTransfer.setData("text/plain",`${row}-${col}`);e.dataTransfer.effectAllowed="move";}}}
+    onDragEnd={e=>{if(e.dataTransfer.dropEffect==="none"&&onDragEnd)onDragEnd(`${row}-${col}`);}}
     onDragOver={e=>{e.preventDefault();e.currentTarget.classList.add("drop");}}
     onDragLeave={e=>{e.currentTarget.classList.remove("drop");}}
     onDrop={e=>{e.preventDefault();e.currentTarget.classList.remove("drop");onDrop&&onDrop(e);}}
@@ -1374,7 +1375,7 @@ function Grid({project,selSlot,multiSel,onSlotMD,onSlotCtx,dispatch,showNums,set
   const hdrop=(r,c,e)=>{const s=e.dataTransfer.getData("text/plain");const t=`${r}-${c}`;if(s&&s!==t)dispatch({type:'MV',from:s,to:t});};
   return(<div className="grid-area" onMouseDown={e=>{if(e.target.classList.contains("grid-area"))onBgClick();}}>
     <div className="inv-f"><div className="inv-t"><McText segs={parseMM(project.name)}/></div>
-      <div className="inv-g">{Array.from({length:project.rows},(_,r)=>Array.from({length:9},(_,c)=>{const k=`${r}-${c}`;return<Slot key={k} row={r} col={c} data={project.slots[k]} selected={selSlot===k} multiSel={multiSel.has(k)} onMouseDown={e=>onSlotMD(e,k)} onContextMenu={e=>onSlotCtx(e,k)} onDrop={e=>hdrop(r,c,e)} showNums={showNums} onMouseEnter={e=>{onPaint(k);if(project.slots[k])setHTT({data:project.slots[k],x:e.clientX,y:e.clientY});}} onMouseLeave={()=>setHTT(null)}/>;}))}
+      <div className="inv-g">{Array.from({length:project.rows},(_,r)=>Array.from({length:9},(_,c)=>{const k=`${r}-${c}`;return<Slot key={k} row={r} col={c} data={project.slots[k]} selected={selSlot===k} multiSel={multiSel.has(k)} onMouseDown={e=>onSlotMD(e,k)} onContextMenu={e=>onSlotCtx(e,k)} onDrop={e=>hdrop(r,c,e)} showNums={showNums} onMouseEnter={e=>{onPaint(k);if(project.slots[k])setHTT({data:project.slots[k],x:e.clientX,y:e.clientY});}} onMouseLeave={()=>setHTT(null)} onDragEnd={k=>{if(project.slots[k])dispatch({type:'RS',key:k});}}/>;}))}
       </div>
     </div>
     {multiSel.size>1&&<div className="sel-ban">{multiSel.size} selected</div>}
