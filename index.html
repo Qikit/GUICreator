@@ -797,6 +797,11 @@ function saveUTpls(t){try{localStorage.setItem(`${PFX}:tpl`,JSON.stringify(t));}
 function loadUTpls(){try{return JSON.parse(localStorage.getItem(`${PFX}:tpl`)||"[]");}catch(e){return[];}}
 function savePrefs(p){try{localStorage.setItem(`${PFX}:prf`,JSON.stringify(p));}catch(e){}}
 function loadPrefs(){try{return JSON.parse(localStorage.getItem(`${PFX}:prf`)||"{}");}catch(e){return{};}}
+function saveWS(ws){try{localStorage.setItem(`${PFX}:ws:${ws.id}`,JSON.stringify(ws));const idx=JSON.parse(localStorage.getItem(`${PFX}:wsi`)||"[]");if(!idx.includes(ws.id)){idx.push(ws.id);localStorage.setItem(`${PFX}:wsi`,JSON.stringify(idx));};}catch(e){}}
+function loadWS(id){try{return JSON.parse(localStorage.getItem(`${PFX}:ws:${id}`));}catch(e){return null;}}
+function loadWSList(){try{return JSON.parse(localStorage.getItem(`${PFX}:wsi`)||"[]");}catch(e){return[];}}
+function delWS(id){try{localStorage.removeItem(`${PFX}:ws:${id}`);const idx=loadWSList().filter(x=>x!==id);localStorage.setItem(`${PFX}:wsi`,JSON.stringify(idx));}catch(e){}}
+function newWS(name="Новый workspace"){return{id:gid(),name,menus:[],connections:[]};}
 
 // ========== REDUCER ==========
 function newProj(name="Новое меню",rows=6){return{id:gid(),name,rows,cols:9,slots:{},createdAt:Date.now(),updatedAt:Date.now()};}
