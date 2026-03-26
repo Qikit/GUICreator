@@ -1614,7 +1614,10 @@ function Palette({selItem,onSelect,recent}){
   const[openCats,setOpenCats]=useState({glass_panes:true,functional:true});
   const tog=k=>setOpenCats(p=>({...p,[k]:!p[k]}));
   const ruKeys=Object.keys(RU_LOADED).length;
-  const filtered=useMemo(()=>{if(!search)return ITEM_DB;const q=search.toLowerCase();const r={};for(const[k,cat]of Object.entries(ITEM_DB)){const items=cat.items.filter(i=>i.id.includes(q)||i.name.toLowerCase().includes(q)||ruName(i.id).toLowerCase().includes(q)||cat.label.toLowerCase().includes(q));if(items.length)r[k]={...cat,items};}return r;},[search,ruKeys]);
+  const filtered=useMemo(()=>{if(!search)return ITEM_DB;const q=search.toLowerCase();const r={};for(const[k,cat]of Object.entries(ITEM_DB)){const items=cat.items.filter(i=>{
+    if(i.id.includes(q)||i.name.toLowerCase().includes(q)||ruName(i.id).toLowerCase().includes(q)||cat.label.toLowerCase().includes(q))return true;
+    if(i.preset&&i.preset.displayName){const dt=i.preset.displayName.map(s=>s.text).join("").toLowerCase();if(dt.includes(q))return true;}
+    return false;});if(items.length)r[k]={...cat,items};}return r;},[search,ruKeys]);
   const[customId,setCustomId]=useState("");
   return(<div className="pal">
     <div className="pal-h">{"Предметы"}</div>
