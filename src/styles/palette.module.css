@@ -1,0 +1,21 @@
+.palette { width: 260px; min-width: 260px; background: var(--pan); border-right: 1px solid var(--bd); display: flex; flex-direction: column; overflow: hidden; }
+.header { padding: 8px 10px; border-bottom: 1px solid var(--bd); font-weight: 600; font-size: 11px; color: var(--tx2); text-transform: uppercase; letter-spacing: .5px; }
+.search { padding: 5px 8px; position: relative; }
+.search input { width: 100%; padding: 4px 7px; border-radius: 5px; font-size: 12px; }
+.clearBtn { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--tx3); cursor: pointer; font-size: 14px; padding: 0; line-height: 1; }
+.body { flex: 1; overflow-y: auto; padding: 3px 5px; }
+.category { margin-bottom: 1px; }
+.catHeader { display: flex; align-items: center; gap: 4px; padding: 4px 5px; cursor: pointer; border-radius: 3px; font-size: 11px; font-weight: 500; color: var(--tx2); user-select: none; }
+.catHeader:hover { background: var(--hov); }
+.catHeader .itemTex { width: 14px; height: 14px; flex-shrink: 0; image-rendering: pixelated; }
+.catCount { color: var(--tx3); font-size: 9px; margin-left: 3px; }
+.itemGrid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 1px; padding: 2px 0; }
+.palItem { display: flex; align-items: center; justify-content: center; padding: 2px; border-radius: 3px; cursor: pointer; aspect-ratio: 1; border: 2px solid transparent; transition: all .08s; position: relative; overflow: hidden; }
+.palItem:hover { background: var(--hov); border-color: var(--bd); }
+.palItemSel { border-color: var(--ac); background: rgba(108,92,231,.15); }
+.palItem .itemTex { width: 28px; height: 28px; image-rendering: pixelated; pointer-events: none; }
+.footer { padding: 5px 8px; border-top: 1px solid var(--bd); display: flex; gap: 3px; }
+.footer input { flex: 1; min-width: 0; font-size: 11px; }
+.eraser { background: rgba(248,113,113,.1); border-color: rgba(248,113,113,.3); width: 100%; height: 30px; display: flex; align-items: center; justify-content: center; gap: 4px; font-size: 11px; color: var(--er); border-radius: 3px; cursor: pointer; border: 2px solid rgba(248,113,113,.3); }
+.eraser:hover { background: rgba(248,113,113,.2); border-color: var(--er); }
+.eraserSel { background: rgba(248,113,113,.25); border-color: var(--er); }
