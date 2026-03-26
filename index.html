@@ -354,6 +354,85 @@ misc_items:{label:"Прочие предметы",items:[
   "beef","porkchop","chicken","mutton","cod","salmon","rabbit","potato","carrot","beetroot",
   "tropical_fish","pufferfish",
 ].map(id=>({id,name:id.replace(/_/g," ")}))},
+// ========== NEW CATEGORIES ==========
+chests:{label:"Сундуки и хранение",items:[
+  "chest","trapped_chest","ender_chest","decorated_pot","conduit","chiseled_bookshelf",
+].map(id=>({id,name:id.replace(/_/g," ")}))},
+corals:{label:"Кораллы",items:(()=>{const t=["brain","bubble","fire","horn","tube"];return t.flatMap(c=>[c+"_coral",c+"_coral_block",c+"_coral_fan","dead_"+c+"_coral","dead_"+c+"_coral_block","dead_"+c+"_coral_fan"]);})().map(id=>({id,name:id.replace(/_/g," ")}))},
+copper_blocks:{label:"Медные блоки",items:(()=>{const stages=["","exposed_","weathered_","oxidized_"];const types=["copper","chiseled_copper","copper_bulb","copper_grate","copper_door","copper_trapdoor","cut_copper","cut_copper_slab","cut_copper_stairs"];const r=[];for(const s of stages)for(const t of types){const id=s+t;if(id!=="copper")r.push(id);}return r;})().map(id=>({id,name:id.replace(/_/g," ")}))},
+waxed_copper:{label:"Вощёная медь",items:(()=>{const stages=["waxed_","waxed_exposed_","waxed_weathered_","waxed_oxidized_"];const types=["copper","chiseled_copper","copper_bulb","copper_grate","copper_door","copper_trapdoor","cut_copper","cut_copper_slab","cut_copper_stairs"];const r=[];for(const s of stages)for(const t of types){const id=s+t;r.push(id);}return r;})().map(id=>({id,name:id.replace(/_/g," ")}))},
+slabs:{label:"Плиты",items:[
+  ..._w.map(w=>w+"_slab"),
+  "stone_slab","smooth_stone_slab","cobblestone_slab","stone_brick_slab","mossy_stone_brick_slab","mossy_cobblestone_slab",
+  "brick_slab","andesite_slab","diorite_slab","granite_slab","polished_andesite_slab","polished_diorite_slab","polished_granite_slab",
+  "sandstone_slab","smooth_sandstone_slab","red_sandstone_slab","smooth_red_sandstone_slab","cut_sandstone_slab","cut_red_sandstone_slab",
+  "nether_brick_slab","red_nether_brick_slab","blackstone_slab","polished_blackstone_slab","polished_blackstone_brick_slab",
+  "deepslate_brick_slab","deepslate_tile_slab","cobbled_deepslate_slab","polished_deepslate_slab","end_stone_brick_slab",
+  "prismarine_slab","prismarine_brick_slab","dark_prismarine_slab","purpur_slab","quartz_slab","smooth_quartz_slab",
+  "mud_brick_slab","resin_brick_slab","tuff_slab","polished_tuff_slab","tuff_brick_slab","bamboo_mosaic_slab","petrified_oak_slab",
+].map(id=>({id,name:id.replace(/_/g," ")}))},
+stairs:{label:"Ступени",items:[
+  ..._w.map(w=>w+"_stairs"),
+  "stone_stairs","cobblestone_stairs","stone_brick_stairs","mossy_stone_brick_stairs","mossy_cobblestone_stairs",
+  "brick_stairs","andesite_stairs","diorite_stairs","granite_stairs","polished_andesite_stairs","polished_diorite_stairs","polished_granite_stairs",
+  "sandstone_stairs","smooth_sandstone_stairs","red_sandstone_stairs","smooth_red_sandstone_stairs",
+  "nether_brick_stairs","red_nether_brick_stairs","blackstone_stairs","polished_blackstone_stairs","polished_blackstone_brick_stairs",
+  "deepslate_brick_stairs","deepslate_tile_stairs","cobbled_deepslate_stairs","polished_deepslate_stairs","end_stone_brick_stairs",
+  "prismarine_stairs","prismarine_brick_stairs","dark_prismarine_stairs","purpur_stairs","quartz_stairs","smooth_quartz_stairs",
+  "mud_brick_stairs","resin_brick_stairs","tuff_stairs","polished_tuff_stairs","tuff_brick_stairs","bamboo_mosaic_stairs",
+].map(id=>({id,name:id.replace(/_/g," ")}))},
+walls:{label:"Стены",items:[
+  "cobblestone_wall","mossy_cobblestone_wall","stone_brick_wall","mossy_stone_brick_wall","brick_wall",
+  "andesite_wall","diorite_wall","granite_wall","sandstone_wall","red_sandstone_wall",
+  "nether_brick_wall","red_nether_brick_wall","blackstone_wall","polished_blackstone_wall","polished_blackstone_brick_wall",
+  "deepslate_brick_wall","deepslate_tile_wall","cobbled_deepslate_wall","polished_deepslate_wall","end_stone_brick_wall",
+  "prismarine_wall","mud_brick_wall","resin_brick_wall","tuff_wall","polished_tuff_wall","tuff_brick_wall",
+].map(id=>({id,name:id.replace(/_/g," ")}))},
+fences:{label:"Заборы и калитки",items:[
+  ..._w.flatMap(w=>[w+"_fence",w+"_fence_gate"]),
+  "nether_brick_fence",
+].map(id=>({id,name:id.replace(/_/g," ")}))},
+buttons_cat:{label:"Кнопки",items:[..._w.map(w=>w+"_button"),"stone_button","polished_blackstone_button"].map(id=>({id,name:id.replace(/_/g," ")}))},
+pressure_plates:{label:"Нажимные плиты",items:[..._w.map(w=>w+"_pressure_plate"),"stone_pressure_plate","polished_blackstone_pressure_plate","heavy_weighted_pressure_plate","light_weighted_pressure_plate"].map(id=>({id,name:id.replace(/_/g," ")}))},
+trapdoors_cat:{label:"Люки",items:[..._w.map(w=>w+"_trapdoor"),"iron_trapdoor"].map(id=>({id,name:id.replace(/_/g," ")}))},
+wood_variants:{label:"Древесина и кора",items:[
+  ..._w.filter(w=>!["crimson","warped"].includes(w)).flatMap(w=>[w+"_wood","stripped_"+w+"_wood","stripped_"+w+"_log"]),
+  "crimson_hyphae","stripped_crimson_hyphae","stripped_crimson_stem",
+  "warped_hyphae","stripped_warped_hyphae","stripped_warped_stem",
+  "stripped_bamboo_block","bamboo_mosaic",
+].map(id=>({id,name:id.replace(/_/g," ")}))},
+torches_cat:{label:"Факелы и освещение",items:["torch","soul_torch","redstone_torch","redstone_lamp"].map(id=>({id,name:id.replace(/_/g," ")}))},
+nature:{label:"Природа (доп.)",items:[
+  "short_grass","tall_grass","chorus_flower","chorus_plant","twisting_vines","weeping_vines",
+  "crimson_roots","warped_roots","crimson_nylium","warped_nylium",
+  "mangrove_roots","muddy_mangrove_roots","brown_mushroom_block","red_mushroom_block","mushroom_stem",
+  "sea_pickle","pale_moss_block","pale_moss_carpet","pale_hanging_moss","leaf_litter",
+  "firefly_bush","bush","open_eyeblossom","closed_eyeblossom","cactus_flower","creaking_heart",
+  "amethyst_cluster","large_amethyst_bud","medium_amethyst_bud","small_amethyst_bud","sculk_vein",
+].map(id=>({id,name:id.replace(/_/g," ")}))},
+extra_functional:{label:"Функциональные (доп.)",items:[
+  "lever","ladder","tripwire_hook","end_portal_frame","tipped_arrow","recovery_compass","iron_trapdoor",
+].map(id=>({id,name:id.replace(/_/g," ")}))},
+chest_boats:{label:"Лодки с сундуком",items:[
+  ..._w.filter(w=>!["crimson","warped","bamboo"].includes(w)).map(w=>w+"_chest_boat"),
+  "bamboo_chest_raft",
+].map(id=>({id,name:id.replace(/_/g," ")}))},
+mob_buckets:{label:"Вёдра с существами",items:[
+  "axolotl_bucket","cod_bucket","salmon_bucket","pufferfish_bucket","tropical_fish_bucket","tadpole_bucket",
+].map(id=>({id,name:id.replace(/_/g," ")}))},
+building_extra:{label:"Строительные (доп.)",items:[
+  "chiseled_deepslate","chiseled_nether_bricks","chiseled_polished_blackstone","chiseled_quartz_block",
+  "chiseled_sandstone","chiseled_red_sandstone","chiseled_tuff","chiseled_tuff_bricks","chiseled_resin_bricks",
+  "tuff_bricks","polished_tuff","polished_deepslate",
+  "cracked_deepslate_bricks","cracked_deepslate_tiles","cracked_nether_bricks","cracked_polished_blackstone_bricks",
+  "cut_sandstone","cut_red_sandstone","smooth_basalt","mossy_cobblestone","dirt_path","snow",
+].map(id=>({id,name:id.replace(/_/g," ")}))},
+misc_extra:{label:"Разное (доп.)",items:[
+  "rotten_flesh","glistering_melon_slice","popped_chorus_fruit","music_disc_tears",
+  "netherite_horse_armor","iron_chain",
+].map(id=>({id,name:id.replace(/_/g," ")}))},
+harnesses:{label:"Упряжь",items:_c.map(c=>({id:c+"_harness",name:c.replace(/_/g," ")+" Harness"}))},
+shelves:{label:"Полки",items:_w.map(w=>({id:w+"_shelf",name:w.replace(/_/g," ")+" Shelf"}))},
 };
 
 // Complete texture mapping: itemId → relative path from TEX base
