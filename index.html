@@ -1536,7 +1536,7 @@ function PalItem({id,sel,onSelect,preset}){
     <ItemTexture itemId={id} size={28} potionColor={preset&&preset.potionColor}/>
     {hover&&ReactDOM.createPortal(<div className="htt" style={{left:hover.x,top:hover.y}}>
       <div className="prev-box" style={{padding:"4px 7px"}}>
-        {preset?<>{preset.displayName&&<McText segs={preset.displayName}/>}{preset.lore&&preset.lore.map((l,i)=><McText key={i} segs={l}/>)}</>
+        {preset?<>{preset.displayName&&<div className="line"><McText segs={preset.displayName}/></div>}{preset.lore&&preset.lore.map((l,i)=><div key={i} className="line" style={{fontSize:11}}><McText segs={l}/></div>)}</>
         :<div className="line" style={{fontSize:13,whiteSpace:"nowrap"}}><span className="mc-tx mc-b" style={{color:"#FFFFFF"}}>{ruName(id)}</span></div>}
       <div style={{color:"#555",fontSize:9,fontFamily:"'Minecraft','Courier New',monospace"}}>minecraft:{id}</div></div>
     </div>,document.body)}
