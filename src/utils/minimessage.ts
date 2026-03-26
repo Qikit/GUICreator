@@ -88,7 +88,7 @@ export function parseMM(input: string): TextSegment[] {
 function detectGradientStops(colors: string[]): string[] | null {
   const n = colors.length
   if (n < 2) return null
-  for (let k = 2; k <= Math.min(n, 8); k++) {
+  for (let k = 2; k <= Math.min(n, 12); k++) {
     const stops: string[] = []
     for (let i = 0; i < k; i++) {
       const idx = k === 1 ? 0 : Math.round(i * (n - 1) / (k - 1))
@@ -101,7 +101,7 @@ function detectGradientStops(colors: string[]): string[] | null {
       const si = Math.min(Math.floor(t * ts), ts - 1)
       const st = (t * ts) - si
       const exp = lerpColor(stops[si], stops[si + 1], st)
-      if (colorDist(colors[i], exp) > 3) { ok = false; break }
+      if (colorDist(colors[i], exp) > 6) { ok = false; break }
     }
     if (ok) return stops
   }

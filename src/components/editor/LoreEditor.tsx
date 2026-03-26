@@ -43,8 +43,8 @@ export function LoreEditor({ lore, onChange }: Props) {
         value={text}
         onChange={e => apply(e.target.value)}
         placeholder={'<gray>Первая строка описания\n<gold>Вторая строка'}
-        rows={Math.max(3, lore.length + 1)}
-        style={{ minHeight: 60 }}
+        rows={Math.max(4, lore.length + 1)}
+        style={{ minHeight: 80 }}
       />
       <div style={{ display: 'flex', gap: 4, alignItems: 'center', marginTop: 2 }}>
         <div className={s.mmHelp}>Каждая строка = строка лора</div>

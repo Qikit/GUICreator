@@ -41,8 +41,8 @@ export function TextEditor({ label, segs, onChange }: Props) {
           value={mmText}
           onChange={e => apply(e.target.value)}
           placeholder="<red><bold>Текст</bold></red>"
-          rows={1}
-          style={{ minHeight: 32, resize: 'none' }}
+          rows={2}
+          style={{ minHeight: 42 }}
         />
         <div style={{ display: 'flex', gap: 4, alignItems: 'center', marginTop: 2 }}>
           <div className={s.mmHelp}>{'<color> <bold> <italic> <gradient:#HEX1:#HEX2>'}</div>
