@@ -1552,7 +1552,7 @@ function Palette({selItem,onSelect,recent}){
   const[customId,setCustomId]=useState("");
   return(<div className="pal">
     <div className="pal-h">{"Предметы"}</div>
-    <div className="pal-s"><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Поиск..."/></div>
+    <div className="pal-s" style={{position:"relative"}}><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Поиск..." style={{paddingRight:search?22:8}}/>{search&&<button onClick={()=>setSearch("")} style={{position:"absolute",right:12,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",color:"var(--tx3)",cursor:"pointer",fontSize:14,padding:0,lineHeight:1}}>{"✕"}</button>}</div>
     <div className="pal-b">
       <div style={{padding:"3px 5px 0"}}><div className={"pi eraser"+(selItem===ERASER_ID?" sel":"")} onClick={()=>onSelect(ERASER_ID)} title="Ластик" style={{width:"100%",height:30,display:"flex",alignItems:"center",justifyContent:"center",gap:4,fontSize:11,color:"var(--er)"}}><span>{"🚫"}</span><span>{"Ластик"}</span></div></div>
       {recent.length>0&&<div className="pal-cat"><div className="pal-ch" onClick={()=>tog("__r")}><span className={"ar"+(openCats.__r!==false?" op":"")}>{"▶"}</span>{"Недавние"}</div>
