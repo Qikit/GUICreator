@@ -1,17 +1,57 @@
-.canvasWrap { flex: 1; overflow: hidden; position: relative; background: #0a0a0c; cursor: grab; }
+.canvasWrap {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  background: #080412;
+  cursor: grab;
+}
+.canvasWrap::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 600px 400px at 20% 30%, rgba(124,58,237,0.08), transparent),
+    radial-gradient(ellipse 500px 350px at 80% 70%, rgba(59,130,246,0.06), transparent);
+  pointer-events: none;
+  z-index: 0;
+}
 .canvasWrap.grabbing { cursor: grabbing; }
-.canvasSurf { position: absolute; top: 0; left: 0; transform-origin: 0 0; }
-.gridBg { position: absolute; inset: 0; background-image: radial-gradient(circle, #1a1a1e 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; }
-.miniMenu { position: absolute; background: var(--pan); border: 1px solid var(--bd); border-radius: var(--r8); box-shadow: 0 4px 16px rgba(0,0,0,.4); user-select: none; min-width: 120px; z-index: 2; }
-.miniMenu:hover { border-color: var(--bd2); }
-.mmHeader { padding: 4px 8px; font-size: 11px; font-weight: 600; color: var(--tx1); cursor: grab; border-bottom: 1px solid var(--bd); display: flex; align-items: center; justify-content: space-between; gap: 4px; border-radius: var(--r8) var(--r8) 0 0; }
+.canvasSurf { position: absolute; top: 0; left: 0; transform-origin: 0 0; z-index: 1; }
+.gridBg { position: absolute; inset: 0; background-image: radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; z-index: 0; }
+.miniMenu {
+  position: absolute;
+  background: var(--glass-panel);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 20px rgba(0,0,0,.4), 0 0 12px rgba(139,92,246,0.05);
+  user-select: none;
+  min-width: 120px;
+  z-index: 2;
+  transition: border-color 150ms;
+}
+.miniMenu:hover { border-color: rgba(255,255,255,0.12); }
+.mmHeader {
+  padding: 5px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--tx1);
+  cursor: grab;
+  border-bottom: 1px solid var(--glass-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
 .mmHeader:active { cursor: grabbing; }
-.mmGrid { display: grid; grid-template-columns: repeat(9, 20px); gap: 1px; padding: 3px; background: var(--srf); border-radius: 0 0 var(--r8) var(--r8); }
+.mmGrid { display: grid; grid-template-columns: repeat(9, 20px); gap: 1px; padding: 4px; background: var(--glass-surface); border-radius: 0 0 var(--radius-md) var(--radius-md); }
 .mmSlot { width: 20px; height: 20px; background: #8B8B8B; border: 1px solid; border-color: #555 #aaa #aaa #555; display: flex; align-items: center; justify-content: center; position: relative; cursor: pointer; }
-.mmSlot:hover { outline: 1px solid var(--ac); z-index: 1; }
-.mmSlotConn { outline: 2px solid #4ade80; z-index: 2; }
+.mmSlot:hover { outline: 1px solid var(--accent); z-index: 1; box-shadow: 0 0 4px rgba(139,92,246,0.3); }
+.mmSlotConn { outline: 2px solid #4ade80; z-index: 2; box-shadow: 0 0 8px rgba(74,222,128,0.3); }
 .mmSlot .itemTex { width: 16px; height: 16px; image-rendering: pixelated; }
-.canvasTb { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); display: flex; gap: 4px; z-index: 10; align-items: center; }
-.connLine { stroke: var(--ac); stroke-width: 2; fill: none; marker-end: url(#arrowhead); }
-.connLine:hover { stroke: #f87171; stroke-width: 3; cursor: pointer; }
-.connHint { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); background: var(--ac); color: #0f0f11; padding: 4px 12px; border-radius: var(--r8); font-size: 11px; font-weight: 600; z-index: 10; }
+.canvasTb { position: absolute; top: var(--sp-md); left: 50%; transform: translateX(-50%); display: flex; gap: var(--sp-xs); z-index: 10; align-items: center; }
+.connLine { stroke: var(--accent); stroke-width: 2; fill: none; marker-end: url(#arrowhead); filter: drop-shadow(0 0 4px rgba(139,92,246,0.3)); }
+.connLine:hover { stroke: #f87171; stroke-width: 3; cursor: pointer; filter: drop-shadow(0 0 6px rgba(248,113,113,0.4)); }
+.connHint { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: #fff; padding: 5px 14px; border-radius: var(--radius-md); font-size: 11px; font-weight: 600; z-index: 10; box-shadow: var(--accent-glow); }
