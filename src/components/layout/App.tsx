@@ -72,17 +72,18 @@ export function App() {
     refreshCache(ws)
   }, [])
 
-  // Auto-add current project to workspace
+  // Sync current project into cache
   useEffect(() => {
     if (!activeWS) return
-    const alreadyInWS = activeWS.menus.find(m => m.projectId === proj.id)
-    if (!alreadyInWS && !removedFromCanvas.current.has(proj.id)) {
-      const updated = { ...activeWS, menus: [...activeWS.menus, { projectId: proj.id, x: 100 + activeWS.menus.length * 250, y: 100 }] }
-      updateWS(updated)
-    } else {
-      setProjectCache(prev => ({ ...prev, [proj.id]: proj }))
-    }
+    setProjectCache(prev => ({ ...prev, [proj.id]: proj }))
   }, [proj.id, proj, activeWS])
+
+  const addToWorkspace = useCallback((projectId: string) => {
+    if (!activeWS) return
+    if (activeWS.menus.find(m => m.projectId === projectId)) return
+    const updated = { ...activeWS, menus: [...activeWS.menus, { projectId, x: 100 + activeWS.menus.length * 250, y: 100 }] }
+    updateWS(updated)
+  }, [activeWS, updateWS])
 
   // Auto-save
   useEffect(() => {
@@ -195,14 +196,14 @@ export function App() {
                 <button onClick={() => { setShowMenu(false); setShowTpls(true) }}>Шаблоны</button>
                 <button onClick={() => { setShowMenu(false); const name = prompt('Название шаблона:', proj.name); if (!name) return; const desc = prompt('Описание:', ''); saveTpl({ name, desc: desc || '', rows: proj.rows, slots: JSON.parse(JSON.stringify(proj.slots)) }) }}>Сохранить шаблон</button>
                 <div style={{ height: 1, background: 'var(--glass-border)', margin: '2px 0' }} />
-                <button onClick={() => { setShowMenu(false); const np = newProject(); saveProject(proj); loadProj(np); setSelSlot(null); setMultiSel(new Set()) }}>Новый проект</button>
+                <button onClick={() => { setShowMenu(false); const np = newProject(); saveProject(proj); saveProject(np); addToWorkspace(np.id); loadProj(np); setSelSlot(null); setMultiSel(new Set()) }}>Новый проект</button>
                 <button onClick={() => { setShowMenu(false); setShowProjs(true) }}>Открыть проект</button>
                 <div style={{ height: 1, background: 'var(--glass-border)', margin: '2px 0' }} />
                 <button onClick={() => { setShowMenu(false); if (!activeWS) return; const projIds = activeWS.menus.map(m => m.projectId); const projs = projIds.map(id => loadProject(id)).filter(Boolean); const d = { workspace: activeWS, projects: projs, templates: uTpls }; const blob = new Blob([JSON.stringify(d, null, 2)], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `${activeWS.name.replace(/[^a-zA-Z0-9\u0400-\u04FF]/g, '_')}-backup.json`; a.click(); URL.revokeObjectURL(url) }}>Бэкап</button>
                 <button onClick={() => { setShowMenu(false); const inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.json'; inp.onchange = (ev: Event) => { const f = (ev.target as HTMLInputElement).files?.[0]; if (!f) return; const reader = new FileReader(); reader.onload = (re) => { try { const d = JSON.parse(re.target?.result as string); if (d.projects) { for (const p of d.projects) saveProject(p) } if (d.workspace && activeWS) { const imported = d.workspace as Workspace; const newMenus = [...activeWS.menus]; const maxX = newMenus.reduce((mx, m) => Math.max(mx, m.x), 0); for (const m of imported.menus) { if (!newMenus.find(e => e.projectId === m.projectId)) newMenus.push({ ...m, x: m.x + maxX + 300 }) } const newConns = [...activeWS.connections, ...imported.connections.filter(c => !activeWS.connections.find(e => e.id === c.id))]; const updated = { ...activeWS, menus: newMenus, connections: newConns }; updateWS(updated) } else if (d.projects?.length && activeWS) { const newMenus = [...activeWS.menus]; let ox = newMenus.reduce((mx, m) => Math.max(mx, m.x), 0) + 300; for (const p of d.projects) { if (!newMenus.find(e => e.projectId === p.id)) { newMenus.push({ projectId: p.id, x: ox, y: 100 }); ox += 250 } }; updateWS({ ...activeWS, menus: newMenus, connections: activeWS.connections }) } const last = d.projects?.[d.projects.length - 1]; if (last) { loadProj(last); setSelSlot(null); setMultiSel(new Set()) } } catch (err) { alert('Ошибка: ' + (err as Error).message) } }; reader.readAsText(f) }; inp.click() }}>Импорт</button>
-                <button onClick={() => { setShowMenu(false); const text = prompt('Вставьте конфиг AbstractMenus (YAML):'); if (!text) return; const am = parseAbstractMenus(text); if (!am) { alert('Не удалось распарсить конфиг AbstractMenus.'); return }; const np = newProject(am.name, am.rows); np.slots = am.slots; saveProject(np); loadProj(np); setSelSlot(null); setMultiSel(new Set()) }}>Импорт AbstractMenus</button>
+                <button onClick={() => { setShowMenu(false); const text = prompt('Вставьте конфиг AbstractMenus (YAML):'); if (!text) return; const am = parseAbstractMenus(text); if (!am) { alert('Не удалось распарсить конфиг AbstractMenus.'); return }; const np = newProject(am.name, am.rows); np.slots = am.slots; saveProject(np); addToWorkspace(np.id); loadProj(np); setSelSlot(null); setMultiSel(new Set()) }}>Импорт AbstractMenus</button>
                 <div style={{ height: 1, background: 'var(--glass-border)', margin: '2px 0' }} />
-                <button onClick={() => { setShowMenu(false); const ws = newWorkspace(); saveWorkspace(ws); removedFromCanvas.current.clear(); removedFromCanvas.current.add(proj.id); setActiveWS(ws); refreshCache(ws) }}>Новый workspace</button>
+                <button onClick={() => { setShowMenu(false); const ws = newWorkspace(); saveWorkspace(ws); setActiveWS(ws); refreshCache(ws) }}>Новый workspace</button>
                 {loadWorkspaceList().length > 1 && <button onClick={() => { setShowMenu(false); setShowWorkspaces(true) }}>Workspaces</button>}
               </div>
             )}
@@ -219,8 +220,8 @@ export function App() {
           const MAX_TABS = 5
           const visible = wsList.slice(0, MAX_TABS)
           const overflow = wsList.length > MAX_TABS
-          const switchWS = (id: string) => { const ws = loadWorkspace(id); if (ws) { removedFromCanvas.current.clear(); setActiveWS(ws); refreshCache(ws) } }
-          const createWS = () => { const ws = newWorkspace(); saveWorkspace(ws); removedFromCanvas.current.clear(); removedFromCanvas.current.add(proj.id); setActiveWS(ws); refreshCache(ws) }
+          const switchWS = (id: string) => { const ws = loadWorkspace(id); if (ws) { setActiveWS(ws); refreshCache(ws) } }
+          const createWS = () => { const ws = newWorkspace(); saveWorkspace(ws); setActiveWS(ws); refreshCache(ws) }
           const deleteWS = (id: string, name: string) => { if (!confirm(`Удалить "${name}"?`)) return; deleteWorkspace(id); if (id === activeWS?.id) { const remaining = loadWorkspaceList(); if (remaining.length) switchWS(remaining[0]); else createWS() } forceRender(x => x + 1) }
           return (
             <div style={{ display: 'flex', alignItems: 'center', gap: 2, marginLeft: 'auto', flexShrink: 1, minWidth: 0, overflow: 'hidden' }}
@@ -304,7 +305,7 @@ export function App() {
       {showExport && <ExportModal project={proj} onClose={() => setShowExport(false)} />}
       {showGrad && <GradientModal onClose={() => setShowGrad(false)} />}
       {showColorPicker && <ColorPickerModal onClose={() => setShowColorPicker(false)} />}
-      {showTpls && <TemplateModal builtIn={BUILT_TPLS as never} userTemplates={[]} onApply={(t: any) => { const np = newProject(t.name || proj.name, t.rows); np.slots = JSON.parse(JSON.stringify(t.slots || {})); loadProj(np); setSelSlot(null); setMultiSel(new Set()); setShowTpls(false) }} onDeleteUser={() => {}} onClose={() => setShowTpls(false)} />}
+      {showTpls && <TemplateModal builtIn={BUILT_TPLS as never} userTemplates={[]} onApply={(t: any) => { const np = newProject(t.name || proj.name, t.rows); np.slots = JSON.parse(JSON.stringify(t.slots || {})); saveProject(np); addToWorkspace(np.id); loadProj(np); setSelSlot(null); setMultiSel(new Set()); setShowTpls(false) }} onDeleteUser={() => {}} onClose={() => setShowTpls(false)} />}
       {showProjs && <ProjectModal list={loadProjectList()} onOpen={p => { loadProj(p); setSelSlot(null); setMultiSel(new Set()); setShowProjs(false) }} onDelete={id => { deleteProject(id); forceRender(x => x + 1) }} onClose={() => setShowProjs(false)} />}
       {ctxMenu && <CtxMenu x={ctxMenu.x} y={ctxMenu.y} items={ctxMenu.items} onClose={() => setCtxMenu(null)} />}
       {showWorkspaces && (
@@ -313,7 +314,7 @@ export function App() {
             {loadWorkspaceList().map(id => {
               const ws = loadWorkspace(id); if (!ws) return null
               return (
-                <div key={id} onClick={() => { removedFromCanvas.current.clear(); setActiveWS(ws); refreshCache(ws); setShowWorkspaces(false) }}
+                <div key={id} onClick={() => { setActiveWS(ws); refreshCache(ws); setShowWorkspaces(false) }}
                   style={{ position: 'relative', padding: 12, background: id === activeWS?.id ? 'var(--accent-subtle)' : 'var(--glass-surface)', border: `1px solid ${id === activeWS?.id ? 'var(--accent)' : 'var(--glass-border)'}`, borderRadius: 'var(--radius-md)', cursor: 'pointer', transition: 'all 150ms' }}
                   onMouseEnter={e => (e.currentTarget.style.background = id === activeWS?.id ? 'var(--accent-subtle)' : 'var(--glass-hover)')}
                   onMouseLeave={e => (e.currentTarget.style.background = id === activeWS?.id ? 'var(--accent-subtle)' : 'var(--glass-surface)')}>
@@ -328,7 +329,7 @@ export function App() {
             })}
           </div>
           <div className={glassModalStyles.actions} style={{ marginTop: 16 }}>
-            <GlowButton onClick={() => { const ws = newWorkspace(); saveWorkspace(ws); removedFromCanvas.current.clear(); removedFromCanvas.current.add(proj.id); setActiveWS(ws); refreshCache(ws); setShowWorkspaces(false) }}>+ Новый</GlowButton>
+            <GlowButton onClick={() => { const ws = newWorkspace(); saveWorkspace(ws); setActiveWS(ws); refreshCache(ws); setShowWorkspaces(false) }}>+ Новый</GlowButton>
             <GlowButton onClick={() => setShowWorkspaces(false)}>Закрыть</GlowButton>
           </div>
         </GlassModal>
