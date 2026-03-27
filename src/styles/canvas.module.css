@@ -243,3 +243,24 @@
 }
 .mmSizeOption:hover { background: var(--glass-hover); }
 .mmSizeOptionActive { color: var(--accent); }
+.mmTexturedBody {
+  position: relative;
+  image-rendering: pixelated;
+  overflow: hidden;
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+}
+.mmTexSlot {
+  position: absolute;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+.mmTexSlot:hover { background: rgba(255,255,255,0.22); }
+.mmTexSlot .mmSlotContent { position: absolute; inset: 2px; display: flex; align-items: center; justify-content: center; }
+.mmTexSlot .mmSlotContent .itemTex { width: 100%; height: 100%; }
+.mmTexSlot .mmSlotAmount { position: absolute; bottom: 0; right: 2px; font-family: 'Minecraft', 'Courier New', monospace; font-size: 12px; color: #FFF; font-weight: bold; text-shadow: 1.5px 1.5px 0 #3F3F3F, -1px -1px 0 #3F3F3F, 1px -1px 0 #3F3F3F, -1px 1px 0 #3F3F3F; z-index: 5; pointer-events: none; }
+.mmTexSlot .mmSlotEnchant { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 3; }
+.mmTexSlot .mmSlotEnchant::after { content: ''; position: absolute; inset: -50%; background: linear-gradient(120deg, transparent 30%, rgba(128,0,255,.2) 50%, transparent 70%); animation: shimmer 2s infinite linear; }
+.mmTexSlot .mmSlotNum { position: absolute; top: 0; left: 1px; font-size: 8px; color: rgba(255,255,255,.4); font-family: monospace; z-index: 5; pointer-events: none; }

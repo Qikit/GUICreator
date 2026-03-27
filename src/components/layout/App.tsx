@@ -236,6 +236,10 @@ export function App() {
               if (pid !== proj.id) switchToProject(pid)
               dispatch({ type: 'SR', rows })
             }}
+            onSetGuiType={(pid, guiType) => {
+              if (pid !== proj.id) switchToProject(pid)
+              dispatch({ type: 'SGT', guiType })
+            }}
             onSetEraser={() => {
               if (palItem === ERASER_ID) { setPalItem(null); setPalPreset(null) }
               else { setPalItem(ERASER_ID); setPalPreset(null) }

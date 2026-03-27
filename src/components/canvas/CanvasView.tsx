@@ -4,6 +4,7 @@ import { gid } from '@/utils/id'
 import { newProject } from '@/utils/slot'
 import { saveProject, loadProject, loadProjectList } from '@/storage'
 import { CtxMenu, HoverTooltip } from '@/components/shared'
+import { getGuiType } from '@/data/guiTypes'
 import { MiniMenu } from './MiniMenu'
 import s from '@/styles/canvas.module.css'
 import ss from '@/styles/shared.module.css'
@@ -24,6 +25,7 @@ interface Props {
   onActivateMenu: (projectId: string) => void
   onBrushPick: (itemId: string) => void
   onResizeMenu: (projectId: string, rows: number) => void
+  onSetGuiType: (projectId: string, guiType: string) => void
   onSetEraser: () => void
   onDeselect: () => void
   onDeselectPalette: () => void
@@ -32,7 +34,7 @@ interface Props {
   onMenuRemoved?: (projectId: string) => void
 }
 
-export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, selSlot, onSlotSelect, palItem, onPlaceItem, onRemoveItem, showNums, onActivateMenu, onBrushPick, onResizeMenu, onSetEraser, onDeselect, onDeselectPalette, onClearAll, onRenameMenu, onMenuRemoved }: Props) {
+export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, selSlot, onSlotSelect, palItem, onPlaceItem, onRemoveItem, showNums, onActivateMenu, onBrushPick, onResizeMenu, onSetGuiType, onSetEraser, onDeselect, onDeselectPalette, onClearAll, onRenameMenu, onMenuRemoved }: Props) {
   const [pan, setPan] = useState({ x: 0, y: 0 })
   const [zoom, setZoom] = useState(1)
   const [connectMode, setConnectMode] = useState(false)
@@ -72,11 +74,12 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
           if (prev) {
             const minX = Math.min(prev.x1, prev.x2), maxX = Math.max(prev.x1, prev.x2)
             const minY = Math.min(prev.y1, prev.y2), maxY = Math.max(prev.y1, prev.y2)
-            const menuW = FRAME_PAD * 2 + 9 * (SLOT_SIZE + SLOT_GAP) - SLOT_GAP
             const sel = new Set<string>()
             for (const m of workspace.menus) {
               const p = projects[m.projectId]; if (!p) continue
-              const menuH = HEADER_H + FRAME_PAD * 2 + p.rows * (SLOT_SIZE + SLOT_GAP) - SLOT_GAP
+              const gt = getGuiType(p.guiType)
+              const menuW = gt && gt.texture ? gt.containerWidth * 2 : FRAME_PAD * 2 + 9 * (SLOT_SIZE + SLOT_GAP) - SLOT_GAP
+              const menuH = gt && gt.texture ? HEADER_H + gt.containerHeight * 2 : HEADER_H + FRAME_PAD * 2 + p.rows * (SLOT_SIZE + SLOT_GAP) - SLOT_GAP
               if (m.x + menuW > minX && m.x < maxX && m.y + menuH > minY && m.y < maxY) {
                 sel.add(m.projectId)
               }
@@ -117,23 +120,32 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
 
   const SNAP_DISTANCE = 10
 
+  const getMenuDims = (p: Project) => {
+    const gt = getGuiType(p.guiType)
+    if (gt && gt.texture) return { w: gt.containerWidth * 2, h: HEADER_H + gt.containerHeight * 2 }
+    const w = FRAME_PAD * 2 + 9 * (SLOT_SIZE + SLOT_GAP) - SLOT_GAP
+    const h = HEADER_H + FRAME_PAD * 2 + p.rows * (SLOT_SIZE + SLOT_GAP) - SLOT_GAP
+    return { w, h }
+  }
+
   const snapMenu = (idx: number, rawX: number, rawY: number) => {
     let sx = rawX, sy = rawY
-    const menuW = FRAME_PAD * 2 + 9 * (SLOT_SIZE + SLOT_GAP) - SLOT_GAP
+    const myP = projects[workspace.menus[idx]?.projectId]
+    const myDims = myP ? getMenuDims(myP) : { w: 460, h: 200 }
 
     for (let j = 0; j < workspace.menus.length; j++) {
       if (j === idx) continue
       const other = workspace.menus[j]
       const op = projects[other.projectId]; if (!op) continue
-      const otherH = HEADER_H + FRAME_PAD * 2 + op.rows * (SLOT_SIZE + SLOT_GAP) - SLOT_GAP
-      const otherCenterX = other.x + menuW / 2
-      const myCenterX = rawX + menuW / 2
+      const od = getMenuDims(op)
+      const otherCenterX = other.x + od.w / 2
+      const myCenterX = rawX + myDims.w / 2
 
-      if (Math.abs(myCenterX - otherCenterX) < SNAP_DISTANCE) sx = other.x
+      if (Math.abs(myCenterX - otherCenterX) < SNAP_DISTANCE) sx = other.x + od.w / 2 - myDims.w / 2
       if (Math.abs(rawX - other.x) < SNAP_DISTANCE) sx = other.x
-      if (Math.abs((rawX + menuW) - (other.x + menuW)) < SNAP_DISTANCE) sx = other.x
+      if (Math.abs((rawX + myDims.w) - (other.x + od.w)) < SNAP_DISTANCE) sx = other.x + od.w - myDims.w
 
-      if (Math.abs(rawY - (other.y + otherH + 20)) < SNAP_DISTANCE) sy = other.y + otherH + 20
+      if (Math.abs(rawY - (other.y + od.h + 20)) < SNAP_DISTANCE) sy = other.y + od.h + 20
       if (Math.abs(rawY - other.y) < SNAP_DISTANCE) sy = other.y
     }
 
@@ -207,7 +219,16 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
 
   const getSlotCenter = (menuId: string, slot: string) => {
     const mi = workspace.menus.findIndex(m => m.projectId === menuId); if (mi < 0) return null
-    const mm = workspace.menus[mi]; const [r, c] = slot.split('-').map(Number)
+    const mm = workspace.menus[mi]
+    const p = projects[menuId]
+    const gt = p ? getGuiType(p.guiType) : null
+    if (gt && gt.texture) {
+      const scale = 2
+      const sl = gt.slots.find(s => s.key === slot)
+      if (!sl) return null
+      return { x: mm.x + sl.x * scale + 9 * scale, y: mm.y + HEADER_H + sl.y * scale + 9 * scale }
+    }
+    const [r, c] = slot.split('-').map(Number)
     return {
       x: mm.x + FRAME_PAD + c * (SLOT_SIZE + SLOT_GAP) + SLOT_SIZE / 2,
       y: mm.y + HEADER_H + FRAME_PAD + r * (SLOT_SIZE + SLOT_GAP) + SLOT_SIZE / 2,
@@ -217,7 +238,9 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
   const getMenuTop = (menuId: string) => {
     const mi = workspace.menus.findIndex(m => m.projectId === menuId); if (mi < 0) return null
     const mm = workspace.menus[mi]
-    const menuWidth = FRAME_PAD * 2 + 9 * (SLOT_SIZE + SLOT_GAP) - SLOT_GAP
+    const p = projects[menuId]
+    const gt = p ? getGuiType(p.guiType) : null
+    const menuWidth = gt && gt.texture ? gt.containerWidth * 2 : FRAME_PAD * 2 + 9 * (SLOT_SIZE + SLOT_GAP) - SLOT_GAP
     return { x: mm.x + menuWidth / 2, y: mm.y }
   }
 
@@ -229,14 +252,12 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
   const fitAll = () => {
     if (!surfRef.current || workspace.menus.length === 0) return
     const rect = surfRef.current.getBoundingClientRect()
-    const SLOT_SIZE = 48, SLOT_GAP = 2, FRAME_PAD = 10, HEADER_H = 32
-    const menuW = FRAME_PAD * 2 + 9 * (SLOT_SIZE + SLOT_GAP) - SLOT_GAP
     let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity
     for (const m of workspace.menus) {
       const p = projects[m.projectId]; if (!p) continue
-      const menuH = HEADER_H + FRAME_PAD * 2 + p.rows * (SLOT_SIZE + SLOT_GAP) - SLOT_GAP
+      const d = getMenuDims(p)
       minX = Math.min(minX, m.x); minY = Math.min(minY, m.y)
-      maxX = Math.max(maxX, m.x + menuW); maxY = Math.max(maxY, m.y + menuH)
+      maxX = Math.max(maxX, m.x + d.w); maxY = Math.max(maxY, m.y + d.h)
     }
     const pad = 40
     const scaleX = (rect.width - pad * 2) / (maxX - minX)
@@ -327,6 +348,7 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
               if (idx >= 0) removeFromCanvas(idx)
             }}
             onResizeMenu={onResizeMenu}
+            onSetGuiType={onSetGuiType}
             onSetEraser={onSetEraser}
             onClearAll={onClearAll}
             onRename={onRenameMenu}

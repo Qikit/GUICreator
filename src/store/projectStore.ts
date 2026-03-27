@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import type { Project, SlotData, UndoableState } from '@/types'
 import { newProject } from '@/utils/slot'
 import { saveProject, loadProject, loadProjectList, loadPrefs, savePrefs } from '@/storage'
+import { getGuiType } from '@/data/guiTypes'
 
 function applyAction(p: Project, action: ProjectStoreAction): Project {
   const r = { ...p, updatedAt: Date.now() }
@@ -17,15 +18,21 @@ function applyAction(p: Project, action: ProjectStoreAction): Project {
       if (d) sl[action.from] = d; else delete sl[action.from]
       return { ...r, slots: sl }
     }
-    case 'SR': return { ...r, rows: action.rows }
+    case 'SR': return { ...r, rows: action.rows, guiType: undefined }
+    case 'SGT': return { ...r, guiType: action.guiType === 'generic' ? undefined : action.guiType }
     case 'CA': return { ...r, slots: {} }
     case 'FE': {
       const sl = { ...r.slots }
-      for (let row = 0; row < r.rows; row++)
-        for (let c = 0; c < 9; c++) {
-          const k = `${row}-${c}`
-          if (!sl[k]) sl[k] = JSON.parse(JSON.stringify(action.data))
-        }
+      const gt = getGuiType(r.guiType)
+      if (gt) {
+        for (const s of gt.slots) { if (!sl[s.key]) sl[s.key] = JSON.parse(JSON.stringify(action.data)) }
+      } else {
+        for (let row = 0; row < r.rows; row++)
+          for (let c = 0; c < 9; c++) {
+            const k = `${row}-${c}`
+            if (!sl[k]) sl[k] = JSON.parse(JSON.stringify(action.data))
+          }
+      }
       return { ...r, slots: sl }
     }
     default: return r
@@ -39,6 +46,7 @@ type ProjectStoreAction =
   | { type: 'RM'; keys: string[] }
   | { type: 'MV'; from: string; to: string }
   | { type: 'SR'; rows: number }
+  | { type: 'SGT'; guiType: string }
   | { type: 'CA' }
   | { type: 'FE'; data: SlotData }
 

@@ -26,6 +26,7 @@ export interface Project {
   name: string
   rows: number
   cols: 9
+  guiType?: string
   slots: Record<string, SlotData>
   createdAt: number
   updatedAt: number
@@ -84,6 +85,7 @@ export type ProjectAction =
   | { type: 'MV'; from: string; to: string }
   | { type: 'SR'; rows: number }
   | { type: 'SN'; name: string }
+  | { type: 'SGT'; guiType: string }
   | { type: 'CA' }
   | { type: 'FE'; data: SlotData }
   | { type: 'UNDO' }
