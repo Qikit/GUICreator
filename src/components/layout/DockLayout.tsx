@@ -8,6 +8,7 @@ interface PanelConfig {
   title: string
   width?: number
   content: React.ReactNode
+  headerExtra?: React.ReactNode
 }
 
 interface Props {
@@ -100,6 +101,7 @@ export function DockLayout({ panels }: Props) {
               isDropTarget={dropTarget === panelId}
               width={width}
               isResizing={!!resizing}
+              headerExtra={panel.headerExtra}
             >
               {panel.content}
             </DockPanel>

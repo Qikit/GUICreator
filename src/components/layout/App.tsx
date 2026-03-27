@@ -117,7 +117,7 @@ export function App() {
   useKeyboardShortcuts({
     selSlot, setSelSlot, multiSel, setMultiSel, proj, clipboard, setClipboard,
     dispatch: dispatch as never, undo, redo, saveProject, setSaveStatus,
-    setShowExport, setShowTpls, setShowProjs, setPalItem, setPalPreset: setPalPreset as (v: unknown) => void, setCtxMenu: () => setCtxMenu(null),
+    setShowExport, setShowTpls, setShowProjs, palItem, setPalItem, setPalPreset: setPalPreset as (v: unknown) => void, setCtxMenu: () => setCtxMenu(null),
   })
 
   const handlePalSelect = (id: string, preset?: SlotPreset) => {
@@ -198,11 +198,11 @@ export function App() {
                 <button onClick={() => { setShowMenu(false); const np = newProject(); saveProject(proj); loadProj(np); setSelSlot(null); setMultiSel(new Set()) }}>Новый проект</button>
                 <button onClick={() => { setShowMenu(false); setShowProjs(true) }}>Открыть проект</button>
                 <div style={{ height: 1, background: 'var(--glass-border)', margin: '2px 0' }} />
-                <button onClick={() => { setShowMenu(false); const all = loadProjectList().map(id => loadProject(id)).filter(Boolean); const d = { projects: all, templates: uTpls }; const blob = new Blob([JSON.stringify(d, null, 2)], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'mc-menu-backup.json'; a.click(); URL.revokeObjectURL(url) }}>Бэкап</button>
-                <button onClick={() => { setShowMenu(false); const inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.json'; inp.onchange = (ev: Event) => { const f = (ev.target as HTMLInputElement).files?.[0]; if (!f) return; const reader = new FileReader(); reader.onload = (re) => { try { const d = JSON.parse(re.target?.result as string); if (d.projects) { for (const p of d.projects) saveProject(p); const last = d.projects[d.projects.length - 1]; if (last) { loadProj(last); setSelSlot(null); setMultiSel(new Set()) } } } catch (err) { alert('Ошибка: ' + (err as Error).message) } }; reader.readAsText(f) }; inp.click() }}>Импорт</button>
+                <button onClick={() => { setShowMenu(false); if (!activeWS) return; const projIds = activeWS.menus.map(m => m.projectId); const projs = projIds.map(id => loadProject(id)).filter(Boolean); const d = { workspace: activeWS, projects: projs, templates: uTpls }; const blob = new Blob([JSON.stringify(d, null, 2)], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `${activeWS.name.replace(/[^a-zA-Z0-9\u0400-\u04FF]/g, '_')}-backup.json`; a.click(); URL.revokeObjectURL(url) }}>Бэкап</button>
+                <button onClick={() => { setShowMenu(false); const inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.json'; inp.onchange = (ev: Event) => { const f = (ev.target as HTMLInputElement).files?.[0]; if (!f) return; const reader = new FileReader(); reader.onload = (re) => { try { const d = JSON.parse(re.target?.result as string); if (d.projects) { for (const p of d.projects) saveProject(p) } if (d.workspace && activeWS) { const imported = d.workspace as Workspace; const newMenus = [...activeWS.menus]; const maxX = newMenus.reduce((mx, m) => Math.max(mx, m.x), 0); for (const m of imported.menus) { if (!newMenus.find(e => e.projectId === m.projectId)) newMenus.push({ ...m, x: m.x + maxX + 300 }) } const newConns = [...activeWS.connections, ...imported.connections.filter(c => !activeWS.connections.find(e => e.id === c.id))]; const updated = { ...activeWS, menus: newMenus, connections: newConns }; updateWS(updated) } else if (d.projects?.length && activeWS) { const newMenus = [...activeWS.menus]; let ox = newMenus.reduce((mx, m) => Math.max(mx, m.x), 0) + 300; for (const p of d.projects) { if (!newMenus.find(e => e.projectId === p.id)) { newMenus.push({ projectId: p.id, x: ox, y: 100 }); ox += 250 } }; updateWS({ ...activeWS, menus: newMenus, connections: activeWS.connections }) } const last = d.projects?.[d.projects.length - 1]; if (last) { loadProj(last); setSelSlot(null); setMultiSel(new Set()) } } catch (err) { alert('Ошибка: ' + (err as Error).message) } }; reader.readAsText(f) }; inp.click() }}>Импорт</button>
                 <button onClick={() => { setShowMenu(false); const text = prompt('Вставьте конфиг AbstractMenus (YAML):'); if (!text) return; const am = parseAbstractMenus(text); if (!am) { alert('Не удалось распарсить конфиг AbstractMenus.'); return }; const np = newProject(am.name, am.rows); np.slots = am.slots; saveProject(np); loadProj(np); setSelSlot(null); setMultiSel(new Set()) }}>Импорт AbstractMenus</button>
                 <div style={{ height: 1, background: 'var(--glass-border)', margin: '2px 0' }} />
-                <button onClick={() => { setShowMenu(false); const ws = newWorkspace(); saveWorkspace(ws); setActiveWS(ws); refreshCache(ws) }}>Новый workspace</button>
+                <button onClick={() => { setShowMenu(false); const ws = newWorkspace(); saveWorkspace(ws); removedFromCanvas.current.clear(); removedFromCanvas.current.add(proj.id); setActiveWS(ws); refreshCache(ws) }}>Новый workspace</button>
                 {loadWorkspaceList().length > 1 && <button onClick={() => { setShowMenu(false); setShowWorkspaces(true) }}>Workspaces</button>}
               </div>
             )}
@@ -214,7 +214,25 @@ export function App() {
         { id: 'palette', title: 'Предметы', content: (
           <Palette itemDB={ITEM_DB} selItem={palItem} onSelect={handlePalSelect} recent={recent} />
         )},
-        { id: 'grid', title: 'Workspace', content: activeWS ? (
+        { id: 'grid', title: 'Workspace', headerExtra: (() => {
+          const wsList = loadWorkspaceList()
+          const MAX_TABS = 4
+          const visible = wsList.slice(0, MAX_TABS)
+          const overflow = wsList.length > MAX_TABS
+          const switchWS = (id: string) => { const ws = loadWorkspace(id); if (ws) { removedFromCanvas.current.clear(); setActiveWS(ws); refreshCache(ws) } }
+          return (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 2, marginLeft: 'auto', flexShrink: 1, minWidth: 0, overflow: 'hidden' }}>
+              {visible.map(id => {
+                const ws = loadWorkspace(id)
+                if (!ws) return null
+                return <button key={id} onClick={e => { e.stopPropagation(); switchWS(id) }}
+                  style={{ padding: '1px 6px', fontSize: 9, border: '1px solid ' + (id === activeWS?.id ? 'var(--accent)' : 'var(--glass-border)'), borderRadius: 3, background: id === activeWS?.id ? 'var(--accent-subtle)' : 'none', color: id === activeWS?.id ? 'var(--accent)' : 'var(--tx3)', cursor: 'pointer', whiteSpace: 'nowrap', maxWidth: 80, overflow: 'hidden', textOverflow: 'ellipsis' }}>{ws.name}</button>
+              })}
+              {overflow && <button onClick={e => { e.stopPropagation(); setShowWorkspaces(true) }}
+                style={{ padding: '1px 4px', fontSize: 9, border: '1px solid var(--glass-border)', borderRadius: 3, background: 'none', color: 'var(--tx3)', cursor: 'pointer' }}>...</button>}
+            </div>
+          )
+        })(), content: activeWS ? (
           <CanvasView
             workspace={activeWS}
             onUpdateWS={updateWS}
@@ -297,7 +315,7 @@ export function App() {
             })}
           </div>
           <div className={glassModalStyles.actions} style={{ marginTop: 16 }}>
-            <GlowButton onClick={() => { const ws = newWorkspace(); saveWorkspace(ws); setActiveWS(ws); refreshCache(ws); setShowWorkspaces(false) }}>+ Новый</GlowButton>
+            <GlowButton onClick={() => { const ws = newWorkspace(); saveWorkspace(ws); removedFromCanvas.current.clear(); removedFromCanvas.current.add(proj.id); setActiveWS(ws); refreshCache(ws); setShowWorkspaces(false) }}>+ Новый</GlowButton>
             <GlowButton onClick={() => setShowWorkspaces(false)}>Закрыть</GlowButton>
           </div>
         </GlassModal>

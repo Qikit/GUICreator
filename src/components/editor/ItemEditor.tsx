@@ -2,7 +2,7 @@ import { useState } from 'react'
 import type { SlotData } from '@/types'
 import { ItemTexture, Preview } from '@/components/shared'
 import { SkullFace } from '@/components/shared/SkullFace'
-import { TINTABLE } from '@/utils/slot'
+import { TINTABLE, TRIMMABLE, TRIM_MATERIALS, TRIM_PATTERNS } from '@/utils/slot'
 import { itemName } from '@/utils/slot'
 import { defaultSegment } from '@/utils/slot'
 import { TextEditor } from './TextEditor'
@@ -30,7 +30,7 @@ export function ItemEditor({ data, slotKey, dispatch }: Props) {
     <div className={s.editor}>
       <div className={s.body}>
         <div className={s.header}>
-          <ItemTexture itemId={data.itemId} size={32} potionColor={data.potionColor} skullTexture={data.skullTexture} />
+          <ItemTexture itemId={data.itemId} size={32} potionColor={data.potionColor} skullTexture={data.skullTexture} armorTrim={data.armorTrim} />
           <div style={{ flex: 1 }}><div className={s.itemId}>{data.itemId}</div></div>
           <button onClick={() => setShowColorPicker(true)} data-tip="Цвета"
             style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-sm)', background: 'none', color: 'var(--tx2)', cursor: 'pointer' }}>
@@ -73,7 +73,7 @@ export function ItemEditor({ data, slotKey, dispatch }: Props) {
 
             {TINTABLE.has(data.itemId) && (
               <>
-                <label>{['potion', 'splash_potion', 'lingering_potion', 'tipped_arrow'].includes(data.itemId) ? 'Цвет зелья' : 'Цвет'}</label>
+                <label>{['potion', 'splash_potion', 'lingering_potion', 'tipped_arrow'].includes(data.itemId) ? 'Цвет зелья' : 'Цвет кожи'}</label>
                 <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
                   <input
                     type="color"
@@ -92,6 +92,35 @@ export function ItemEditor({ data, slotKey, dispatch }: Props) {
                     style={{ width: 80, fontSize: 11 }}
                   />
                   {data.potionColor && <GlowButton size="sm" onClick={() => upd({ potionColor: null })}>✕</GlowButton>}
+                </div>
+              </>
+            )}
+
+            {TRIMMABLE.has(data.itemId) && (
+              <>
+                <label>Отделка</label>
+                <div style={{ display: 'flex', gap: 4, alignItems: 'center', flexWrap: 'wrap' }}>
+                  <select
+                    value={data.armorTrim?.pattern || ''}
+                    onChange={e => {
+                      if (!e.target.value) { upd({ armorTrim: null }); return }
+                      upd({ armorTrim: { pattern: e.target.value, material: data.armorTrim?.material || 'redstone' } })
+                    }}
+                    style={{ fontSize: 11, width: 100 }}
+                  >
+                    <option value="">Нет</option>
+                    {TRIM_PATTERNS.map(p => <option key={p} value={p}>{p}</option>)}
+                  </select>
+                  {data.armorTrim && (
+                    <select
+                      value={data.armorTrim.material}
+                      onChange={e => upd({ armorTrim: { ...data.armorTrim!, material: e.target.value } })}
+                      style={{ fontSize: 11, width: 90 }}
+                    >
+                      {TRIM_MATERIALS.map(m => <option key={m} value={m}>{m}</option>)}
+                    </select>
+                  )}
+                  {data.armorTrim && <GlowButton size="sm" onClick={() => upd({ armorTrim: null })}>✕</GlowButton>}
                 </div>
               </>
             )}
@@ -125,7 +154,7 @@ export function ItemEditor({ data, slotKey, dispatch }: Props) {
         </div>
 
         <div className={s.actions}>
-          <GlowButton onClick={() => upd({ displayName: [defaultSegment(itemName(data.itemId), '#FFFFFF')], lore: [], amount: 1, enchanted: false, customModelData: null, potionColor: null, skullTexture: null })}>Сбросить</GlowButton>
+          <GlowButton onClick={() => upd({ displayName: [defaultSegment(itemName(data.itemId), '#FFFFFF')], lore: [], amount: 1, enchanted: false, customModelData: null, potionColor: null, skullTexture: null, armorTrim: null })}>Сбросить</GlowButton>
           <GlowButton variant="danger" onClick={() => dispatch({ type: 'RS', key: slotKey })}>Удалить</GlowButton>
         </div>
       </div>

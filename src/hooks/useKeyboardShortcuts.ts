@@ -17,6 +17,7 @@ interface Params {
   setShowExport: (v: boolean) => void
   setShowTpls: (v: boolean) => void
   setShowProjs: (v: boolean) => void
+  palItem: string | null
   setPalItem: (v: string | null) => void
   setPalPreset: (v: unknown) => void
   setCtxMenu: (v: null) => void
@@ -26,7 +27,7 @@ export function useKeyboardShortcuts(params: Params) {
   const {
     selSlot, setSelSlot, multiSel, setMultiSel, proj, clipboard, setClipboard,
     dispatch, undo, redo, saveProject, setSaveStatus,
-    setShowExport, setShowTpls, setShowProjs, setPalItem, setPalPreset, setCtxMenu,
+    setShowExport, setShowTpls, setShowProjs, palItem, setPalItem, setPalPreset, setCtxMenu,
   } = params
 
   useEffect(() => {
@@ -37,6 +38,7 @@ export function useKeyboardShortcuts(params: Params) {
       if (e.ctrlKey && e.key === 'e') { e.preventDefault(); setShowExport(true) }
       if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProject(proj); setSaveStatus('Saved') }
       if (e.key === 'Escape') { setSelSlot(null); setMultiSel(new Set()); setCtxMenu(null); setShowExport(false); setShowTpls(false); setShowProjs(false); setPalItem(null); setPalPreset(null) }
+      if (e.key === 'e' && !e.ctrlKey && !e.metaKey) { e.preventDefault(); if (palItem === '__eraser__') { setPalItem(null); setPalPreset(null) } else { setPalItem('__eraser__'); setPalPreset(null) } }
       if (e.key === 'Delete' || e.key === 'Backspace') {
         if (multiSel.size > 0) { e.preventDefault(); dispatch({ type: 'RM', keys: [...multiSel] }); setMultiSel(new Set()); setSelSlot(null) }
         else if (selSlot && proj.slots[selSlot]) { e.preventDefault(); dispatch({ type: 'RS', key: selSlot }) }
@@ -93,5 +95,5 @@ export function useKeyboardShortcuts(params: Params) {
     }
     window.addEventListener('keydown', h)
     return () => window.removeEventListener('keydown', h)
-  }, [selSlot, proj, clipboard, multiSel, undo, redo, dispatch])
+  }, [selSlot, proj, clipboard, multiSel, palItem, undo, redo, dispatch])
 }

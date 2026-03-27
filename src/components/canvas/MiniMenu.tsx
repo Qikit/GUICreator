@@ -89,7 +89,7 @@ export function MiniMenu({ project, x, y, zoom, onDrag, onSlotClick, onSlotRight
         {showNums && <span className={s.mmSlotNum}>{displayNum !== undefined ? displayNum : key}</span>}
         {d && (
           <div className={s.mmSlotContent}>
-            <ItemTexture itemId={d.itemId} potionColor={d.potionColor} skullTexture={d.skullTexture} />
+            <ItemTexture itemId={d.itemId} potionColor={d.potionColor} skullTexture={d.skullTexture} armorTrim={d.armorTrim} />
           </div>
         )}
         {d?.enchanted && <div className={s.mmSlotEnchant} />}
@@ -120,11 +120,10 @@ export function MiniMenu({ project, x, y, zoom, onDrag, onSlotClick, onSlotRight
   }
 
   const downloadPng = async () => {
-    const DL_SCALE = 4
+    const DL_SCALE = 8
     const gt = getGuiType(project.guiType)
     const canvas = document.createElement('canvas')
     const ctx = canvas.getContext('2d')!
-    ctx.imageSmoothingEnabled = false
 
     if (gt && gt.texture) {
       const cropY = gt.cropY ?? 0
@@ -132,6 +131,7 @@ export function MiniMenu({ project, x, y, zoom, onDrag, onSlotClick, onSlotRight
       const h = gt.containerHeight
       canvas.width = w * DL_SCALE
       canvas.height = h * DL_SCALE
+      ctx.imageSmoothingEnabled = false
       const img = new Image()
       img.crossOrigin = 'anonymous'
       await new Promise<void>(resolve => {
@@ -154,6 +154,7 @@ export function MiniMenu({ project, x, y, zoom, onDrag, onSlotClick, onSlotRight
       const h = PAD * 2 + rows * SLOT + 14
       canvas.width = w * DL_SCALE
       canvas.height = h * DL_SCALE
+      ctx.imageSmoothingEnabled = false
       ctx.scale(DL_SCALE, DL_SCALE)
       ctx.fillStyle = '#C6C6C6'
       ctx.fillRect(0, 14, w, h - 14)
@@ -243,13 +244,13 @@ export function MiniMenu({ project, x, y, zoom, onDrag, onSlotClick, onSlotRight
         onClick={e => { e.stopPropagation(); if (confirm('Удалить меню с canvas?')) onDeleteMenu?.(project.id) }}>
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 4h10M5 4V3a1 1 0 011-1h2a1 1 0 011 1v1M4 4v7a1 1 0 001 1h4a1 1 0 001-1V4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/></svg>
       </button>
-      <button className={s.mmToolBtn} data-tip="Тип / размер"
-        onClick={e => { e.stopPropagation(); setShowSizeMenu(v => !v) }}>
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 2h4M2 2v4M12 12H8M12 12V8" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/></svg>
-      </button>
       <button className={`${s.mmToolBtn} ${palItem === '__eraser__' ? s.mmToolBtnActive : ''}`} data-tip="Ластик"
         onClick={e => { e.stopPropagation(); onSetEraser?.() }}>
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M8.5 2.5l3 3-6 6H3L1.5 10l7-7.5z" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/><path d="M3 13h8" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/></svg>
+      </button>
+      <button className={s.mmToolBtn} data-tip="Очистить все слоты"
+        onClick={e => { e.stopPropagation(); onClearAll?.(project.id) }}>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 2l10 10M12 2L2 12" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/></svg>
       </button>
       <button className={s.mmToolBtn} data-tip="Скачать PNG"
         onClick={e => { e.stopPropagation(); downloadPng() }}>
@@ -314,7 +315,7 @@ export function MiniMenu({ project, x, y, zoom, onDrag, onSlotClick, onSlotRight
                     onMouseEnter={e => { if (d) onSlotHover?.(d, e.clientX, e.clientY); onSlotEnter?.(project.id, sl.key) }}
                     onMouseLeave={() => onSlotHover?.(null, 0, 0)}>
                     {showNums && <span className={s.mmSlotNum}>{sl.key}</span>}
-                    {d && <div className={s.mmSlotContent}><ItemTexture itemId={d.itemId} potionColor={d.potionColor} skullTexture={d.skullTexture} /></div>}
+                    {d && <div className={s.mmSlotContent}><ItemTexture itemId={d.itemId} potionColor={d.potionColor} skullTexture={d.skullTexture} armorTrim={d.armorTrim} /></div>}
                     {d?.enchanted && <div className={s.mmSlotEnchant} />}
                     {d && d.amount > 1 && <span className={s.mmSlotAmount}>{d.amount}</span>}
                   </div>

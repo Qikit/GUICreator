@@ -15,11 +15,12 @@ interface Props {
   children: ReactNode
   width?: number | string
   isResizing?: boolean
+  headerExtra?: ReactNode
 }
 
 export function DockPanel({
   id, title, position, collapsed, onCollapse, onDragStart, onDragOver, onDragEnd,
-  isDropTarget, children, width, isResizing,
+  isDropTarget, children, width, isResizing, headerExtra,
 }: Props) {
   const posClass = position === 'left' ? s.panelLeft : position === 'right' ? s.panelRight : s.panelCenter
 
@@ -59,6 +60,7 @@ export function DockPanel({
           <div className={s.gripDot} />
         </div>
         {title}
+        {headerExtra}
         {position !== 'center' && onCollapse && (
           <button className={s.collapseBtn} onClick={onCollapse} data-tip="Свернуть">
             {position === 'left' ? '◂' : '▸'}

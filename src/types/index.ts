@@ -8,6 +8,11 @@ export interface TextSegment {
   obfuscated: boolean
 }
 
+export interface ArmorTrim {
+  material: string
+  pattern: string
+}
+
 export interface SlotData {
   itemId: string
   displayName: TextSegment[]
@@ -18,6 +23,7 @@ export interface SlotData {
   hideFlags: number
   potionColor: string | null
   skullTexture: string | null
+  armorTrim: ArmorTrim | null
 }
 
 export interface Project {
@@ -65,6 +71,7 @@ export interface SlotPreset {
   customModelData?: number | null
   potionColor?: string | null
   skullTexture?: string | null
+  armorTrim?: ArmorTrim | null
 }
 
 export interface ItemCategory {

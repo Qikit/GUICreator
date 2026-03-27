@@ -55,6 +55,7 @@ export function Slot({
             itemId={data.itemId}
             potionColor={data.potionColor}
             skullTexture={data.skullTexture}
+            armorTrim={data.armorTrim}
           />
         </div>
       )}
