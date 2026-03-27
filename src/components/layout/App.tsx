@@ -245,7 +245,7 @@ export function App() {
 
       {htt && <HoverTooltip data={htt.data} x={htt.x} y={htt.y} />}
       {showExport && <ExportModal project={proj} onClose={() => setShowExport(false)} />}
-      {showGrad && <GradientModal onClose={() => setShowGrad(false)} onApply={selSlot && proj.slots[selSlot] ? (segs) => dispatch({ type: 'SS', key: selSlot, data: { ...proj.slots[selSlot], displayName: segs } }) : null} />}
+      {showGrad && <GradientModal onClose={() => setShowGrad(false)} />}
       {showColorPicker && <ColorPickerModal onClose={() => setShowColorPicker(false)} />}
       {showTpls && <TemplateModal builtIn={BUILT_TPLS as never} userTemplates={[]} onApply={(t: any) => { const np = newProject(t.name || proj.name, t.rows); np.slots = JSON.parse(JSON.stringify(t.slots || {})); loadProj(np); setSelSlot(null); setMultiSel(new Set()); setShowTpls(false) }} onDeleteUser={() => {}} onClose={() => setShowTpls(false)} />}
       {showProjs && <ProjectModal list={loadProjectList()} onOpen={p => { loadProj(p); setSelSlot(null); setMultiSel(new Set()); setShowProjs(false) }} onDelete={id => { deleteProject(id); setShowProjs(false) }} onClose={() => setShowProjs(false)} />}

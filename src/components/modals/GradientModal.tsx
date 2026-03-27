@@ -9,15 +9,15 @@ import s from '@/styles/shared.module.css'
 
 interface Props {
   onClose: () => void
-  onApply?: ((segs: TextSegment[]) => void) | null
 }
 
-export function GradientModal({ onClose, onApply }: Props) {
+export function GradientModal({ onClose }: Props) {
   const [text, setText] = useState('Пример текста')
   const [colors, setColors] = useState(['#FF0000', '#00FF00'])
   const [bold, setBold] = useState(false)
   const [italic, setItalic] = useState(false)
   const [copied, setCopied] = useState('')
+  const [showPresets, setShowPresets] = useState(false)
 
   const genSegs = (): TextSegment[] => {
     if (!text) return []
@@ -43,15 +43,21 @@ export function GradientModal({ onClose, onApply }: Props) {
 
   return (
     <GlassModal onClose={onClose} title="Градиент-генератор">
-      <div style={{ marginBottom: 10 }}>
-        <div style={{ fontSize: 10, color: 'var(--tx3)', marginBottom: 4, fontWeight: 600, textTransform: 'uppercase' }}>Пресеты</div>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-          {GRAD_PRESETS.map((p, i) => (
-            <GlowButton key={i} style={{ background: `linear-gradient(90deg,${p.colors.join(',')})`, color: '#fff', textShadow: '0 1px 2px #000', fontSize: 10, padding: '3px 8px' }}
-              onClick={() => { setColors([...p.colors]); setText(p.text) }}>{p.name}</GlowButton>
-          ))}
-        </div>
-      </div>
+      <GlowButton onClick={() => setShowPresets(true)} style={{ marginBottom: 8 }}>Пресеты</GlowButton>
+
+      {showPresets && (
+        <GlassModal onClose={() => setShowPresets(false)} title="Пресеты градиентов">
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+            {GRAD_PRESETS.map((p, i) => (
+              <GlowButton key={i} size="md"
+                style={{ background: `linear-gradient(90deg,${p.colors.join(',')})`, color: '#fff', textShadow: '0 1px 2px #000', padding: '6px 14px' }}
+                onClick={() => { setColors([...p.colors]); setText(p.text); setShowPresets(false) }}>
+                {p.name}
+              </GlowButton>
+            ))}
+          </div>
+        </GlassModal>
+      )}
 
       <div style={{ marginBottom: 8 }}>
         <div style={{ fontSize: 10, color: 'var(--tx3)', marginBottom: 4, fontWeight: 600, textTransform: 'uppercase' }}>Текст</div>
@@ -88,7 +94,9 @@ export function GradientModal({ onClose, onApply }: Props) {
         <div style={{ fontSize: 10, color: 'var(--tx3)', marginBottom: 4, fontWeight: 600, textTransform: 'uppercase' }}>MiniMessage</div>
         <div style={{ display: 'flex', gap: 6 }}>
           <div className={glassModalStyles.code} style={{ flex: 1, fontSize: 11, padding: '8px 10px', maxHeight: 80 }}>{gradTag}</div>
-          <GlowButton onClick={() => copy(gradTag, 'mm')}>{copied === 'mm' ? '✓' : 'Коп.'}</GlowButton>
+          <GlowButton size="md" onClick={() => copy(gradTag, 'mm')} style={{ minWidth: 80 }}>
+            {copied === 'mm' ? '✓ Скопировано' : '📋 Копировать'}
+          </GlowButton>
         </div>
       </div>
 
@@ -96,13 +104,17 @@ export function GradientModal({ onClose, onApply }: Props) {
         <div style={{ fontSize: 10, color: 'var(--tx3)', marginBottom: 4, fontWeight: 600, textTransform: 'uppercase' }}>§-коды</div>
         <div style={{ display: 'flex', gap: 6 }}>
           <div className={glassModalStyles.code} style={{ flex: 1, fontSize: 11, padding: '8px 10px', maxHeight: 80 }}>{seg2leg(segs)}</div>
-          <GlowButton onClick={() => copy(seg2leg(segs), 'leg')}>{copied === 'leg' ? '✓' : 'Коп.'}</GlowButton>
+          <GlowButton size="md" onClick={() => copy(seg2leg(segs), 'leg')} style={{ minWidth: 80 }}>
+            {copied === 'leg' ? '✓ Скопировано' : '📋 Копировать'}
+          </GlowButton>
         </div>
       </div>
 
       <div className={glassModalStyles.actions}>
-        {onApply && <GlowButton variant="primary" onClick={() => { onApply(parseMM(gradTag)); onClose() }}>Применить к имени</GlowButton>}
-        <GlowButton onClick={onClose}>Закрыть</GlowButton>
+        <GlowButton variant="primary" size="md" onClick={() => copy(gradTag, 'mm')}>
+          {copied === 'mm' ? '✓ Скопировано' : '📋 Копировать MiniMessage'}
+        </GlowButton>
+        <GlowButton size="md" onClick={onClose}>Закрыть</GlowButton>
       </div>
     </GlassModal>
   )
