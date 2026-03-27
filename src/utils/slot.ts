@@ -69,4 +69,8 @@ export function newProject(name = 'Новое меню', rows = 6): Project {
 
 export const ERASER_ID = '__eraser__'
 
-export const TINTABLE = new Set(['potion', 'splash_potion', 'lingering_potion', 'tipped_arrow'])
+export const TINTABLE = new Set([
+  'potion', 'splash_potion', 'lingering_potion', 'tipped_arrow',
+  'leather_helmet', 'leather_chestplate', 'leather_leggings', 'leather_boots',
+  'leather_horse_armor',
+])

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import type { TextSegment } from '@/types'
 import { parseMM, seg2mm } from '@/utils/minimessage'
 import { defaultSegment } from '@/utils/slot'
@@ -17,14 +18,6 @@ export function TextEditor({ label, segs, onChange }: Props) {
   const [mmText, setMmText] = useState(() => seg2mm(segs))
   const [showSymbols, setShowSymbols] = useState(false)
   const symBtnRef = useRef<HTMLButtonElement>(null)
-  const [symPos, setSymPos] = useState<{ top: number; left: number } | null>(null)
-
-  useEffect(() => {
-    if (showSymbols && symBtnRef.current) {
-      const r = symBtnRef.current.getBoundingClientRect()
-      setSymPos({ top: r.top, left: Math.min(r.right - 240, window.innerWidth - 250) })
-    }
-  }, [showSymbols])
 
   useEffect(() => { setMmText(seg2mm(segs)) }, [segs])
 
@@ -57,21 +50,26 @@ export function TextEditor({ label, segs, onChange }: Props) {
           <div className={s.mmHelp}>{'<color> <bold> <italic> <gradient:#HEX1:#HEX2>'}</div>
           <div style={{ marginLeft: 'auto' }}>
             <button ref={symBtnRef} className={s.addBtn} onClick={() => setShowSymbols(!showSymbols)}>⚝</button>
-            {showSymbols && symPos && (
-              <div style={{ position: 'fixed', zIndex: 1000, background: 'rgba(255,255,255,0.06)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-md)', padding: 6, boxShadow: '0 8px 32px rgba(0,0,0,.5)', width: 240, top: symPos.top, left: symPos.left, transform: 'translateY(-100%)' }}>
-                {MC_SYMBOLS.map((g, gi) => (
-                  <div key={gi} style={{ marginBottom: 4 }}>
-                    <div style={{ fontSize: 9, color: 'var(--tx3)', marginBottom: 2 }}>{g.group}</div>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
-                      {g.symbols.map((sym, si) => (
-                        <button key={si} style={{ width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--glass-border)', borderRadius: 2, cursor: 'pointer', fontSize: 12, background: 'none', color: 'var(--tx1)' }}
-                          onClick={() => insertSymbol(sym)} title={sym}>{sym}</button>
-                      ))}
+            {showSymbols && (() => {
+              const r = symBtnRef.current?.getBoundingClientRect()
+              if (!r) return null
+              return createPortal(
+                <div style={{ position: 'fixed', zIndex: 1000, background: 'rgba(15, 7, 32, 0.95)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-md)', padding: 6, boxShadow: '0 8px 32px rgba(0,0,0,.5)', width: 240, top: r.top, left: Math.min(r.right - 240, window.innerWidth - 250), transform: 'translateY(-100%)' }}>
+                  {MC_SYMBOLS.map((g, gi) => (
+                    <div key={gi} style={{ marginBottom: 4 }}>
+                      <div style={{ fontSize: 9, color: 'var(--tx3)', marginBottom: 2 }}>{g.group}</div>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+                        {g.symbols.map((sym, si) => (
+                          <button key={si} style={{ width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--glass-border)', borderRadius: 2, cursor: 'pointer', fontSize: 12, background: 'none', color: 'var(--tx1)' }}
+                            onClick={() => insertSymbol(sym)} title={sym}>{sym}</button>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            )}
+                  ))}
+                </div>,
+                document.body
+              )
+            })()}
           </div>
         </div>
       </div>

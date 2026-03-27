@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import type { TextSegment } from '@/types'
 import { parseMM, seg2mm } from '@/utils/minimessage'
 import { LORE_TPLS } from '@/data/loreTemplates'
@@ -15,14 +16,6 @@ export function LoreEditor({ lore, onChange }: Props) {
   const [text, setText] = useState(() => lore.map(line => seg2mm(line)).join('\n'))
   const [showTpls, setShowTpls] = useState(false)
   const tplBtnRef = useRef<HTMLButtonElement>(null)
-  const [tplPos, setTplPos] = useState<{ top: number; left: number } | null>(null)
-
-  useEffect(() => {
-    if (showTpls && tplBtnRef.current) {
-      const r = tplBtnRef.current.getBoundingClientRect()
-      setTplPos({ top: r.top, left: Math.min(r.right - 220, window.innerWidth - 230) })
-    }
-  }, [showTpls])
 
   useEffect(() => {
     setText(lore.map(line => seg2mm(line)).join('\n'))
@@ -59,18 +52,23 @@ export function LoreEditor({ lore, onChange }: Props) {
         <div className={s.mmHelp}>Каждая строка = строка лора</div>
         <div style={{ marginLeft: 'auto' }}>
           <button ref={tplBtnRef} className={s.addBtn} onClick={() => setShowTpls(!showTpls)}>Шаблоны ▾</button>
-          {showTpls && tplPos && (
-            <div style={{ position: 'fixed', zIndex: 1000, background: 'rgba(255,255,255,0.06)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-md)', padding: 2, boxShadow: '0 8px 32px rgba(0,0,0,.5)', width: 220, maxHeight: 240, overflowY: 'auto', top: tplPos.top, left: tplPos.left, transform: 'translateY(-100%)' }}>
-              {LORE_TPLS.map((t, i) => (
-                <button key={i} style={{ display: 'block', width: '100%', padding: '5px 8px', borderRadius: 2, cursor: 'pointer', fontSize: 11, border: 'none', background: 'none', color: 'var(--tx1)', textAlign: 'left' }}
-                  onMouseEnter={e => (e.currentTarget.style.background = 'var(--glass-hover)')}
-                  onMouseLeave={e => (e.currentTarget.style.background = 'none')}
-                  onClick={() => insertTemplate(t.segments)}>
-                  {t.label}
-                </button>
-              ))}
-            </div>
-          )}
+          {showTpls && (() => {
+            const r = tplBtnRef.current?.getBoundingClientRect()
+            if (!r) return null
+            return createPortal(
+              <div style={{ position: 'fixed', zIndex: 1000, background: 'rgba(15, 7, 32, 0.95)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-md)', padding: 2, boxShadow: '0 8px 32px rgba(0,0,0,.5)', width: 220, maxHeight: 240, overflowY: 'auto', top: r.top, left: Math.min(r.right - 220, window.innerWidth - 230), transform: 'translateY(-100%)' }}>
+                {LORE_TPLS.map((t, i) => (
+                  <button key={i} style={{ display: 'block', width: '100%', padding: '5px 8px', borderRadius: 2, cursor: 'pointer', fontSize: 11, border: 'none', background: 'none', color: 'var(--tx1)', textAlign: 'left' }}
+                    onMouseEnter={e => (e.currentTarget.style.background = 'var(--glass-hover)')}
+                    onMouseLeave={e => (e.currentTarget.style.background = 'none')}
+                    onClick={() => insertTemplate(t.segments)}>
+                    {t.label}
+                  </button>
+                ))}
+              </div>,
+              document.body
+            )
+          })()}
         </div>
       </div>
       {lore.length > 0 && (

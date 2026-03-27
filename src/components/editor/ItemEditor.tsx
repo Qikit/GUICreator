@@ -65,7 +65,7 @@ export function ItemEditor({ data, slotKey, dispatch }: Props) {
 
             {TINTABLE.has(data.itemId) && (
               <>
-                <label>Цвет зелья</label>
+                <label>{['potion', 'splash_potion', 'lingering_potion', 'tipped_arrow'].includes(data.itemId) ? 'Цвет зелья' : 'Цвет'}</label>
                 <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
                   <input
                     type="color"
