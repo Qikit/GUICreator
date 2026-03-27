@@ -17,6 +17,7 @@ export interface GuiType {
   containerHeight: number
   cropY?: number
   slots: SlotPosition[]
+  hideRects?: { x: number; y: number; w: number; h: number }[]
 }
 
 function grid(startX: number, startY: number, cols: number, rows: number, spacing = 18, offset = 0): SlotPosition[] {
@@ -106,13 +107,13 @@ export const GUI_TYPES: GuiType[] = [
     name: 'Наковальня',
     texture: TEX + 'anvil.png',
     containerWidth: 176,
-    containerHeight: 54,
-    cropY: 30,
+    containerHeight: 84,
     slots: [
-      { key: '0', x: 26, y: 16 },
-      { key: '1', x: 75, y: 16 },
-      { key: '2', x: 133, y: 16 },
+      { key: '0', x: 27, y: 47 },
+      { key: '1', x: 76, y: 47 },
+      { key: '2', x: 134, y: 47 },
     ],
+    hideRects: [{ x: 59, y: 6, w: 110, h: 20 }],
   },
   {
     id: 'brewing',
@@ -121,11 +122,11 @@ export const GUI_TYPES: GuiType[] = [
     containerWidth: 176,
     containerHeight: 84,
     slots: [
-      { key: '0', x: 55, y: 50 },
-      { key: '1', x: 78, y: 58 },
-      { key: '2', x: 101, y: 50 },
-      { key: '3', x: 78, y: 6 },
-      { key: '4', x: 16, y: 16 },
+      { key: '0', x: 56, y: 51 },
+      { key: '1', x: 79, y: 58 },
+      { key: '2', x: 102, y: 51 },
+      { key: '3', x: 79, y: 17 },
+      { key: '4', x: 17, y: 17 },
     ],
   },
   {
@@ -157,9 +158,9 @@ export const GUI_TYPES: GuiType[] = [
     containerWidth: 176,
     containerHeight: 84,
     slots: [
-      { key: '0', x: 14, y: 16 },
-      { key: '1', x: 14, y: 52 },
-      { key: '2', x: 143, y: 34 },
+      { key: '0', x: 15, y: 15 },
+      { key: '1', x: 15, y: 52 },
+      { key: '2', x: 145, y: 33 },
     ],
   },
   {
@@ -182,9 +183,9 @@ export const GUI_TYPES: GuiType[] = [
     containerWidth: 176,
     containerHeight: 84,
     slots: [
-      { key: '0', x: 12, y: 25 },
-      { key: '1', x: 32, y: 25 },
-      { key: '2', x: 12, y: 43 },
+      { key: '0', x: 13, y: 26 },
+      { key: '1', x: 33, y: 26 },
+      { key: '2', x: 23, y: 44 },
       { key: '3', x: 143, y: 34 },
     ],
   },

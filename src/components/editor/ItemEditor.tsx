@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { SlotData } from '@/types'
 import { ItemTexture, Preview } from '@/components/shared'
 import { SkullFace } from '@/components/shared/SkullFace'
@@ -6,6 +7,7 @@ import { itemName } from '@/utils/slot'
 import { defaultSegment } from '@/utils/slot'
 import { TextEditor } from './TextEditor'
 import { LoreEditor } from './LoreEditor'
+import { ColorPickerModal } from '@/components/modals'
 import { GlassToggle, GlowButton } from '@/components/ui'
 import s from '@/styles/editor.module.css'
 
@@ -16,6 +18,8 @@ interface Props {
 }
 
 export function ItemEditor({ data, slotKey, dispatch }: Props) {
+  const [showColorPicker, setShowColorPicker] = useState(false)
+
   if (!data || !slotKey) {
     return <div className={s.editor}><div className={s.empty}>Выберите слот для редактирования</div></div>
   }
@@ -27,7 +31,11 @@ export function ItemEditor({ data, slotKey, dispatch }: Props) {
       <div className={s.body}>
         <div className={s.header}>
           <ItemTexture itemId={data.itemId} size={32} potionColor={data.potionColor} skullTexture={data.skullTexture} rpTexture={data.rpTexture} />
-          <div><div className={s.itemId}>{data.itemId}</div></div>
+          <div style={{ flex: 1 }}><div className={s.itemId}>{data.itemId}</div></div>
+          <button onClick={() => setShowColorPicker(true)} data-tip="Цвета"
+            style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-sm)', background: 'none', color: 'var(--tx2)', cursor: 'pointer' }}>
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1.2"/><circle cx="5" cy="5" r="1" fill="#f87171"/><circle cx="9" cy="5" r="1" fill="#4ade80"/><circle cx="5" cy="9" r="1" fill="#60a5fa"/><circle cx="9" cy="9" r="1" fill="#facc15"/></svg>
+          </button>
         </div>
 
         <TextEditor label="Название" segs={data.displayName} onChange={segs => upd({ displayName: segs })} />
@@ -121,6 +129,7 @@ export function ItemEditor({ data, slotKey, dispatch }: Props) {
           <GlowButton variant="danger" onClick={() => dispatch({ type: 'RS', key: slotKey })}>Удалить</GlowButton>
         </div>
       </div>
+      {showColorPicker && <ColorPickerModal onClose={() => setShowColorPicker(false)} />}
     </div>
   )
 }

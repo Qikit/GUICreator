@@ -320,6 +320,17 @@ export function MiniMenu({ project, x, y, zoom, onDrag, onSlotClick, onSlotRight
                   </div>
                 )
               })}
+              {guiType.hideRects?.map((r, i) => (
+                <div key={`hr-${i}`} style={{
+                  position: 'absolute',
+                  left: r.x * SCALE,
+                  top: (r.y - (guiType.cropY || 0)) * SCALE,
+                  width: r.w * SCALE,
+                  height: r.h * SCALE,
+                  background: '#8B8B8B',
+                  zIndex: 0,
+                }} />
+              ))}
             </div>
           </div>
           {toolbar}
