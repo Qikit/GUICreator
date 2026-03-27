@@ -74,7 +74,7 @@ export function ColorPickerModal({ onClose, onApply }: Props) {
           <div style={{ position: 'absolute', width: 24, height: 6, border: '2px solid #fff', borderRadius: 3, boxShadow: '0 0 3px rgba(0,0,0,.5)', pointerEvents: 'none', left: -2, top: hue / 360 * 200 - 3 }} />
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flex: 1 }}>
-          <div style={{ width: '100%', height: 48, borderRadius: 4, border: '1px solid var(--bd)', background: hex }} />
+          <div style={{ width: '100%', height: 48, borderRadius: 4, border: '1px solid var(--glass-border)', background: hex }} />
           <input value={hex} onChange={e => { const v = e.target.value; setHex(v); if (/^#[0-9A-Fa-f]{6}$/.test(v)) fromHex(v.toUpperCase()) }} style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 13 }} />
           <GlowButton variant="primary" onClick={copyHex}>{copied ? 'Скопировано!' : 'Копировать <#>'}</GlowButton>
           {onApply && <GlowButton onClick={() => { onApply(hex); onClose() }}>Применить</GlowButton>}

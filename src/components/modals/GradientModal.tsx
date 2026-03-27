@@ -55,7 +55,7 @@ export function GradientModal({ onClose, onApply }: Props) {
 
       <div style={{ marginBottom: 8 }}>
         <div style={{ fontSize: 10, color: 'var(--tx3)', marginBottom: 4, fontWeight: 600, textTransform: 'uppercase' }}>Текст</div>
-        <input value={text} onChange={e => setText(e.target.value)} style={{ width: '100%', padding: '8px 12px', fontSize: 14, borderRadius: 'var(--r8)' }} placeholder="Введите текст..." />
+        <input value={text} onChange={e => setText(e.target.value)} style={{ width: '100%', padding: '8px 12px', fontSize: 14, borderRadius: 'var(--radius-md)' }} placeholder="Введите текст..." />
       </div>
 
       <div style={{ marginBottom: 8 }}>
@@ -63,7 +63,7 @@ export function GradientModal({ onClose, onApply }: Props) {
         <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', alignItems: 'center' }}>
           {colors.map((c, i) => (
             <div key={i} style={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-              <input type="color" value={c} onChange={e => setColors(colors.map((v, j) => j === i ? e.target.value.toUpperCase() : v))} style={{ width: 28, height: 28, padding: 0, border: '1px solid var(--bd)', borderRadius: 3, cursor: 'pointer' }} />
+              <input type="color" value={c} onChange={e => setColors(colors.map((v, j) => j === i ? e.target.value.toUpperCase() : v))} style={{ width: 28, height: 28, padding: 0, border: '1px solid var(--glass-border)', borderRadius: 3, cursor: 'pointer' }} />
               <input value={c} onChange={e => { if (/^#[0-9A-Fa-f]{6}$/.test(e.target.value)) setColors(colors.map((v, j) => j === i ? e.target.value.toUpperCase() : v)) }} style={{ width: 72, fontSize: 11, fontFamily: 'monospace' }} />
               {colors.length > 2 && <GlowButton style={{ padding: '0 4px', fontSize: 10 }} onClick={() => setColors(colors.filter((_, j) => j !== i))}>✕</GlowButton>}
             </div>

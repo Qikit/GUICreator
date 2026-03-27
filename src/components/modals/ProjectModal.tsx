@@ -22,7 +22,7 @@ export function ProjectModal({ list, onOpen, onDelete, onClose }: Props) {
       {!projects.length && <div style={{ color: 'var(--tx3)', padding: 12 }}>Нет проектов</div>}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(170px, 1fr))', gap: 8 }}>
         {projects.map(p => (
-          <div key={p.id} style={{ background: 'var(--srf)', border: '1px solid var(--bd)', borderRadius: 5, padding: 12 }}>
+          <div key={p.id} style={{ background: 'var(--glass-surface)', border: '1px solid var(--glass-border)', borderRadius: 5, padding: 12 }}>
             <div style={{ fontWeight: 600, marginBottom: 2, fontSize: 12 }}>{p.name}</div>
             <div style={{ fontSize: 9, color: 'var(--tx3)' }}>{p.rows}x9 · {Object.keys(p.slots).length} предм.</div>
             <div style={{ display: 'flex', gap: 3, marginTop: 4 }}>

@@ -39,12 +39,7 @@ html, body { height: 100%; overflow: hidden; }
   --radius-md: 10px;
   --radius-lg: 14px;
 
-  /* Legacy aliases (temporary, for incremental migration) */
-  --bg: #0f0720;
-  --bg2: rgba(255,255,255,0.04);
-  --pan: rgba(255,255,255,0.04);
-  --srf: rgba(255,255,255,0.06);
-  --hov: rgba(255,255,255,0.10);
+  /* Legacy aliases */
   --tx1: #e4e4e7;
   --tx2: #8b8b96;
   --tx3: #5a5a64;
@@ -54,9 +49,6 @@ html, body { height: 100%; overflow: hidden; }
   --ok: #4ade80;
   --er: #f87171;
   --inf: #60a5fa;
-  --bd: rgba(255,255,255,0.08);
-  --bd2: rgba(255,255,255,0.12);
-  --r8: 10px;
 }
 
 body {

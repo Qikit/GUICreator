@@ -105,7 +105,7 @@ export function CanvasView({ workspace, onUpdateWS, onEditMenu, projects }: Prop
             return (
               <g key={c.id} style={{ pointerEvents: 'auto' }}>
                 <path className={s.connLine} d={`M${from.x},${from.y} C${from.x},${from.y + dy * 0.5} ${to.x},${to.y - Math.abs(dy) * 0.3} ${to.x},${to.y}`} />
-                <circle cx={(from.x + to.x) / 2} cy={(from.y + to.y) / 2} r={7} fill="var(--srf)" stroke="var(--er)" strokeWidth={1.5}
+                <circle cx={(from.x + to.x) / 2} cy={(from.y + to.y) / 2} r={7} fill="var(--glass-surface)" stroke="var(--er)" strokeWidth={1.5}
                   style={{ cursor: 'pointer', opacity: 0 }} onClick={() => delConn(c.id)}
                   onMouseEnter={e => (e.currentTarget.style.opacity = '1')} onMouseLeave={e => (e.currentTarget.style.opacity = '0')} />
               </g>
@@ -131,10 +131,10 @@ export function CanvasView({ workspace, onUpdateWS, onEditMenu, projects }: Prop
       </div>
       <div className={s.canvasTb}>
         <input value={workspace.name} onChange={e => onUpdateWS({ ...workspace, name: e.target.value })}
-          style={{ background: 'var(--pan)', border: '1px solid var(--bd)', borderRadius: 'var(--r8)', padding: '4px 8px', color: 'var(--tx1)', fontSize: 12, width: 160, textAlign: 'center' }} />
+          style={{ background: 'var(--glass-panel)', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-md)', padding: '4px 8px', color: 'var(--tx1)', fontSize: 12, width: 160, textAlign: 'center' }} />
         <GlowButton onClick={addNew}>+ Новое</GlowButton>
         <select onChange={e => { if (e.target.value) addExisting(e.target.value); e.target.value = '' }}
-          style={{ fontSize: 11, padding: '4px 6px', background: 'var(--pan)', border: '1px solid var(--bd)', color: 'var(--tx1)', borderRadius: 4 }}>
+          style={{ fontSize: 11, padding: '4px 6px', background: 'var(--glass-panel)', border: '1px solid var(--glass-border)', color: 'var(--tx1)', borderRadius: 4 }}>
           <option value="">+ Существующее...</option>
           {loadProjectList().filter(id => !workspace.menus.find(m => m.projectId === id)).map(id => {
             const p = loadProject(id); return p ? <option key={id} value={id}>{p.name}</option> : null
