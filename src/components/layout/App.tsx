@@ -6,8 +6,9 @@ import { ITEM_DB } from '@/data/items'
 import { BUILT_TPLS } from '@/data/templates'
 import { saveProject, loadProject, loadProjectList, deleteProject, loadPrefs, savePrefs, saveWorkspace, loadWorkspace, loadWorkspaceList, newWorkspace, saveUserTemplates } from '@/storage'
 import { loadLocale, loadFunItems, loadResourcepackIndex } from '@/loaders'
-import { defSlot, makeSlot, newProject, ERASER_ID, itemName } from '@/utils/slot'
+import { makeSlot, newProject, ERASER_ID } from '@/utils/slot'
 import { parseMM } from '@/utils/minimessage'
+import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { Grid } from '@/components/grid'
 import { Palette } from '@/components/palette'
 import { ItemEditor } from '@/components/editor'
@@ -15,6 +16,7 @@ import { HoverTooltip, CtxMenu } from '@/components/shared'
 import type { CtxMenuItem } from '@/components/shared'
 import { ExportModal, GradientModal, ColorPickerModal, TemplateModal, ProjectModal } from '@/components/modals'
 import { CanvasView } from '@/components/canvas'
+import { StatusBar } from './StatusBar'
 import tb from '@/styles/toolbar.module.css'
 import ss from '@/styles/shared.module.css'
 
@@ -104,72 +106,11 @@ export function App() {
     return () => document.removeEventListener('mousedown', h)
   }, [showMenu])
 
-  // Keyboard shortcuts
-  useEffect(() => {
-    const h = (e: KeyboardEvent) => {
-      if ((e.target as HTMLElement).tagName === 'INPUT' || (e.target as HTMLElement).tagName === 'TEXTAREA') return
-      if (e.ctrlKey && e.key === 'z') { e.preventDefault(); undo() }
-      if (e.ctrlKey && (e.key === 'y' || (e.shiftKey && e.key === 'Z'))) { e.preventDefault(); redo() }
-      if (e.ctrlKey && e.key === 'e') { e.preventDefault(); setShowExport(true) }
-      if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProject(proj); setSaveStatus('Saved') }
-      if (e.key === 'Escape') { setSelSlot(null); setMultiSel(new Set()); setCtxMenu(null); setShowExport(false); setShowTpls(false); setShowProjs(false); setPalItem(null); setPalPreset(null) }
-      if (e.key === 'Delete' || e.key === 'Backspace') {
-        if (multiSel.size > 0) { e.preventDefault(); dispatch({ type: 'RM', keys: [...multiSel] }); setMultiSel(new Set()); setSelSlot(null) }
-        else if (selSlot && proj.slots[selSlot]) { e.preventDefault(); dispatch({ type: 'RS', key: selSlot }) }
-      }
-      if (e.ctrlKey && e.key === 'a') { e.preventDefault(); const all = new Set<string>(); for (let r = 0; r < proj.rows; r++) for (let c = 0; c < 9; c++) all.add(`${r}-${c}`); setMultiSel(all) }
-      if (e.ctrlKey && e.key === 'd') {
-        e.preventDefault()
-        if (selSlot && proj.slots[selSlot]) {
-          const [r, c] = selSlot.split('-').map(Number)
-          for (let nc = c + 1; nc < 9; nc++) {
-            const nk = `${r}-${nc}`
-            if (!proj.slots[nk]) { dispatch({ type: 'SS', key: nk, data: JSON.parse(JSON.stringify(proj.slots[selSlot])) }); setSelSlot(nk); break }
-          }
-        }
-      }
-      // Copy
-      if (e.ctrlKey && e.key === 'c') {
-        if (multiSel.size > 0) {
-          e.preventDefault(); const d: Record<string, SlotData> = {}
-          for (const k of multiSel) if (proj.slots[k]) d[k] = JSON.parse(JSON.stringify(proj.slots[k]))
-          setClipboard({ multi: true, data: d, keys: [...multiSel] })
-        } else if (selSlot && proj.slots[selSlot]) {
-          e.preventDefault(); setClipboard({ multi: false, data: JSON.parse(JSON.stringify(proj.slots[selSlot])) })
-        }
-      }
-      // Paste
-      if (e.ctrlKey && e.key === 'v' && clipboard && selSlot) {
-        e.preventDefault()
-        if (clipboard.multi && clipboard.keys) {
-          const keys = clipboard.keys; if (!keys.length) return
-          const [br, bc] = keys[0].split('-').map(Number); const [sr, sc] = selSlot.split('-').map(Number)
-          const dr = sr - br, dc = sc - bc; const slots: Record<string, SlotData> = {}
-          for (const k of keys) {
-            const d = (clipboard.data as Record<string, SlotData>)[k]; if (!d) continue
-            const [r, c] = k.split('-').map(Number); const nk = `${r + dr}-${c + dc}`
-            if (r + dr >= 0 && r + dr < proj.rows && c + dc >= 0 && c + dc < 9) slots[nk] = JSON.parse(JSON.stringify(d))
-          }
-          dispatch({ type: 'SM', slots })
-        } else { dispatch({ type: 'SS', key: selSlot, data: JSON.parse(JSON.stringify(clipboard.data)) }) }
-      }
-      // Arrow keys
-      if (selSlot && ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
-        e.preventDefault(); const [r, c] = selSlot.split('-').map(Number)
-        let nr = r, nc = c
-        if (e.key === 'ArrowUp') nr = Math.max(0, r - 1)
-        if (e.key === 'ArrowDown') nr = Math.min(proj.rows - 1, r + 1)
-        if (e.key === 'ArrowLeft') nc = Math.max(0, c - 1)
-        if (e.key === 'ArrowRight') nc = Math.min(8, c + 1)
-        const nk = `${nr}-${nc}`
-        if (e.shiftKey) setMultiSel(prev => { const n = new Set(prev); n.add(nk); return n })
-        else setMultiSel(new Set())
-        setSelSlot(nk)
-      }
-    }
-    window.addEventListener('keydown', h)
-    return () => window.removeEventListener('keydown', h)
-  }, [selSlot, proj, clipboard, multiSel, undo, redo, dispatch])
+  useKeyboardShortcuts({
+    selSlot, setSelSlot, multiSel, setMultiSel, proj, clipboard, setClipboard,
+    dispatch: dispatch as never, undo, redo, saveProject, setSaveStatus,
+    setShowExport, setShowTpls, setShowProjs, setPalItem, setPalPreset: setPalPreset as (v: unknown) => void, setCtxMenu: () => setCtxMenu(null),
+  })
 
   const onSlotMD = (e: React.MouseEvent, key: string) => {
     if (e.button === 1) {
@@ -340,11 +281,9 @@ export function App() {
         <CanvasView workspace={activeWS} onUpdateWS={updateWS} onEditMenu={editMenuFromCanvas} projects={projectCache} />
       )}
 
-      {mode === 'editor' && <div className={tb.statusBar}>
-        <span>{selSlot ? `Slot ${selSlot} (#${parseInt(selSlot.split('-')[0]) * 9 + parseInt(selSlot.split('-')[1])})` : multiSel.size > 1 ? `${multiSel.size} selected` : ''}</span>
-        <span>{palItem && palItem !== ERASER_ID ? `Размещение: ${itemName(palItem)}` : ''}</span>
-        <span>{proj.rows}x9 · {Object.keys(proj.slots).length} предм. · {saveStatus}</span>
-      </div>}
+      {mode === 'editor' && (
+        <StatusBar selSlot={selSlot} multiSel={multiSel} palItem={palItem} rows={proj.rows} slotCount={Object.keys(proj.slots).length} saveStatus={saveStatus} />
+      )}
 
       {htt && <HoverTooltip data={htt.data} x={htt.x} y={htt.y} />}
       {showExport && <ExportModal project={proj} onClose={() => setShowExport(false)} />}
