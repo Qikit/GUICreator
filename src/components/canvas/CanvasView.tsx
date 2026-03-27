@@ -1,10 +1,11 @@
 import { useState, useRef } from 'react'
-import type { Workspace, Project } from '@/types'
+import type { Workspace, Project, SlotData } from '@/types'
 import { gid } from '@/utils/id'
 import { newProject } from '@/utils/slot'
 import { saveProject, loadProject, loadProjectList } from '@/storage'
-import { CtxMenu } from '@/components/shared'
+import { CtxMenu, HoverTooltip } from '@/components/shared'
 import { MiniMenu } from './MiniMenu'
+import { GlowButton } from '@/components/ui'
 import s from '@/styles/canvas.module.css'
 import ss from '@/styles/shared.module.css'
 
@@ -20,9 +21,10 @@ interface Props {
   palItem: string | null
   onPlaceItem: (projectId: string, slotKey: string) => void
   onRemoveItem: (projectId: string, slotKey: string) => void
+  showNums: boolean
 }
 
-export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, selSlot, onSlotSelect, palItem, onPlaceItem, onRemoveItem }: Props) {
+export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, selSlot, onSlotSelect, palItem, onPlaceItem, onRemoveItem, showNums }: Props) {
   const [pan, setPan] = useState({ x: 0, y: 0 })
   const [zoom, setZoom] = useState(1)
   const [connectMode, setConnectMode] = useState(false)
@@ -31,11 +33,11 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
   const [grabbing, setGrabbing] = useState(false)
   const [mmCtx, setMmCtx] = useState<{ x: number; y: number; idx: number } | null>(null)
   const [slotCtx, setSlotCtx] = useState<{ x: number; y: number; menuId: string; slotKey: string } | null>(null)
-  const [showAddExisting, setShowAddExisting] = useState(false)
+  const [hoverData, setHoverData] = useState<{ data: SlotData; x: number; y: number } | null>(null)
   const surfRef = useRef<HTMLDivElement>(null)
 
   const onBgDown = (e: React.MouseEvent) => {
-    if ((e.target as HTMLElement).closest(`.${s.miniMenu}`) || (e.target as HTMLElement).closest(`.${s.canvasBottomBar}`) || (e.target as HTMLElement).closest(`.${s.wsName}`) || (e.target as HTMLElement).closest(`.${ss.ctxMenu}`)) return
+    if ((e.target as HTMLElement).closest(`.${s.miniMenu}`) || (e.target as HTMLElement).closest(`.${s.canvasTb}`) || (e.target as HTMLElement).closest(`.${ss.ctxMenu}`)) return
     if (e.button !== 0) return
     if (connecting) { setConnecting(null); return }
     setGrabbing(true)
@@ -89,7 +91,6 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
   const addExisting = (id: string) => {
     if (workspace.menus.find(m => m.projectId === id)) return
     onUpdateWS({ ...workspace, menus: [...workspace.menus, { projectId: id, x: 200 + workspace.menus.length * 60, y: 200 + workspace.menus.length * 40 }] })
-    setShowAddExisting(false)
   }
 
   const removeFromCanvas = (idx: number) => {
@@ -97,16 +98,25 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
     onUpdateWS({ ...workspace, menus: workspace.menus.filter((_, i) => i !== idx), connections: workspace.connections.filter(c => c.fromMenu !== pid && c.toMenu !== pid) })
   }
 
+  const SLOT_SIZE = 48
+  const SLOT_GAP = 2
+  const FRAME_PAD = 7 + 3
+  const HEADER_H = 32
+
   const getSlotCenter = (menuId: string, slot: string) => {
     const mi = workspace.menus.findIndex(m => m.projectId === menuId); if (mi < 0) return null
     const mm = workspace.menus[mi]; const [r, c] = slot.split('-').map(Number)
-    return { x: mm.x + 3 + c * 21 + 10, y: mm.y + 28 + r * 21 + 10 }
+    return {
+      x: mm.x + FRAME_PAD + c * (SLOT_SIZE + SLOT_GAP) + SLOT_SIZE / 2,
+      y: mm.y + HEADER_H + FRAME_PAD + r * (SLOT_SIZE + SLOT_GAP) + SLOT_SIZE / 2,
+    }
   }
 
   const getMenuTop = (menuId: string) => {
     const mi = workspace.menus.findIndex(m => m.projectId === menuId); if (mi < 0) return null
     const mm = workspace.menus[mi]
-    return { x: mm.x + (3 + 9 * 21) / 2, y: mm.y }
+    const menuWidth = FRAME_PAD * 2 + 9 * (SLOT_SIZE + SLOT_GAP) - SLOT_GAP
+    return { x: mm.x + menuWidth / 2, y: mm.y }
   }
 
   const toggleConnectMode = () => {
@@ -114,18 +124,11 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
     setConnecting(null)
   }
 
-  const existingIds = loadProjectList().filter(id => !workspace.menus.find(m => m.projectId === id))
-
   return (
     <div className={`${s.canvasWrap} ${grabbing ? s.grabbing : ''}`} onMouseDown={onBgDown} onWheel={onWheel}
       onMouseMove={e => setMousePos({ x: (e.clientX - pan.x) / zoom, y: (e.clientY - pan.y) / zoom })} ref={surfRef}
-      onKeyDown={e => { if (e.key === 'Escape') { setConnecting(null); setConnectMode(false); setShowAddExisting(false) } }} tabIndex={0}>
+      onKeyDown={e => { if (e.key === 'Escape') { setConnecting(null); setConnectMode(false) } }} tabIndex={0}>
       <div className={s.gridBg} style={{ backgroundPosition: `${pan.x}px ${pan.y}px`, backgroundSize: `${40 * zoom}px ${40 * zoom}px` }} />
-      <input
-        className={s.wsName}
-        value={workspace.name}
-        onChange={e => onUpdateWS({ ...workspace, name: e.target.value })}
-      />
       <div className={s.canvasSurf} style={{ transform: `translate(${pan.x}px,${pan.y}px) scale(${zoom})` }}>
         <svg style={{ position: 'absolute', top: 0, left: 0, width: 1, height: 1, overflow: 'visible', pointerEvents: 'none', zIndex: 5 }}>
           <defs><marker id="arrowhead" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="var(--ac)" /></marker></defs>
@@ -157,6 +160,8 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
             onCtxMenu={(cx, cy) => setMmCtx({ x: (cx - pan.x) / zoom, y: (cy - pan.y) / zoom, idx: i })}
             isActive={m.projectId === activeProjectId}
             selectedSlot={m.projectId === activeProjectId ? selSlot : null}
+            showNums={showNums}
+            onSlotHover={(data, x, y) => data ? setHoverData({ data, x, y }) : setHoverData(null)}
           />
         })}
         {mmCtx && <CtxMenu x={mmCtx.x} y={mmCtx.y} onClose={() => setMmCtx(null)} items={[
@@ -170,37 +175,23 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
           ]} />
         })()}
       </div>
-      <div className={s.canvasBottomBar}>
-        <div className={s.bottomBarGroup}>
-          <button className={`${s.bottomBtn} ${connectMode ? s.bottomBtnActive : ''}`} onClick={toggleConnectMode} title="Связи">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h12M10 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-          </button>
-          <button className={s.bottomBtn} onClick={addNew} title="Новое меню">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
-          </button>
-          <div style={{ position: 'relative' }}>
-            <button className={`${s.bottomBtn} ${showAddExisting ? s.bottomBtnActive : ''}`} onClick={() => setShowAddExisting(v => !v)} title="Добавить существующее">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5" height="5" rx="1" stroke="currentColor" strokeWidth="1.5"/><rect x="9" y="9" width="5" height="5" rx="1" stroke="currentColor" strokeWidth="1.5"/><path d="M7 11H4a1 1 0 01-1-1V7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
-            </button>
-            {showAddExisting && (
-              <div className={s.addExistingPopover}>
-                {existingIds.length === 0
-                  ? <button disabled style={{ opacity: 0.4 }}>Нет доступных меню</button>
-                  : existingIds.map(id => {
-                      const p = loadProject(id)
-                      return p ? <button key={id} onClick={() => addExisting(id)}>{p.name}</button> : null
-                    })
-                }
-              </div>
-            )}
-          </div>
-        </div>
-        <div className={s.bottomBarGroup}>
-          <span className={s.bottomZoom}>{Math.round(zoom * 100)}%</span>
-        </div>
+      <div className={s.canvasTb}>
+        <input value={workspace.name} onChange={e => onUpdateWS({ ...workspace, name: e.target.value })}
+          style={{ background: 'var(--glass-panel)', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-md)', padding: '4px 8px', color: 'var(--tx1)', fontSize: 12, width: 160, textAlign: 'center' }} />
+        <GlowButton onClick={addNew}>+ Новое</GlowButton>
+        <select onChange={e => { if (e.target.value) addExisting(e.target.value); e.target.value = '' }}
+          style={{ fontSize: 11, padding: '4px 6px', background: 'var(--glass-panel)', border: '1px solid var(--glass-border)', color: 'var(--tx1)', borderRadius: 4 }}>
+          <option value="">Существующее...</option>
+          {loadProjectList().filter(id => !workspace.menus.find(m => m.projectId === id)).map(id => {
+            const p = loadProject(id); return p ? <option key={id} value={id}>{p.name}</option> : null
+          })}
+        </select>
+        <GlowButton onClick={toggleConnectMode} variant={connectMode ? 'primary' : 'ghost'} title="Режим соединений">⇒ Связи</GlowButton>
+        <span style={{ fontSize: 10, color: 'var(--tx3)' }}>{Math.round(zoom * 100)}%</span>
       </div>
       {connectMode && connecting && <div className={s.connHint}>Кликните по целевому меню · Esc — отмена</div>}
       {connectMode && !connecting && <div className={s.connHint}>Режим связей: кликните по слоту-источнику · Esc — выход</div>}
+      {hoverData && <HoverTooltip data={hoverData.data} x={hoverData.x} y={hoverData.y} />}
     </div>
   )
 }

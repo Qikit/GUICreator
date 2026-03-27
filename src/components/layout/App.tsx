@@ -234,6 +234,7 @@ export function App() {
             palItem={palItem}
             onPlaceItem={handlePlaceItem}
             onRemoveItem={handleRemoveItem}
+            showNums={showNums}
           />
         ) : <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--tx3)' }}>Загрузка...</div>},
         { id: 'editor', title: 'Редактор', content: (
