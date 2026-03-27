@@ -26,9 +26,10 @@ interface Props {
   onResizeMenu: (projectId: string, rows: number) => void
   onSetEraser: () => void
   onDeselect: () => void
+  onRenameMenu: (projectId: string, name: string) => void
 }
 
-export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, selSlot, onSlotSelect, palItem, onPlaceItem, onRemoveItem, showNums, onActivateMenu, onBrushPick, onResizeMenu, onSetEraser, onDeselect }: Props) {
+export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, selSlot, onSlotSelect, palItem, onPlaceItem, onRemoveItem, showNums, onActivateMenu, onBrushPick, onResizeMenu, onSetEraser, onDeselect, onRenameMenu }: Props) {
   const [pan, setPan] = useState({ x: 0, y: 0 })
   const [zoom, setZoom] = useState(1)
   const [connectMode, setConnectMode] = useState(false)
@@ -232,15 +233,13 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
               const idx = workspace.menus.findIndex(mm => mm.projectId === pid)
               if (idx >= 0) removeFromCanvas(idx)
             }}
-            onResizeMenu={pid => {
-              const p2 = projects[pid]; if (!p2) return
-              const rows = prompt('Количество рядов (1-6):', String(p2.rows))
-              if (rows) {
-                const nr = Math.max(1, Math.min(6, parseInt(rows) || p2.rows))
-                onResizeMenu(pid, nr)
-              }
+            onResizeMenu={(pid, _cur) => {
+              const r = prompt('Количество строк (1-6):', String(projects[pid]?.rows ?? _cur ?? 3))
+              const rows = r ? parseInt(r) : NaN
+              if (!isNaN(rows) && rows >= 1 && rows <= 6) onResizeMenu(pid, rows)
             }}
             onSetEraser={onSetEraser}
+            onRename={onRenameMenu}
           />
         })}
       </div>

@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { Project } from '@/types'
 import type { SlotData } from '@/types'
 import { ItemTexture } from '@/components/shared'
@@ -24,11 +25,15 @@ interface Props {
   onActivate?: (menuId: string) => void
   palItem?: string | null
   onDeleteMenu?: (menuId: string) => void
-  onResizeMenu?: (menuId: string) => void
+  onResizeMenu?: (menuId: string, rows: number) => void
   onSetEraser?: () => void
+  onRename?: (menuId: string, name: string) => void
 }
 
-export function MiniMenu({ project, x, y, zoom, onDrag, onSlotClick, onSlotRightClick, onSlotMouseDown, connectingFrom, onCtxMenu, isActive, selectedSlot, showNums, onSlotHover, onActivate, palItem, onDeleteMenu, onResizeMenu, onSetEraser }: Props) {
+export function MiniMenu({ project, x, y, zoom, onDrag, onSlotClick, onSlotRightClick, onSlotMouseDown, connectingFrom, onCtxMenu, isActive, selectedSlot, showNums, onSlotHover, onActivate, palItem, onDeleteMenu, onResizeMenu, onSetEraser, onRename }: Props) {
+  const [editingName, setEditingName] = useState(false)
+  const [nameText, setNameText] = useState(project.name)
+
   const startDrag = (e: React.MouseEvent) => {
     if (e.button !== 0) return; e.stopPropagation()
     onActivate?.(project.id)
@@ -47,9 +52,27 @@ export function MiniMenu({ project, x, y, zoom, onDrag, onSlotClick, onSlotRight
     <div className={`${s.miniMenu} ${isActive ? s.mmActive : ''}`} style={{ left: x, top: y }}
       onMouseDown={e => { e.stopPropagation(); onActivate?.(project.id) }}>
       <div className={s.mmMain}>
-        <div className={s.mmHeader} onMouseDown={startDrag} onContextMenu={e => { e.preventDefault(); e.stopPropagation(); onCtxMenu?.(e.clientX, e.clientY) }}>
-          <span><McText segs={parseMM(project.name)} /></span>
-          <span style={{ fontSize: 9, color: 'var(--tx3)' }}>{project.rows}x9</span>
+        <div className={s.mmHeader} onMouseDown={editingName ? undefined : startDrag} onContextMenu={e => { e.preventDefault(); e.stopPropagation(); onCtxMenu?.(e.clientX, e.clientY) }}>
+          {editingName ? (
+            <input
+              value={nameText}
+              onChange={e => setNameText(e.target.value)}
+              onBlur={() => { onRename?.(project.id, nameText); setEditingName(false) }}
+              onKeyDown={e => {
+                if (e.key === 'Enter') { onRename?.(project.id, nameText); setEditingName(false) }
+                if (e.key === 'Escape') setEditingName(false)
+              }}
+              onClick={e => e.stopPropagation()}
+              onMouseDown={e => e.stopPropagation()}
+              autoFocus
+              style={{ background: 'var(--glass-surface)', border: '1px solid var(--accent)', borderRadius: 3, padding: '1px 4px', color: 'var(--tx1)', fontSize: 11, fontWeight: 600, width: '100%', outline: 'none' }}
+            />
+          ) : (
+            <span onDoubleClick={e => { e.stopPropagation(); setNameText(project.name); setEditingName(true) }}>
+              <McText segs={parseMM(project.name)} />
+            </span>
+          )}
+          <span style={{ fontSize: 9, color: 'var(--tx3)', flexShrink: 0 }}>{project.rows}x9</span>
         </div>
         <div className={s.mmBody}>
           <div className={s.mmGrid}>
@@ -91,7 +114,7 @@ export function MiniMenu({ project, x, y, zoom, onDrag, onSlotClick, onSlotRight
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 4h10M5 4V3a1 1 0 011-1h2a1 1 0 011 1v1M4 4v7a1 1 0 001 1h4a1 1 0 001-1V4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/></svg>
           </button>
           <button className={s.mmToolBtn} data-tip="Изменить размер"
-            onClick={e => { e.stopPropagation(); onResizeMenu?.(project.id) }}>
+            onClick={e => { e.stopPropagation(); onResizeMenu?.(project.id, project.rows) }}>
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 2h4M2 2v4M12 12H8M12 12V8" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/></svg>
           </button>
           <button className={`${s.mmToolBtn} ${palItem === '__eraser__' ? s.mmToolBtnActive : ''}`} data-tip="Ластик"

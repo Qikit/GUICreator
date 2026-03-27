@@ -204,7 +204,6 @@ export function App() {
             {showMenu && (
               <div className={tb.burgerDd}>
                 <button onClick={() => { setShowMenu(false); setShowTpls(true) }}>Шаблоны</button>
-                <button onClick={() => { setShowMenu(false); if (!palItem || palItem === ERASER_ID) { alert('Сначала выберите предмет'); return }; dispatch({ type: 'FE', data: makeSlot(palItem, palPreset) }) }}>Залить пустые</button>
                 <button onClick={() => { setShowMenu(false); const name = prompt('Название шаблона:', proj.name); if (!name) return; const desc = prompt('Описание:', ''); saveTpl({ name, desc: desc || '', rows: proj.rows, slots: JSON.parse(JSON.stringify(proj.slots)) }) }}>Сохранить шаблон</button>
                 <div style={{ height: 1, background: 'var(--glass-border)', margin: '2px 0' }} />
                 <button onClick={() => { setShowMenu(false); const np = newProject(); saveProject(proj); loadProj(np); setSelSlot(null); setMultiSel(new Set()) }}>Новый проект</button>
@@ -249,6 +248,10 @@ export function App() {
               else { setPalItem(ERASER_ID); setPalPreset(null) }
             }}
             onDeselect={() => { setSelSlot(null); setMultiSel(new Set()) }}
+            onRenameMenu={(pid, name) => {
+              if (pid !== proj.id) switchToProject(pid)
+              setName(name)
+            }}
           />
         ) : <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--tx3)' }}>Загрузка...</div>},
         { id: 'editor', title: 'Редактор', content: (
