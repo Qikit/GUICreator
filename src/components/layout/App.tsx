@@ -18,12 +18,12 @@ import { ExportModal, GradientModal, ColorPickerModal, TemplateModal, ProjectMod
 import { CanvasView } from '@/components/canvas'
 import { DockLayout } from './DockLayout'
 import { StatusBar } from './StatusBar'
+import { GlowButton } from '@/components/ui'
 import tb from '@/styles/toolbar.module.css'
-import ss from '@/styles/shared.module.css'
 
 export function App() {
   const { present: proj, past, future, dispatch, undo, redo, setName, loadProject: loadProj } = useProjectStore()
-  const { showNums, showRP, toggleNums, toggleRP } = usePrefsStore()
+  const { showNums, showRP, toggleNums, toggleRP, animations, toggleAnimations } = usePrefsStore()
 
   const [selSlot, setSelSlot] = useState<string | null>(null)
   const [multiSel, setMultiSel] = useState<Set<string>>(new Set())
@@ -224,44 +224,43 @@ export function App() {
         </div>
         <div className={tb.sep} />
         <div className={tb.group}>
-          <button className={ss.btn} onClick={undo} disabled={!past.length} title="Ctrl+Z">↩</button>
-          <button className={ss.btn} onClick={redo} disabled={!future.length} title="Ctrl+Y">↪</button>
+          <GlowButton onClick={undo} disabled={!past.length} title="Ctrl+Z">↩</GlowButton>
+          <GlowButton onClick={redo} disabled={!future.length} title="Ctrl+Y">↪</GlowButton>
         </div>
         <div className={tb.sep} />
         <div className={tb.group}>
-          <button className={ss.btn} onClick={toggleNums} style={showNums ? { background: 'var(--ac)', color: '#0f0f11', borderColor: 'var(--ac)' } : {}} title="Номера слотов">#</button>
-          <button className={ss.btn} onClick={toggleRP} style={showRP ? { background: 'var(--ok)', color: '#0f0f11', borderColor: 'var(--ok)' } : { opacity: .5 }} title="Ресурспак">RP</button>
-          <button className={`${ss.btn} ${ss.btnDanger}`} onClick={() => { if (confirm('Очистить всё?')) { dispatch({ type: 'CA' }); setSelSlot(null); setMultiSel(new Set()) } }}>Очистить</button>
+          <GlowButton onClick={toggleNums} variant={showNums ? 'primary' : 'ghost'} title="Номера слотов">#</GlowButton>
+          <GlowButton onClick={toggleRP} variant={showRP ? 'primary' : 'ghost'} title="Ресурспак">RP</GlowButton>
+          <GlowButton onClick={toggleAnimations} variant={animations ? 'primary' : 'ghost'} title="Анимации">✦</GlowButton>
+          <GlowButton variant="danger" onClick={() => { if (confirm('Очистить всё?')) { dispatch({ type: 'CA' }); setSelSlot(null); setMultiSel(new Set()) } }}>Очистить</GlowButton>
         </div>
         <div className={tb.spacer} />
         <div className={tb.group}>
-          <button className={ss.btn} onClick={() => setShowGrad(true)} style={{ borderImage: 'linear-gradient(90deg,var(--ac),#22d3ee) 1', borderWidth: 1, borderStyle: 'solid' }}>Градиент</button>
-          <button className={ss.btn} onClick={() => setShowColorPicker(true)}>
-            <span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 2, background: 'linear-gradient(135deg,#ff0000,#00ff00,#0000ff)', marginRight: 3 }} />Цвета
-          </button>
-          <button className={`${ss.btn} ${ss.btnPrimary}`} onClick={() => setShowExport(true)}>Экспорт</button>
+          <GlowButton onClick={() => setShowGrad(true)}>Градиент</GlowButton>
+          <GlowButton onClick={() => setShowColorPicker(true)}>Цвета</GlowButton>
+          <GlowButton variant="primary" onClick={() => setShowExport(true)}>Экспорт</GlowButton>
           <div className={tb.sep} />
           {mode === 'editor' ? (
-            <button className={ss.btn} onClick={() => { const wl = loadWorkspaceList(); if (wl.length) { const ws = loadWorkspace(wl[wl.length - 1]); if (ws) { openCanvas(ws); return } }; const ws = newWorkspace(); saveWorkspace(ws); openCanvas(ws) }} style={{ borderColor: 'var(--ac)' }}>Canvas</button>
+            <GlowButton onClick={() => { const wl = loadWorkspaceList(); if (wl.length) { const ws = loadWorkspace(wl[wl.length - 1]); if (ws) { openCanvas(ws); return } }; const ws = newWorkspace(); saveWorkspace(ws); openCanvas(ws) }}>Canvas</GlowButton>
           ) : (
-            <button className={ss.btn} onClick={() => setMode('editor')} style={{ borderColor: 'var(--ac)' }}>← Редактор</button>
+            <GlowButton onClick={() => setMode('editor')}>← Редактор</GlowButton>
           )}
           <div className={tb.burger} ref={menuRef}>
-            <button className={ss.btn} onClick={() => setShowMenu(!showMenu)}>☰</button>
+            <GlowButton onClick={() => setShowMenu(!showMenu)}>☰</GlowButton>
             {showMenu && (
               <div className={tb.burgerDd}>
-                <button className={ss.btn} onClick={() => { setShowMenu(false); setShowTpls(true) }}>Шаблоны</button>
-                <button className={ss.btn} onClick={() => { setShowMenu(false); if (!palItem || palItem === ERASER_ID) { alert('Сначала выберите предмет'); return }; dispatch({ type: 'FE', data: makeSlot(palItem, palPreset) }) }}>Залить пустые</button>
-                <button className={ss.btn} onClick={() => { setShowMenu(false); const name = prompt('Название шаблона:', proj.name); if (!name) return; const desc = prompt('Описание:', ''); saveTpl({ name, desc: desc || '', rows: proj.rows, slots: JSON.parse(JSON.stringify(proj.slots)) }) }}>Сохранить шаблон</button>
-                <div style={{ height: 1, background: 'var(--bd)', margin: '2px 0' }} />
-                <button className={ss.btn} onClick={() => { setShowMenu(false); const np = newProject(); saveProject(proj); loadProj(np); setSelSlot(null); setMultiSel(new Set()) }}>Новый проект</button>
-                <button className={ss.btn} onClick={() => { setShowMenu(false); setShowProjs(true) }}>Открыть проект</button>
-                <div style={{ height: 1, background: 'var(--bd)', margin: '2px 0' }} />
-                <button className={ss.btn} onClick={() => { setShowMenu(false); const all = loadProjectList().map(id => loadProject(id)).filter(Boolean); const d = { projects: all, templates: uTpls }; const blob = new Blob([JSON.stringify(d, null, 2)], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'mc-menu-backup.json'; a.click(); URL.revokeObjectURL(url) }}>Бэкап</button>
-                <button className={ss.btn} onClick={() => { setShowMenu(false); const inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.json'; inp.onchange = (ev: Event) => { const f = (ev.target as HTMLInputElement).files?.[0]; if (!f) return; const reader = new FileReader(); reader.onload = (re) => { try { const d = JSON.parse(re.target?.result as string); if (d.projects) { for (const p of d.projects) saveProject(p); const last = d.projects[d.projects.length - 1]; if (last) { loadProj(last); setSelSlot(null); setMultiSel(new Set()) } } } catch (err) { alert('Ошибка: ' + (err as Error).message) } }; reader.readAsText(f) }; inp.click() }}>Импорт</button>
-                <div style={{ height: 1, background: 'var(--bd)', margin: '2px 0' }} />
-                <button className={ss.btn} onClick={() => { setShowMenu(false); const ws = newWorkspace(); saveWorkspace(ws); openCanvas(ws) }}>Новый workspace</button>
-                {loadWorkspaceList().map(id => { const ws = loadWorkspace(id); return ws ? <button key={id} className={ss.btn} onClick={() => { setShowMenu(false); openCanvas(ws) }}>{'\uD83D\uDDFA ' + ws.name}</button> : null })}
+                <button onClick={() => { setShowMenu(false); setShowTpls(true) }}>Шаблоны</button>
+                <button onClick={() => { setShowMenu(false); if (!palItem || palItem === ERASER_ID) { alert('Сначала выберите предмет'); return }; dispatch({ type: 'FE', data: makeSlot(palItem, palPreset) }) }}>Залить пустые</button>
+                <button onClick={() => { setShowMenu(false); const name = prompt('Название шаблона:', proj.name); if (!name) return; const desc = prompt('Описание:', ''); saveTpl({ name, desc: desc || '', rows: proj.rows, slots: JSON.parse(JSON.stringify(proj.slots)) }) }}>Сохранить шаблон</button>
+                <div style={{ height: 1, background: 'var(--glass-border)', margin: '2px 0' }} />
+                <button onClick={() => { setShowMenu(false); const np = newProject(); saveProject(proj); loadProj(np); setSelSlot(null); setMultiSel(new Set()) }}>Новый проект</button>
+                <button onClick={() => { setShowMenu(false); setShowProjs(true) }}>Открыть проект</button>
+                <div style={{ height: 1, background: 'var(--glass-border)', margin: '2px 0' }} />
+                <button onClick={() => { setShowMenu(false); const all = loadProjectList().map(id => loadProject(id)).filter(Boolean); const d = { projects: all, templates: uTpls }; const blob = new Blob([JSON.stringify(d, null, 2)], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'mc-menu-backup.json'; a.click(); URL.revokeObjectURL(url) }}>Бэкап</button>
+                <button onClick={() => { setShowMenu(false); const inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.json'; inp.onchange = (ev: Event) => { const f = (ev.target as HTMLInputElement).files?.[0]; if (!f) return; const reader = new FileReader(); reader.onload = (re) => { try { const d = JSON.parse(re.target?.result as string); if (d.projects) { for (const p of d.projects) saveProject(p); const last = d.projects[d.projects.length - 1]; if (last) { loadProj(last); setSelSlot(null); setMultiSel(new Set()) } } } catch (err) { alert('Ошибка: ' + (err as Error).message) } }; reader.readAsText(f) }; inp.click() }}>Импорт</button>
+                <div style={{ height: 1, background: 'var(--glass-border)', margin: '2px 0' }} />
+                <button onClick={() => { setShowMenu(false); const ws = newWorkspace(); saveWorkspace(ws); openCanvas(ws) }}>Новый workspace</button>
+                {loadWorkspaceList().map(id => { const ws = loadWorkspace(id); return ws ? <button key={id} onClick={() => { setShowMenu(false); openCanvas(ws) }}>{'\uD83D\uDDFA ' + ws.name}</button> : null })}
               </div>
             )}
           </div>
