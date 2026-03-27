@@ -1,12 +1,23 @@
-.gridArea { flex: 1; display: flex; align-items: center; justify-content: center; overflow: auto; padding: 16px; position: relative; }
+.gridArea { flex: 1; display: flex; align-items: center; justify-content: center; overflow: auto; padding: var(--sp-xl); position: relative; }
+.gridWrap {
+  background: var(--glass-panel);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  padding: var(--sp-lg);
+  box-shadow: 0 0 40px rgba(139,92,246,0.05);
+}
+
 .invFrame { background: #C6C6C6; padding: 7px; border: 3px solid; border-color: #FFF #555 #555 #FFF; box-shadow: 0 4px 20px rgba(0,0,0,.5); }
 .invTitle { text-align: left; padding: 2px 0 5px 7px; font-family: 'Minecraft', 'Courier New', monospace; font-size: 13px; color: #3F3F3F; font-weight: bold; }
 .invGrid { display: grid; grid-template-columns: repeat(9, 48px); gap: 2px; }
 
 .slot { width: 48px; height: 48px; position: relative; background: #8B8B8B; border: 2px solid; border-color: #373737 #FFF #FFF #373737; cursor: pointer; display: flex; align-items: center; justify-content: center; user-select: none; }
 .slot:hover .slotHover { opacity: 1; }
-.slotSelected { outline: 2px solid #4A9EFF; outline-offset: -1px; z-index: 2; }
-.slotMulti { outline: 2px solid #4AFF9E; outline-offset: -1px; z-index: 2; }
+
+.slotSelected { outline: 2px solid var(--accent); outline-offset: -1px; z-index: 2; box-shadow: 0 0 0 2px var(--accent), var(--accent-glow); }
+.slotMulti { outline: 2px solid var(--ok); outline-offset: -1px; z-index: 2; box-shadow: 0 0 12px rgba(74,222,128,0.2); }
 .slotDrop { outline: 2px solid #55FF55; outline-offset: -1px; z-index: 2; }
 .slot[draggable=true] { cursor: grab; }
 .slot[draggable=true]:active { cursor: grabbing; }
@@ -19,4 +30,19 @@
 .slotEnchant { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 3; }
 .slotEnchant::after { content: ''; position: absolute; inset: -50%; background: linear-gradient(120deg, transparent 30%, rgba(128,0,255,.2) 50%, transparent 70%); animation: shimmer 2s infinite linear; }
 @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
-.selBanner { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); background: var(--ac); color: #fff; padding: 5px 14px; border-radius: 5px; font-size: 11px; font-weight: 500; z-index: 50; box-shadow: 0 4px 14px rgba(0,0,0,.4); }
+
+.selBanner {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+  color: #fff;
+  padding: 6px 16px;
+  border-radius: var(--radius-md);
+  font-size: 11px;
+  font-weight: 500;
+  z-index: 50;
+  box-shadow: var(--accent-glow), 0 4px 14px rgba(0,0,0,.4);
+  backdrop-filter: blur(8px);
+}
