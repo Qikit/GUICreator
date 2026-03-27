@@ -99,6 +99,7 @@ export function DockLayout({ panels }: Props) {
               onDragEnd={handleDragEnd}
               isDropTarget={dropTarget === panelId}
               width={width}
+              isResizing={!!resizing}
             >
               {panel.content}
             </DockPanel>

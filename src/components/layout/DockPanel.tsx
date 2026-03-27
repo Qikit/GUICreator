@@ -14,11 +14,12 @@ interface Props {
   isDropTarget?: boolean
   children: ReactNode
   width?: number | string
+  isResizing?: boolean
 }
 
 export function DockPanel({
   id, title, position, collapsed, onCollapse, onDragStart, onDragOver, onDragEnd,
-  isDropTarget, children, width,
+  isDropTarget, children, width, isResizing,
 }: Props) {
   const posClass = position === 'left' ? s.panelLeft : position === 'right' ? s.panelRight : s.panelCenter
 
@@ -40,7 +41,7 @@ export function DockPanel({
 
   return (
     <GlassPanel
-      className={`${s.panel} ${posClass}`}
+      className={`${s.panel} ${posClass} ${!isResizing ? s.panelAnimated : ''}`}
       style={style}
     >
       <div
