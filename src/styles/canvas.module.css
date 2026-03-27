@@ -200,3 +200,45 @@
   z-index: 2;
   box-shadow: 0 0 6px rgba(139,92,246,0.4);
 }
+.mmMultiSel .mmMain {
+  border-color: #4ade80 !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,.4), 0 0 16px rgba(74,222,128,0.2);
+}
+.mmSizeBadge {
+  font-size: 9px;
+  color: var(--tx3);
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 3px;
+  transition: all 150ms;
+}
+.mmSizeBadge:hover { background: var(--glass-hover); color: var(--tx1); }
+.mmSizeMenu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  background: rgba(15, 7, 32, 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  padding: 2px;
+  min-width: 140px;
+  z-index: 100;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+}
+.mmSizeOption {
+  display: block;
+  width: 100%;
+  padding: 4px 8px;
+  border: none;
+  border-radius: 3px;
+  background: none;
+  color: var(--tx1);
+  font-size: 11px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 150ms;
+}
+.mmSizeOption:hover { background: var(--glass-hover); }
+.mmSizeOptionActive { color: var(--accent); }
