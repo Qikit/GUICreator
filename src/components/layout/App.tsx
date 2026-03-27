@@ -16,7 +16,8 @@ import { ExportModal, GradientModal, ColorPickerModal, TemplateModal, ProjectMod
 import { CanvasView } from '@/components/canvas'
 import { DockLayout } from './DockLayout'
 import { StatusBar } from './StatusBar'
-import { GlowButton } from '@/components/ui'
+import { GlowButton, GlassModal, glassModalStyles } from '@/components/ui'
+import { parseFunMenu, parseAbstractMenus } from '@/utils/importMenu'
 import { AmbientBackground } from './AmbientBackground'
 import tb from '@/styles/toolbar.module.css'
 
@@ -39,6 +40,7 @@ export function App() {
   const [recent, setRecent] = useState<string[]>([])
   const [clipboard, setClipboard] = useState<{ multi: boolean; data: Record<string, SlotData> | SlotData; keys?: string[] } | null>(null)
   const [showMenu, setShowMenu] = useState(false)
+  const [showWorkspaces, setShowWorkspaces] = useState(false)
   const [uTpls, setUTpls] = useState<unknown[]>([])
   const saveTpl = (t: unknown) => { const upd = [...uTpls, t]; setUTpls(upd); saveUserTemplates(upd) }
   const [activeWS, setActiveWS] = useState<Workspace | null>(null)
@@ -210,9 +212,10 @@ export function App() {
                 <div style={{ height: 1, background: 'var(--glass-border)', margin: '2px 0' }} />
                 <button onClick={() => { setShowMenu(false); const all = loadProjectList().map(id => loadProject(id)).filter(Boolean); const d = { projects: all, templates: uTpls }; const blob = new Blob([JSON.stringify(d, null, 2)], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'mc-menu-backup.json'; a.click(); URL.revokeObjectURL(url) }}>Бэкап</button>
                 <button onClick={() => { setShowMenu(false); const inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.json'; inp.onchange = (ev: Event) => { const f = (ev.target as HTMLInputElement).files?.[0]; if (!f) return; const reader = new FileReader(); reader.onload = (re) => { try { const d = JSON.parse(re.target?.result as string); if (d.projects) { for (const p of d.projects) saveProject(p); const last = d.projects[d.projects.length - 1]; if (last) { loadProj(last); setSelSlot(null); setMultiSel(new Set()) } } } catch (err) { alert('Ошибка: ' + (err as Error).message) } }; reader.readAsText(f) }; inp.click() }}>Импорт</button>
+                <button onClick={() => { setShowMenu(false); const text = prompt('Вставьте код FunMenu (Kotlin) или конфиг AbstractMenus (YAML):'); if (!text) return; const fm = parseFunMenu(text); const am = fm || parseAbstractMenus(text); if (!am) { alert('Не удалось распарсить. Поддерживается FunMenu (Kotlin) и AbstractMenus (YAML).'); return }; const np = newProject(am.name, am.rows); np.slots = am.slots; saveProject(np); loadProj(np); setSelSlot(null); setMultiSel(new Set()) }}>Импорт FunMenu / AM</button>
                 <div style={{ height: 1, background: 'var(--glass-border)', margin: '2px 0' }} />
                 <button onClick={() => { setShowMenu(false); const ws = newWorkspace(); saveWorkspace(ws); setActiveWS(ws); refreshCache(ws) }}>Новый workspace</button>
-                {loadWorkspaceList().map(id => { const ws = loadWorkspace(id); return ws ? <button key={id} onClick={() => { setShowMenu(false); setActiveWS(ws); refreshCache(ws) }}>{'\uD83D\uDDFA ' + ws.name}</button> : null })}
+                {loadWorkspaceList().length > 1 && <button onClick={() => { setShowMenu(false); setShowWorkspaces(true) }}>Workspaces</button>}
               </div>
             )}
           </div>
@@ -235,6 +238,8 @@ export function App() {
             onPlaceItem={handlePlaceItem}
             onRemoveItem={handleRemoveItem}
             showNums={showNums}
+            onActivateMenu={switchToProject}
+            onBrushPick={id => { setPalItem(id); setPalPreset(null) }}
           />
         ) : <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--tx3)' }}>Загрузка...</div>},
         { id: 'editor', title: 'Редактор', content: (
@@ -251,6 +256,28 @@ export function App() {
       {showTpls && <TemplateModal builtIn={BUILT_TPLS as never} userTemplates={[]} onApply={(t: any) => { const np = newProject(t.name || proj.name, t.rows); np.slots = JSON.parse(JSON.stringify(t.slots || {})); loadProj(np); setSelSlot(null); setMultiSel(new Set()); setShowTpls(false) }} onDeleteUser={() => {}} onClose={() => setShowTpls(false)} />}
       {showProjs && <ProjectModal list={loadProjectList()} onOpen={p => { loadProj(p); setSelSlot(null); setMultiSel(new Set()); setShowProjs(false) }} onDelete={id => { deleteProject(id); setShowProjs(false) }} onClose={() => setShowProjs(false)} />}
       {ctxMenu && <CtxMenu x={ctxMenu.x} y={ctxMenu.y} items={ctxMenu.items} onClose={() => setCtxMenu(null)} />}
+      {showWorkspaces && (
+        <GlassModal onClose={() => setShowWorkspaces(false)} title="Workspaces">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 12 }}>
+            {loadWorkspaceList().map(id => {
+              const ws = loadWorkspace(id); if (!ws) return null
+              return (
+                <div key={id} onClick={() => { setActiveWS(ws); refreshCache(ws); setShowWorkspaces(false) }}
+                  style={{ padding: 12, background: id === activeWS?.id ? 'var(--accent-subtle)' : 'var(--glass-surface)', border: `1px solid ${id === activeWS?.id ? 'var(--accent)' : 'var(--glass-border)'}`, borderRadius: 'var(--radius-md)', cursor: 'pointer', transition: 'all 150ms' }}
+                  onMouseEnter={e => (e.currentTarget.style.background = id === activeWS?.id ? 'var(--accent-subtle)' : 'var(--glass-hover)')}
+                  onMouseLeave={e => (e.currentTarget.style.background = id === activeWS?.id ? 'var(--accent-subtle)' : 'var(--glass-surface)')}>
+                  <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 4 }}>{ws.name}</div>
+                  <div style={{ fontSize: 11, color: 'var(--tx3)' }}>{ws.menus.length} меню · {ws.connections.length} связей</div>
+                </div>
+              )
+            })}
+          </div>
+          <div className={glassModalStyles.actions} style={{ marginTop: 16 }}>
+            <GlowButton onClick={() => { const ws = newWorkspace(); saveWorkspace(ws); setActiveWS(ws); refreshCache(ws); setShowWorkspaces(false) }}>+ Новый</GlowButton>
+            <GlowButton onClick={() => setShowWorkspaces(false)}>Закрыть</GlowButton>
+          </div>
+        </GlassModal>
+      )}
     </div>
   )
 }
