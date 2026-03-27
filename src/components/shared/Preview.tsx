@@ -7,13 +7,14 @@ interface Props {
   name: TextSegment[]
   lore: TextSegment[][]
   itemId: string
+  showIcon?: boolean
 }
 
-export function Preview({ name, lore, itemId }: Props) {
+export function Preview({ name, lore, itemId, showIcon = true }: Props) {
   return (
     <div className={s.prevBox}>
       <div style={{ display: 'flex', gap: 6, alignItems: 'flex-start' }}>
-        <ItemTexture itemId={itemId} size={32} />
+        {showIcon && <ItemTexture itemId={itemId} size={32} />}
         <div>
           <div className={s.prevLine}><McText segs={name} /></div>
           {lore.map((line, i) => (

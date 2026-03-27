@@ -12,7 +12,7 @@ interface Props {
 export function HoverTooltip({ data, x, y }: Props) {
   return createPortal(
     <div className={s.hoverTT} style={{ left: x + 14, top: y - 8 }}>
-      <Preview name={data.displayName} lore={data.lore} itemId={data.itemId} />
+      <Preview name={data.displayName} lore={data.lore} itemId={data.itemId} showIcon={false} />
     </div>,
     document.body,
   )
