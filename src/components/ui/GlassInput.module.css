@@ -1,0 +1,40 @@
+.wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.input {
+  width: 100%;
+  background: var(--glass-surface);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  color: var(--tx1);
+  font-size: 12px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+.input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 12px rgba(139,92,246,0.15);
+}
+.input::placeholder { color: var(--tx3); }
+.hasPrefix { padding-left: 32px; }
+.hasSuffix { padding-right: 32px; }
+.prefix, .suffix {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--tx3);
+  pointer-events: none;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+}
+.prefix { left: 10px; }
+.suffix { right: 10px; }
+.textarea {
+  resize: vertical;
+  min-height: 60px;
+}
