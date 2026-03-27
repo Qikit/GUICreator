@@ -4,6 +4,8 @@
   position: relative;
   background: #080412;
   cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
 }
 .canvasWrap::before {
   content: '';

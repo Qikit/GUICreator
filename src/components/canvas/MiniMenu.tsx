@@ -1,6 +1,8 @@
 import type { Project } from '@/types'
 import type { SlotData } from '@/types'
 import { ItemTexture } from '@/components/shared'
+import { McText } from '@/components/shared'
+import { parseMM } from '@/utils/minimessage'
 import s from '@/styles/canvas.module.css'
 
 interface ConnectingFrom { menuId: string; slot: string }
@@ -8,30 +10,39 @@ interface ConnectingFrom { menuId: string; slot: string }
 interface Props {
   project: Project
   x: number; y: number
+  zoom: number
   onDrag: (nx: number, ny: number) => void
   onSlotClick: (menuId: string, slot: string) => void
   onSlotRightClick?: (menuId: string, slot: string, x: number, y: number) => void
+  onSlotMouseDown?: (menuId: string, slot: string, e: React.MouseEvent) => void
   connectingFrom: ConnectingFrom | null
   onCtxMenu?: (cx: number, cy: number) => void
   isActive?: boolean
   selectedSlot?: string | null
   showNums?: boolean
   onSlotHover?: (data: SlotData | null, x: number, y: number) => void
+  onActivate?: (menuId: string) => void
 }
 
-export function MiniMenu({ project, x, y, onDrag, onSlotClick, onSlotRightClick, connectingFrom, onCtxMenu, isActive, selectedSlot, showNums, onSlotHover }: Props) {
+export function MiniMenu({ project, x, y, zoom, onDrag, onSlotClick, onSlotRightClick, onSlotMouseDown, connectingFrom, onCtxMenu, isActive, selectedSlot, showNums, onSlotHover, onActivate }: Props) {
   const startDrag = (e: React.MouseEvent) => {
     if (e.button !== 0) return; e.stopPropagation()
-    const sx = e.clientX - x, sy = e.clientY - y
-    const mv = (ev: MouseEvent) => onDrag(ev.clientX - sx, ev.clientY - sy)
+    const startMouseX = e.clientX, startMouseY = e.clientY
+    const startX = x, startY = y
+    const mv = (ev: MouseEvent) => {
+      const dx = (ev.clientX - startMouseX) / zoom
+      const dy = (ev.clientY - startMouseY) / zoom
+      onDrag(startX + dx, startY + dy)
+    }
     const up = () => { window.removeEventListener('mousemove', mv); window.removeEventListener('mouseup', up) }
     window.addEventListener('mousemove', mv); window.addEventListener('mouseup', up)
   }
 
   return (
-    <div className={`${s.miniMenu} ${isActive ? s.mmActive : ''}`} style={{ left: x, top: y }}>
+    <div className={`${s.miniMenu} ${isActive ? s.mmActive : ''}`} style={{ left: x, top: y }}
+      onMouseDown={e => { e.stopPropagation(); onActivate?.(project.id) }}>
       <div className={s.mmHeader} onMouseDown={startDrag} onContextMenu={e => { e.preventDefault(); e.stopPropagation(); onCtxMenu?.(e.clientX, e.clientY) }}>
-        <span>{project.name}</span>
+        <span><McText segs={parseMM(project.name)} /></span>
         <span style={{ fontSize: 9, color: 'var(--tx3)' }}>{project.rows}x9</span>
       </div>
       <div className={s.mmBody}>
@@ -44,6 +55,7 @@ export function MiniMenu({ project, x, y, onDrag, onSlotClick, onSlotRightClick,
               return (
                 <div key={k} className={`${s.mmSlot} ${isSrc ? s.mmSlotConn : ''} ${isSel ? s.mmSlotSel : ''}`}
                   onClick={e => { e.stopPropagation(); onSlotClick(project.id, k) }}
+                  onMouseDown={e => { onSlotMouseDown?.(project.id, k, e) }}
                   onContextMenu={e => { e.preventDefault(); e.stopPropagation(); onSlotRightClick?.(project.id, k, e.clientX, e.clientY) }}
                   onMouseEnter={e => { if (d) onSlotHover?.(d, e.clientX, e.clientY) }}
                   onMouseLeave={() => onSlotHover?.(null, 0, 0)}>
