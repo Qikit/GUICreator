@@ -62,6 +62,11 @@
 }
 .burgerDd button:hover { background: var(--glass-hover); }
 
+.toolbar [data-tip]::after {
+  bottom: auto;
+  top: calc(100% + 6px);
+}
+
 .statusBar {
   display: flex;
   align-items: center;

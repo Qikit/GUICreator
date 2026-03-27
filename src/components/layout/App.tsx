@@ -178,14 +178,14 @@ export function App() {
         </div>
         <div className={tb.sep} />
         <div className={tb.group}>
-          <GlowButton onClick={undo} disabled={!past.length} title="Ctrl+Z">↩</GlowButton>
-          <GlowButton onClick={redo} disabled={!future.length} title="Ctrl+Y">↪</GlowButton>
+          <GlowButton onClick={undo} disabled={!past.length} data-tip="Отменить (Ctrl+Z)">↩</GlowButton>
+          <GlowButton onClick={redo} disabled={!future.length} data-tip="Повторить (Ctrl+Y)">↪</GlowButton>
         </div>
         <div className={tb.sep} />
         <div className={tb.group}>
-          <GlowButton onClick={toggleNums} variant={showNums ? 'primary' : 'ghost'} title="Номера слотов">#</GlowButton>
-          <GlowButton onClick={toggleRP} variant={showRP ? 'primary' : 'ghost'} title="Ресурспак">RP</GlowButton>
-          <GlowButton onClick={toggleAnimations} variant={animations ? 'primary' : 'ghost'} title="Анимации">✦</GlowButton>
+          <GlowButton onClick={toggleNums} variant={showNums ? 'primary' : 'ghost'} data-tip="Номера слотов">#</GlowButton>
+          <GlowButton onClick={toggleRP} variant={showRP ? 'primary' : 'ghost'} data-tip="Ресурспак">RP</GlowButton>
+          <GlowButton onClick={toggleAnimations} variant={animations ? 'primary' : 'ghost'} data-tip="Анимации">✦</GlowButton>
         </div>
         <div className={tb.spacer} />
         <div className={tb.group}>

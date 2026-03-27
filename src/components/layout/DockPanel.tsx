@@ -60,7 +60,7 @@ export function DockPanel({
         </div>
         {title}
         {position !== 'center' && onCollapse && (
-          <button className={s.collapseBtn} onClick={onCollapse} title="Свернуть">
+          <button className={s.collapseBtn} onClick={onCollapse} data-tip="Свернуть">
             {position === 'left' ? '◂' : '▸'}
           </button>
         )}

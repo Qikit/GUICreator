@@ -61,7 +61,7 @@ export function TextEditor({ label, segs, onChange }: Props) {
         <div style={{ display: 'flex', gap: 4, alignItems: 'center', marginTop: 2 }}>
           <div className={s.mmHelp}>{'<color> <bold> <italic> <gradient:#HEX1:#HEX2>'}</div>
           <div style={{ marginLeft: 'auto' }}>
-            <button ref={symBtnRef} className={s.addBtn} onClick={() => setShowSymbols(!showSymbols)}>⚝</button>
+            <button ref={symBtnRef} className={s.addBtn} data-tip="Символы" onClick={() => setShowSymbols(!showSymbols)}>⚝</button>
             {showSymbols && (() => {
               const r = symBtnRef.current?.getBoundingClientRect()
               if (!r) return null

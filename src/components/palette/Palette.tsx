@@ -103,23 +103,23 @@ export function Palette({ itemDB, selItem, onSelect, recent }: Props) {
             <button
               className={`${s.viewBtn} ${paletteView === 'grid' ? s.viewBtnActive : ''}`}
               onClick={() => setPaletteView('grid')}
-              title="Мелкие значки"
+              data-tip="Мелкие значки"
             >▦</button>
             <button
               className={`${s.viewBtn} ${paletteView === 'largeGrid' ? s.viewBtnActive : ''}`}
               onClick={() => setPaletteView('largeGrid')}
-              title="Крупные значки"
+              data-tip="Крупные значки"
             >▣</button>
             <button
               className={`${s.viewBtn} ${paletteView === 'list' ? s.viewBtnActive : ''}`}
               onClick={() => setPaletteView('list')}
-              title="Список"
+              data-tip="Список"
             >☰</button>
           </div>
           <button
             className={`${s.eraserBtn} ${selItem === ERASER_ID ? s.eraserBtnSel : ''}`}
             onClick={() => onSelect(ERASER_ID)}
-            title="Ластик"
+            data-tip="Ластик"
           >🚫</button>
         </div>
       </div>
