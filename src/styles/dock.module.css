@@ -1,0 +1,118 @@
+.layout {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  gap: 1px;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: width 250ms ease;
+}
+.panelLeft, .panelRight {
+  flex-shrink: 0;
+}
+.panelCenter {
+  flex: 1;
+  min-width: 200px;
+}
+.collapsed {
+  width: 40px !important;
+  min-width: 40px !important;
+}
+.collapsed .panelContent {
+  display: none;
+}
+.collapsedIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  font-size: 11px;
+  color: var(--tx3);
+  cursor: pointer;
+  user-select: none;
+}
+.collapsedIcon:hover {
+  color: var(--tx1);
+}
+
+.dragHandle {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-xs);
+  padding: 6px 10px;
+  cursor: grab;
+  user-select: none;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--tx2);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.dragHandle:active { cursor: grabbing; }
+.grip {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  opacity: 0.3;
+  transition: opacity 150ms;
+}
+.dragHandle:hover .grip { opacity: 0.7; }
+.gripDot {
+  display: flex;
+  gap: 2px;
+}
+.gripDot::before, .gripDot::after {
+  content: '';
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--tx2);
+}
+.collapseBtn {
+  margin-left: auto;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: none;
+  color: var(--tx3);
+  cursor: pointer;
+  font-size: 10px;
+  transition: all 150ms;
+}
+.collapseBtn:hover {
+  background: var(--glass-hover);
+  color: var(--tx1);
+}
+
+.panelContent {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.dropZone {
+  position: absolute;
+  inset: 0;
+  border: 2px dashed var(--accent);
+  border-radius: var(--radius-lg);
+  background: var(--accent-subtle);
+  box-shadow: var(--accent-glow);
+  pointer-events: none;
+  z-index: 100;
+  animation: pulseGlow 1s ease infinite;
+}
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 20px rgba(139,92,246,0.2); }
+  50% { box-shadow: 0 0 30px rgba(139,92,246,0.4); }
+}
