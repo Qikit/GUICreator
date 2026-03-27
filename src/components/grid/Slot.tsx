@@ -9,7 +9,6 @@ interface Props {
   selected: boolean
   multiSel: boolean
   showNums: boolean
-  showRP: boolean
   onMouseDown: (e: React.MouseEvent) => void
   onContextMenu: (e: React.MouseEvent) => void
   onDrop?: (e: React.DragEvent) => void
@@ -19,7 +18,7 @@ interface Props {
 }
 
 export function Slot({
-  row, col, data, selected, multiSel, showNums, showRP,
+  row, col, data, selected, multiSel, showNums,
   onMouseDown, onContextMenu, onDrop, onMouseEnter, onMouseLeave, onDragEnd,
 }: Props) {
   const cls = [s.slot]
@@ -56,8 +55,6 @@ export function Slot({
             itemId={data.itemId}
             potionColor={data.potionColor}
             skullTexture={data.skullTexture}
-            rpTexture={data.rpTexture}
-            showRP={showRP}
           />
         </div>
       )}

@@ -59,7 +59,6 @@ export function Palette({ itemDB, selItem, onSelect, recent }: Props) {
                   size={20}
                   potionColor={preset?.potionColor}
                   skullTexture={preset?.skullTexture}
-                  rpTexture={preset?.rpTexture}
                 />
                 <span>{ruName(id) || (typeof it === 'string' ? id : it.name)}</span>
               </div>

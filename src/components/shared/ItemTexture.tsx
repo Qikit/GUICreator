@@ -19,20 +19,14 @@ interface Props {
   className?: string
   potionColor?: string | null
   skullTexture?: string | null
-  rpTexture?: string | null
-  showRP?: boolean
 }
 
-export function ItemTexture({ itemId, size, className, potionColor, skullTexture, rpTexture, showRP }: Props) {
+export function ItemTexture({ itemId, size, className, potionColor, skullTexture }: Props) {
   const [stage, setStage] = useState(0)
   const sz = size || '100%'
   const cls = `${s.itemTex} ${className || ''}`
 
   useEffect(() => { setStage(0) }, [itemId])
-
-  if (showRP !== false && rpTexture) {
-    return <img className={cls} src={rpTexture} style={{ width: sz, height: sz, imageRendering: 'pixelated' }} alt="" draggable={false} />
-  }
 
   if (skullTexture && itemId === 'player_head') {
     return <SkullFace url={skullTexture} size={sz} className={className} />

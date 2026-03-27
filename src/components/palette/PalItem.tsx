@@ -32,7 +32,6 @@ export function PalItem({ id, selected, preset, onSelect, size = 28 }: Props) {
         size={size}
         potionColor={preset?.potionColor}
         skullTexture={preset?.skullTexture}
-        rpTexture={preset?.rpTexture}
       />
       {hover && createPortal(
         <div className={ss.hoverTT} style={{ left: hover.x, top: hover.y }}>

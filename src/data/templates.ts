@@ -1,6 +1,6 @@
 import { defaultSegment as ds } from '@/utils/slot'
 
-const g = (id: string) => ({ itemId: id, displayName: [ds(' ')], lore: [] as never[], amount: 1, enchanted: false, customModelData: null, hideFlags: 0, potionColor: null, skullTexture: null, rpTexture: null })
+const g = (id: string) => ({ itemId: id, displayName: [ds(' ')], lore: [] as never[], amount: 1, enchanted: false, customModelData: null, hideFlags: 0, potionColor: null, skullTexture: null })
 
 export const BUILT_TPLS = [
   {

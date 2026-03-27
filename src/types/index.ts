@@ -18,7 +18,6 @@ export interface SlotData {
   hideFlags: number
   potionColor: string | null
   skullTexture: string | null
-  rpTexture: string | null
 }
 
 export interface Project {
@@ -66,7 +65,6 @@ export interface SlotPreset {
   customModelData?: number | null
   potionColor?: string | null
   skullTexture?: string | null
-  rpTexture?: string | null
 }
 
 export interface ItemCategory {

@@ -30,7 +30,7 @@ export function ItemEditor({ data, slotKey, dispatch }: Props) {
     <div className={s.editor}>
       <div className={s.body}>
         <div className={s.header}>
-          <ItemTexture itemId={data.itemId} size={32} potionColor={data.potionColor} skullTexture={data.skullTexture} rpTexture={data.rpTexture} />
+          <ItemTexture itemId={data.itemId} size={32} potionColor={data.potionColor} skullTexture={data.skullTexture} />
           <div style={{ flex: 1 }}><div className={s.itemId}>{data.itemId}</div></div>
           <button onClick={() => setShowColorPicker(true)} data-tip="Цвета"
             style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-sm)', background: 'none', color: 'var(--tx2)', cursor: 'pointer' }}>

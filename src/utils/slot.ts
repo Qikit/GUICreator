@@ -33,7 +33,6 @@ export function defSlot(id: string): SlotData {
     hideFlags: 0,
     potionColor: null,
     skullTexture: null,
-    rpTexture: null,
   }
 }
 
@@ -49,7 +48,6 @@ export function makeSlot(id: string, preset?: SlotPreset | null): SlotData {
       hideFlags: 0,
       potionColor: preset.potionColor || null,
       skullTexture: preset.skullTexture || null,
-      rpTexture: preset.rpTexture || null,
     }
   }
   return defSlot(id)

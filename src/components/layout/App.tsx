@@ -5,7 +5,7 @@ import { usePrefsStore } from '@/store/prefsStore'
 import { ITEM_DB } from '@/data/items'
 import { BUILT_TPLS } from '@/data/templates'
 import { saveProject, loadProject, loadProjectList, deleteProject, loadPrefs, savePrefs, saveWorkspace, loadWorkspace, loadWorkspaceList, newWorkspace, saveUserTemplates, deleteWorkspace } from '@/storage'
-import { loadLocale, loadFunItems, loadResourcepackIndex } from '@/loaders'
+import { loadLocale } from '@/loaders'
 import { makeSlot, newProject, ERASER_ID } from '@/utils/slot'
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { Palette } from '@/components/palette'
@@ -17,13 +17,12 @@ import { CanvasView } from '@/components/canvas'
 import { DockLayout } from './DockLayout'
 import { StatusBar } from './StatusBar'
 import { GlowButton, GlassModal, glassModalStyles } from '@/components/ui'
-import { parseFunMenu, parseAbstractMenus } from '@/utils/importMenu'
 import { AmbientBackground } from './AmbientBackground'
 import tb from '@/styles/toolbar.module.css'
 
 export function App() {
   const { present: proj, past, future, dispatch, undo, redo, setName, loadProject: loadProj } = useProjectStore()
-  const { showNums, showRP, toggleNums, toggleRP, animations, toggleAnimations } = usePrefsStore()
+  const { showNums, toggleNums, animations, toggleAnimations } = usePrefsStore()
 
   const [selSlot, setSelSlot] = useState<string | null>(null)
   const [multiSel, setMultiSel] = useState<Set<string>>(new Set())
@@ -63,9 +62,6 @@ export function App() {
   // Init loaders + auto-init workspace
   useEffect(() => {
     loadLocale().then(n => { if (n) forceRender(x => x + 1) })
-    loadResourcepackIndex().then(() => {
-      loadFunItems(ITEM_DB).then(() => forceRender(x => x + 1))
-    })
 
     const wl = loadWorkspaceList()
     let ws: Workspace | null = null
@@ -184,7 +180,6 @@ export function App() {
         <div className={tb.sep} />
         <div className={tb.group}>
           <GlowButton onClick={toggleNums} variant={showNums ? 'primary' : 'ghost'} data-tip="Номера слотов">#</GlowButton>
-          <GlowButton onClick={toggleRP} variant={showRP ? 'primary' : 'ghost'} data-tip="Ресурспак">RP</GlowButton>
           <GlowButton onClick={toggleAnimations} variant={animations ? 'primary' : 'ghost'} data-tip="Анимации">✦</GlowButton>
         </div>
         <div className={tb.spacer} />
@@ -204,7 +199,6 @@ export function App() {
                 <div style={{ height: 1, background: 'var(--glass-border)', margin: '2px 0' }} />
                 <button onClick={() => { setShowMenu(false); const all = loadProjectList().map(id => loadProject(id)).filter(Boolean); const d = { projects: all, templates: uTpls }; const blob = new Blob([JSON.stringify(d, null, 2)], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'mc-menu-backup.json'; a.click(); URL.revokeObjectURL(url) }}>Бэкап</button>
                 <button onClick={() => { setShowMenu(false); const inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.json'; inp.onchange = (ev: Event) => { const f = (ev.target as HTMLInputElement).files?.[0]; if (!f) return; const reader = new FileReader(); reader.onload = (re) => { try { const d = JSON.parse(re.target?.result as string); if (d.projects) { for (const p of d.projects) saveProject(p); const last = d.projects[d.projects.length - 1]; if (last) { loadProj(last); setSelSlot(null); setMultiSel(new Set()) } } } catch (err) { alert('Ошибка: ' + (err as Error).message) } }; reader.readAsText(f) }; inp.click() }}>Импорт</button>
-                <button onClick={() => { setShowMenu(false); const text = prompt('Вставьте код FunMenu (Kotlin) или конфиг AbstractMenus (YAML):'); if (!text) return; const fm = parseFunMenu(text); const am = fm || parseAbstractMenus(text); if (!am) { alert('Не удалось распарсить. Поддерживается FunMenu (Kotlin) и AbstractMenus (YAML).'); return }; const np = newProject(am.name, am.rows); np.slots = am.slots; saveProject(np); loadProj(np); setSelSlot(null); setMultiSel(new Set()) }}>Импорт FunMenu / AM</button>
                 <div style={{ height: 1, background: 'var(--glass-border)', margin: '2px 0' }} />
                 <button onClick={() => { setShowMenu(false); const ws = newWorkspace(); saveWorkspace(ws); setActiveWS(ws); refreshCache(ws) }}>Новый workspace</button>
                 {loadWorkspaceList().length > 1 && <button onClick={() => { setShowMenu(false); setShowWorkspaces(true) }}>Workspaces</button>}

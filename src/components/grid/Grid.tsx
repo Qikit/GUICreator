@@ -9,7 +9,6 @@ interface Props {
   selSlot: string | null
   multiSel: Set<string>
   showNums: boolean
-  showRP: boolean
   onSlotMD: (e: React.MouseEvent, key: string) => void
   onSlotCtx: (e: React.MouseEvent, key: string) => void
   onPaint: (key: string) => void
@@ -19,7 +18,7 @@ interface Props {
 }
 
 export function Grid({
-  project, selSlot, multiSel, showNums, showRP,
+  project, selSlot, multiSel, showNums,
   onSlotMD, onSlotCtx, onPaint, setHTT, dispatch, onBgClick,
 }: Props) {
   const handleDrop = (r: number, c: number, e: React.DragEvent) => {
@@ -51,7 +50,6 @@ export function Grid({
                     selected={selSlot === k}
                     multiSel={multiSel.has(k)}
                     showNums={showNums}
-                    showRP={showRP}
                     onMouseDown={e => onSlotMD(e, k)}
                     onContextMenu={e => onSlotCtx(e, k)}
                     onDrop={e => handleDrop(r, c, e)}

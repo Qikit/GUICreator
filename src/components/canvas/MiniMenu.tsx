@@ -89,7 +89,7 @@ export function MiniMenu({ project, x, y, zoom, onDrag, onSlotClick, onSlotRight
         {showNums && <span className={s.mmSlotNum}>{displayNum !== undefined ? displayNum : key}</span>}
         {d && (
           <div className={s.mmSlotContent}>
-            <ItemTexture itemId={d.itemId} potionColor={d.potionColor} skullTexture={d.skullTexture} rpTexture={d.rpTexture} />
+            <ItemTexture itemId={d.itemId} potionColor={d.potionColor} skullTexture={d.skullTexture} />
           </div>
         )}
         {d?.enchanted && <div className={s.mmSlotEnchant} />}
@@ -314,7 +314,7 @@ export function MiniMenu({ project, x, y, zoom, onDrag, onSlotClick, onSlotRight
                     onMouseEnter={e => { if (d) onSlotHover?.(d, e.clientX, e.clientY); onSlotEnter?.(project.id, sl.key) }}
                     onMouseLeave={() => onSlotHover?.(null, 0, 0)}>
                     {showNums && <span className={s.mmSlotNum}>{sl.key}</span>}
-                    {d && <div className={s.mmSlotContent}><ItemTexture itemId={d.itemId} potionColor={d.potionColor} skullTexture={d.skullTexture} rpTexture={d.rpTexture} /></div>}
+                    {d && <div className={s.mmSlotContent}><ItemTexture itemId={d.itemId} potionColor={d.potionColor} skullTexture={d.skullTexture} /></div>}
                     {d?.enchanted && <div className={s.mmSlotEnchant} />}
                     {d && d.amount > 1 && <span className={s.mmSlotAmount}>{d.amount}</span>}
                   </div>
