@@ -7,9 +7,7 @@ import { BUILT_TPLS } from '@/data/templates'
 import { saveProject, loadProject, loadProjectList, deleteProject, loadPrefs, savePrefs, saveWorkspace, loadWorkspace, loadWorkspaceList, newWorkspace, saveUserTemplates } from '@/storage'
 import { loadLocale, loadFunItems, loadResourcepackIndex } from '@/loaders'
 import { makeSlot, newProject, ERASER_ID } from '@/utils/slot'
-import { parseMM } from '@/utils/minimessage'
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
-import { Grid } from '@/components/grid'
 import { Palette } from '@/components/palette'
 import { ItemEditor } from '@/components/editor'
 import { HoverTooltip, CtxMenu } from '@/components/shared'
@@ -43,31 +41,48 @@ export function App() {
   const [showMenu, setShowMenu] = useState(false)
   const [uTpls, setUTpls] = useState<unknown[]>([])
   const saveTpl = (t: unknown) => { const upd = [...uTpls, t]; setUTpls(upd); saveUserTemplates(upd) }
-  const [mode, setMode] = useState<'editor' | 'canvas'>('editor')
   const [activeWS, setActiveWS] = useState<Workspace | null>(null)
   const [projectCache, setProjectCache] = useState<Record<string, Project>>({})
-  const refreshCache = (ws: Workspace) => { const c: Record<string, Project> = {}; for (const m of ws.menus) { const p = loadProject(m.projectId); if (p) c[m.projectId] = p }; setProjectCache(c) }
-  const openCanvas = (ws: Workspace) => { setActiveWS(ws); refreshCache(ws); setMode('canvas') }
-  const updateWS = (ws: Workspace) => { setActiveWS(ws); saveWorkspace(ws); refreshCache(ws) }
-  const editMenuFromCanvas = (pid: string) => { const p = loadProject(pid); if (p) { saveProject(proj); loadProj(p); setSelSlot(null); setMultiSel(new Set()); setMode('editor') } }
+
+  const refreshCache = useCallback((ws: Workspace) => {
+    const c: Record<string, Project> = {}
+    for (const m of ws.menus) { const p = loadProject(m.projectId); if (p) c[m.projectId] = p }
+    setProjectCache(c)
+  }, [])
+
+  const updateWS = useCallback((ws: Workspace) => { setActiveWS(ws); saveWorkspace(ws); refreshCache(ws) }, [refreshCache])
+
   const [, forceRender] = useState(0)
 
-  const lastClick = useRef<string | null>(null)
   const saveTimer = useRef<ReturnType<typeof setTimeout>>()
-  const painting = useRef(false)
-  const rmbDown = useRef(false)
-  const rmbDragged = useRef(false)
-  const rmbWasDragged = useRef(false)
-  const rmbStart = useRef<string | null>(null)
   const menuRef = useRef<HTMLDivElement>(null)
 
-  // Init loaders
+  // Init loaders + auto-init workspace
   useEffect(() => {
     loadLocale().then(n => { if (n) forceRender(x => x + 1) })
     loadResourcepackIndex().then(() => {
       loadFunItems(ITEM_DB).then(() => forceRender(x => x + 1))
     })
+
+    const wl = loadWorkspaceList()
+    let ws: Workspace | null = null
+    if (wl.length) ws = loadWorkspace(wl[wl.length - 1])
+    if (!ws) { ws = newWorkspace(); saveWorkspace(ws) }
+    setActiveWS(ws)
+    refreshCache(ws)
   }, [])
+
+  // Auto-add current project to workspace
+  useEffect(() => {
+    if (!activeWS) return
+    const alreadyInWS = activeWS.menus.find(m => m.projectId === proj.id)
+    if (!alreadyInWS) {
+      const updated = { ...activeWS, menus: [...activeWS.menus, { projectId: proj.id, x: 100 + activeWS.menus.length * 250, y: 100 }] }
+      updateWS(updated)
+    } else {
+      setProjectCache(prev => ({ ...prev, [proj.id]: proj }))
+    }
+  }, [proj.id, proj, activeWS])
 
   // Auto-save
   useEffect(() => {
@@ -91,15 +106,6 @@ export function App() {
     return () => window.removeEventListener('mousemove', h)
   }, [htt])
 
-  // Mouse up
-  useEffect(() => {
-    const h = () => { painting.current = false; rmbWasDragged.current = rmbDragged.current; rmbDown.current = false; rmbDragged.current = false; rmbStart.current = null }
-    window.addEventListener('mouseup', h)
-    return () => window.removeEventListener('mouseup', h)
-  }, [])
-
-  useEffect(() => { if (mode === 'canvas' && activeWS) { saveProject(proj); refreshCache(activeWS) } }, [mode])
-
   // Burger close
   useEffect(() => {
     if (!showMenu) return
@@ -114,100 +120,50 @@ export function App() {
     setShowExport, setShowTpls, setShowProjs, setPalItem, setPalPreset: setPalPreset as (v: unknown) => void, setCtxMenu: () => setCtxMenu(null),
   })
 
-  const onSlotMD = (e: React.MouseEvent, key: string) => {
-    if (e.button === 1) {
-      e.preventDefault()
-      const d = proj.slots[key]
-      if (d) {
-        setPalItem(d.itemId)
-        setPalPreset({ displayName: JSON.parse(JSON.stringify(d.displayName)), lore: JSON.parse(JSON.stringify(d.lore)), enchanted: d.enchanted, amount: d.amount, customModelData: d.customModelData, potionColor: d.potionColor, skullTexture: d.skullTexture, rpTexture: d.rpTexture })
-        setRecent(prev => [d.itemId, ...prev.filter(x => x !== d.itemId)].slice(0, 8))
-      } else { setPalItem(null); setPalPreset(null) }
-      return
-    }
-    if (e.button === 2) {
-      rmbDown.current = true; rmbDragged.current = false; rmbStart.current = key; lastClick.current = key
-      if (!palItem) { setMultiSel(prev => { const n = new Set(prev); n.add(key); return n }); setSelSlot(key) }
-      return
-    }
-    if (e.button !== 0) return
-    setHTT(null)
-    // Eraser
-    if (palItem === ERASER_ID) {
-      if (multiSel.size > 0) { const ks = [...multiSel]; if (!ks.includes(key)) ks.push(key); dispatch({ type: 'RM', keys: ks.filter(k => proj.slots[k]) }); setMultiSel(new Set()); setSelSlot(null) }
-      else if (proj.slots[key]) dispatch({ type: 'RS', key })
-      lastClick.current = key; return
-    }
-    // Alt+Click = brush
-    if (e.altKey && palItem && palItem !== ERASER_ID) {
-      e.preventDefault(); painting.current = true
-      dispatch({ type: 'SS', key, data: makeSlot(palItem, palPreset) })
-      setRecent(prev => [palItem, ...prev.filter(x => x !== palItem)].slice(0, 8)); return
-    }
-    if (e.altKey && palItem === ERASER_ID) {
-      e.preventDefault(); painting.current = true
-      if (proj.slots[key]) dispatch({ type: 'RS', key }); return
-    }
-    // Ctrl+Click = toggle multisel
-    if (e.ctrlKey) {
-      setMultiSel(prev => { const n = new Set(prev); if (n.has(key)) n.delete(key); else n.add(key); return n })
-      setSelSlot(key); lastClick.current = key
-      if (palItem && !multiSel.has(key)) { dispatch({ type: 'SS', key, data: makeSlot(palItem, palPreset) }); setRecent(prev => [palItem, ...prev.filter(x => x !== palItem)].slice(0, 8)) }
-      return
-    }
-    // Shift+Click = range select
-    if (e.shiftKey && lastClick.current) {
-      const [r1, c1] = lastClick.current.split('-').map(Number); const [r2, c2] = key.split('-').map(Number)
-      const n = new Set(multiSel)
-      for (let r = Math.min(r1, r2); r <= Math.max(r1, r2); r++) for (let c = Math.min(c1, c2); c <= Math.max(c1, c2); c++) n.add(`${r}-${c}`)
-      setMultiSel(n); setSelSlot(key); return
-    }
-    // Normal click
-    if (palItem) {
-      if (multiSel.size > 1) {
-        const slots: Record<string, SlotData> = {}; for (const k of multiSel) slots[k] = makeSlot(palItem, palPreset); slots[key] = makeSlot(palItem, palPreset)
-        dispatch({ type: 'SM', slots }); setRecent(prev => [palItem, ...prev.filter(x => x !== palItem)].slice(0, 8))
-        setMultiSel(new Set()); setSelSlot(key)
-      } else {
-        dispatch({ type: 'SS', key, data: makeSlot(palItem, palPreset) })
-        setRecent(prev => [palItem, ...prev.filter(x => x !== palItem)].slice(0, 8))
-        setSelSlot(key); setMultiSel(new Set())
-      }
-    } else { setSelSlot(key === selSlot ? null : key); setMultiSel(new Set()) }
-    lastClick.current = key
-  }
-
-  const onSlotCtx = (e: React.MouseEvent, key: string) => {
-    e.preventDefault()
-    if (rmbDragged.current || rmbWasDragged.current) { rmbDown.current = false; rmbDragged.current = false; rmbStart.current = null; rmbWasDragged.current = false; return }
-    rmbWasDragged.current = false; rmbDown.current = false; rmbStart.current = null
-    setHTT(null)
-    const items: CtxMenuItem[] = []
-    if (proj.slots[key]) {
-      items.push({ label: 'Редактировать', fn: () => { setSelSlot(key); setMultiSel(new Set()) } })
-      items.push({ label: 'Копировать', fn: () => setClipboard({ multi: false, data: JSON.parse(JSON.stringify(proj.slots[key])) }) })
-    }
-    if (proj.slots[key]) { items.push({ sep: true }); items.push({ label: 'Удалить', danger: true, fn: () => { dispatch({ type: 'RS', key }); if (selSlot === key) setSelSlot(null) } }) }
-    if (items.length) setCtxMenu({ x: e.clientX, y: e.clientY, items })
-  }
-
-  const onPaint = (key: string) => {
-    if (painting.current && palItem) {
-      if (palItem === ERASER_ID) { if (proj.slots[key]) dispatch({ type: 'RS', key }) }
-      else dispatch({ type: 'SS', key, data: makeSlot(palItem, palPreset) })
-      return
-    }
-    if (rmbDown.current && key !== rmbStart.current) {
-      rmbDragged.current = true
-      if (palItem === ERASER_ID) { if (proj.slots[key]) dispatch({ type: 'RS', key }) }
-      else if (palItem) { dispatch({ type: 'SS', key, data: makeSlot(palItem, palPreset) }) }
-      else { setMultiSel(prev => { const n = new Set(prev); n.add(key); return n }); setSelSlot(key) }
-    }
-  }
-
   const handlePalSelect = (id: string, preset?: SlotPreset) => {
     if (id === palItem && !preset) { setPalItem(null); setPalPreset(null) }
     else { setPalItem(id); setPalPreset(preset || null) }
+  }
+
+  const switchToProject = (pid: string) => {
+    if (pid === proj.id) return
+    saveProject(proj)
+    const p = loadProject(pid)
+    if (p) { loadProj(p); setSelSlot(null); setMultiSel(new Set()) }
+  }
+
+  const handleSlotSelect = (pid: string, key: string) => {
+    if (pid !== proj.id) {
+      saveProject(proj)
+      const p = loadProject(pid)
+      if (p) { loadProj(p) }
+    }
+    setSelSlot(key); setMultiSel(new Set())
+  }
+
+  const handlePlaceItem = (pid: string, key: string) => {
+    if (pid !== proj.id) {
+      saveProject(proj)
+      const p = loadProject(pid)
+      if (p) { loadProj(p) }
+    }
+    if (palItem === ERASER_ID) {
+      dispatch({ type: 'RS', key })
+    } else if (palItem) {
+      dispatch({ type: 'SS', key, data: makeSlot(palItem, palPreset) })
+      setRecent(prev => [palItem!, ...prev.filter(x => x !== palItem)].slice(0, 8))
+    }
+    setSelSlot(key); setMultiSel(new Set())
+  }
+
+  const handleRemoveItem = (pid: string, key: string) => {
+    if (pid !== proj.id) {
+      saveProject(proj)
+      const p = loadProject(pid)
+      if (p) { loadProj(p) }
+    }
+    dispatch({ type: 'RS', key })
+    if (selSlot === key) setSelSlot(null)
   }
 
   return (
@@ -241,12 +197,6 @@ export function App() {
           <GlowButton onClick={() => setShowGrad(true)}>Градиент</GlowButton>
           <GlowButton onClick={() => setShowColorPicker(true)}>Цвета</GlowButton>
           <GlowButton variant="primary" onClick={() => setShowExport(true)}>Экспорт</GlowButton>
-          <div className={tb.sep} />
-          {mode === 'editor' ? (
-            <GlowButton onClick={() => { const wl = loadWorkspaceList(); if (wl.length) { const ws = loadWorkspace(wl[wl.length - 1]); if (ws) { openCanvas(ws); return } }; const ws = newWorkspace(); saveWorkspace(ws); openCanvas(ws) }}>Canvas</GlowButton>
-          ) : (
-            <GlowButton onClick={() => setMode('editor')}>← Редактор</GlowButton>
-          )}
           <div className={tb.burger} ref={menuRef}>
             <GlowButton onClick={() => setShowMenu(!showMenu)}>☰</GlowButton>
             {showMenu && (
@@ -261,37 +211,37 @@ export function App() {
                 <button onClick={() => { setShowMenu(false); const all = loadProjectList().map(id => loadProject(id)).filter(Boolean); const d = { projects: all, templates: uTpls }; const blob = new Blob([JSON.stringify(d, null, 2)], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'mc-menu-backup.json'; a.click(); URL.revokeObjectURL(url) }}>Бэкап</button>
                 <button onClick={() => { setShowMenu(false); const inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.json'; inp.onchange = (ev: Event) => { const f = (ev.target as HTMLInputElement).files?.[0]; if (!f) return; const reader = new FileReader(); reader.onload = (re) => { try { const d = JSON.parse(re.target?.result as string); if (d.projects) { for (const p of d.projects) saveProject(p); const last = d.projects[d.projects.length - 1]; if (last) { loadProj(last); setSelSlot(null); setMultiSel(new Set()) } } } catch (err) { alert('Ошибка: ' + (err as Error).message) } }; reader.readAsText(f) }; inp.click() }}>Импорт</button>
                 <div style={{ height: 1, background: 'var(--glass-border)', margin: '2px 0' }} />
-                <button onClick={() => { setShowMenu(false); const ws = newWorkspace(); saveWorkspace(ws); openCanvas(ws) }}>Новый workspace</button>
-                {loadWorkspaceList().map(id => { const ws = loadWorkspace(id); return ws ? <button key={id} onClick={() => { setShowMenu(false); openCanvas(ws) }}>{'\uD83D\uDDFA ' + ws.name}</button> : null })}
+                <button onClick={() => { setShowMenu(false); const ws = newWorkspace(); saveWorkspace(ws); setActiveWS(ws); refreshCache(ws) }}>Новый workspace</button>
+                {loadWorkspaceList().map(id => { const ws = loadWorkspace(id); return ws ? <button key={id} onClick={() => { setShowMenu(false); setActiveWS(ws); refreshCache(ws) }}>{'\uD83D\uDDFA ' + ws.name}</button> : null })}
               </div>
             )}
           </div>
         </div>
       </div>
 
-      {mode === 'editor' ? (
-        <DockLayout panels={[
-          { id: 'palette', title: 'Предметы', content: (
-            <Palette itemDB={ITEM_DB} selItem={palItem} onSelect={handlePalSelect} recent={recent} />
-          )},
-          { id: 'grid', title: proj.name, content: (
-            <Grid
-              project={proj} selSlot={selSlot} multiSel={multiSel} showNums={showNums} showRP={showRP}
-              onSlotMD={onSlotMD} onSlotCtx={onSlotCtx} onPaint={onPaint} setHTT={setHTT}
-              dispatch={dispatch as never} onBgClick={() => { setPalItem(null); setPalPreset(null); setSelSlot(null); setMultiSel(new Set()) }}
-            />
-          )},
-          { id: 'editor', title: 'Редактор', content: (
-            <ItemEditor data={selSlot ? proj.slots[selSlot] : null} slotKey={selSlot} dispatch={dispatch as never} />
-          )},
-        ]} />
-      ) : activeWS && (
-        <CanvasView workspace={activeWS} onUpdateWS={updateWS} onEditMenu={editMenuFromCanvas} projects={projectCache} />
-      )}
+      <DockLayout panels={[
+        { id: 'palette', title: 'Предметы', content: (
+          <Palette itemDB={ITEM_DB} selItem={palItem} onSelect={handlePalSelect} recent={recent} />
+        )},
+        { id: 'grid', title: 'Workspace', content: activeWS ? (
+          <CanvasView
+            workspace={activeWS}
+            onUpdateWS={updateWS}
+            projects={projectCache}
+            activeProjectId={proj.id}
+            selSlot={selSlot}
+            onSlotSelect={handleSlotSelect}
+            palItem={palItem}
+            onPlaceItem={handlePlaceItem}
+            onRemoveItem={handleRemoveItem}
+          />
+        ) : <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--tx3)' }}>Загрузка...</div>},
+        { id: 'editor', title: 'Редактор', content: (
+          <ItemEditor data={selSlot ? proj.slots[selSlot] : null} slotKey={selSlot} dispatch={dispatch as never} />
+        )},
+      ]} />
 
-      {mode === 'editor' && (
-        <StatusBar selSlot={selSlot} multiSel={multiSel} palItem={palItem} rows={proj.rows} slotCount={Object.keys(proj.slots).length} saveStatus={saveStatus} />
-      )}
+      <StatusBar selSlot={selSlot} multiSel={multiSel} palItem={palItem} rows={proj.rows} slotCount={Object.keys(proj.slots).length} saveStatus={saveStatus} />
 
       {htt && <HoverTooltip data={htt.data} x={htt.x} y={htt.y} />}
       {showExport && <ExportModal project={proj} onClose={() => setShowExport(false)} />}

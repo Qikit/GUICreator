@@ -55,3 +55,13 @@
 .connLine { stroke: var(--accent); stroke-width: 2; fill: none; marker-end: url(#arrowhead); filter: drop-shadow(0 0 4px rgba(139,92,246,0.3)); }
 .connLine:hover { stroke: #f87171; stroke-width: 3; cursor: pointer; filter: drop-shadow(0 0 6px rgba(248,113,113,0.4)); }
 .connHint { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: #fff; padding: 5px 14px; border-radius: var(--radius-md); font-size: 11px; font-weight: 600; z-index: 10; box-shadow: var(--accent-glow); }
+.mmActive {
+  border-color: var(--accent) !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,.4), 0 0 20px rgba(139,92,246,0.15);
+}
+.mmSlotSel {
+  outline: 2px solid var(--accent) !important;
+  outline-offset: -1px;
+  z-index: 2;
+  box-shadow: 0 0 6px rgba(139,92,246,0.4);
+}

@@ -14,17 +14,24 @@ interface ConnectingFrom { menuId: string; slot: string }
 interface Props {
   workspace: Workspace
   onUpdateWS: (ws: Workspace) => void
-  onEditMenu: (projectId: string) => void
   projects: Record<string, Project>
+  activeProjectId: string | null
+  selSlot: string | null
+  onSlotSelect: (projectId: string, slotKey: string) => void
+  palItem: string | null
+  onPlaceItem: (projectId: string, slotKey: string) => void
+  onRemoveItem: (projectId: string, slotKey: string) => void
 }
 
-export function CanvasView({ workspace, onUpdateWS, onEditMenu, projects }: Props) {
+export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, selSlot, onSlotSelect, palItem, onPlaceItem, onRemoveItem }: Props) {
   const [pan, setPan] = useState({ x: 0, y: 0 })
   const [zoom, setZoom] = useState(1)
+  const [connectMode, setConnectMode] = useState(false)
   const [connecting, setConnecting] = useState<ConnectingFrom | null>(null)
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
   const [grabbing, setGrabbing] = useState(false)
   const [mmCtx, setMmCtx] = useState<{ x: number; y: number; idx: number } | null>(null)
+  const [slotCtx, setSlotCtx] = useState<{ x: number; y: number; menuId: string; slotKey: string } | null>(null)
   const surfRef = useRef<HTMLDivElement>(null)
 
   const onBgDown = (e: React.MouseEvent) => {
@@ -53,12 +60,23 @@ export function CanvasView({ workspace, onUpdateWS, onEditMenu, projects }: Prop
   }
 
   const onSlotClick = (menuId: string, slot: string) => {
-    if (!connecting) { setConnecting({ menuId, slot }) }
-    else {
-      if (connecting.menuId === menuId) return
-      onUpdateWS({ ...workspace, connections: [...workspace.connections, { id: gid(), fromMenu: connecting.menuId, fromSlot: connecting.slot, toMenu: menuId }] })
-      setConnecting(null)
+    if (connectMode) {
+      if (!connecting) { setConnecting({ menuId, slot }) }
+      else {
+        if (connecting.menuId === menuId) return
+        onUpdateWS({ ...workspace, connections: [...workspace.connections, { id: gid(), fromMenu: connecting.menuId, fromSlot: connecting.slot, toMenu: menuId }] })
+        setConnecting(null)
+      }
+    } else if (palItem) {
+      onPlaceItem(menuId, slot)
+    } else {
+      onSlotSelect(menuId, slot)
     }
+  }
+
+  const onSlotRightClick = (menuId: string, slotKey: string, cx: number, cy: number) => {
+    onSlotSelect(menuId, slotKey)
+    setSlotCtx({ x: (cx - pan.x) / zoom, y: (cy - pan.y) / zoom, menuId, slotKey })
   }
 
   const delConn = (id: string) => onUpdateWS({ ...workspace, connections: workspace.connections.filter(c => c.id !== id) })
@@ -90,10 +108,15 @@ export function CanvasView({ workspace, onUpdateWS, onEditMenu, projects }: Prop
     return { x: mm.x + (3 + 9 * 21) / 2, y: mm.y }
   }
 
+  const toggleConnectMode = () => {
+    setConnectMode(v => !v)
+    setConnecting(null)
+  }
+
   return (
     <div className={`${s.canvasWrap} ${grabbing ? s.grabbing : ''}`} onMouseDown={onBgDown} onWheel={onWheel}
       onMouseMove={e => setMousePos({ x: (e.clientX - pan.x) / zoom, y: (e.clientY - pan.y) / zoom })} ref={surfRef}
-      onKeyDown={e => { if (e.key === 'Escape') setConnecting(null) }} tabIndex={0}>
+      onKeyDown={e => { if (e.key === 'Escape') { setConnecting(null); setConnectMode(false) } }} tabIndex={0}>
       <div className={s.gridBg} style={{ backgroundPosition: `${pan.x}px ${pan.y}px`, backgroundSize: `${40 * zoom}px ${40 * zoom}px` }} />
       <div className={s.canvasSurf} style={{ transform: `translate(${pan.x}px,${pan.y}px) scale(${zoom})` }}>
         <svg style={{ position: 'absolute', top: 0, left: 0, width: 1, height: 1, overflow: 'visible', pointerEvents: 'none', zIndex: 5 }}>
@@ -111,7 +134,7 @@ export function CanvasView({ workspace, onUpdateWS, onEditMenu, projects }: Prop
               </g>
             )
           })}
-          {connecting && getSlotCenter(connecting.menuId, connecting.slot) && (() => {
+          {connectMode && connecting && getSlotCenter(connecting.menuId, connecting.slot) && (() => {
             const from = getSlotCenter(connecting.menuId, connecting.slot)!
             return <line x1={from.x} y1={from.y} x2={mousePos.x} y2={mousePos.y} stroke="var(--ac)" strokeWidth={2} strokeDasharray="6,4" style={{ pointerEvents: 'none' }} />
           })()}
@@ -119,15 +142,25 @@ export function CanvasView({ workspace, onUpdateWS, onEditMenu, projects }: Prop
         {workspace.menus.map((m, i) => {
           const p = projects[m.projectId]; if (!p) return null
           return <MiniMenu key={m.projectId} project={p} x={m.x} y={m.y}
-            onDrag={(nx, ny) => moveMenu(i, nx, ny)} onDblClick={() => onEditMenu(m.projectId)}
-            onSlotClick={onSlotClick} connectingFrom={connecting}
-            onCtxMenu={(cx, cy) => setMmCtx({ x: (cx - pan.x) / zoom, y: (cy - pan.y) / zoom, idx: i })} />
+            onDrag={(nx, ny) => moveMenu(i, nx, ny)}
+            onSlotClick={onSlotClick}
+            onSlotRightClick={onSlotRightClick}
+            connectingFrom={connectMode ? connecting : null}
+            onCtxMenu={(cx, cy) => setMmCtx({ x: (cx - pan.x) / zoom, y: (cy - pan.y) / zoom, idx: i })}
+            isActive={m.projectId === activeProjectId}
+            selectedSlot={m.projectId === activeProjectId ? selSlot : null}
+          />
         })}
         {mmCtx && <CtxMenu x={mmCtx.x} y={mmCtx.y} onClose={() => setMmCtx(null)} items={[
-          { label: 'Редактировать', fn: () => onEditMenu(workspace.menus[mmCtx.idx].projectId) },
-          { sep: true },
           { label: 'Убрать с canvas', danger: true, fn: () => removeFromCanvas(mmCtx.idx) },
         ]} />}
+        {slotCtx && (() => {
+          const p = projects[slotCtx.menuId]
+          const hasItem = p?.slots[slotCtx.slotKey]
+          return <CtxMenu x={slotCtx.x} y={slotCtx.y} onClose={() => setSlotCtx(null)} items={[
+            ...(hasItem ? [{ label: 'Удалить предмет', danger: true, fn: () => { onRemoveItem(slotCtx.menuId, slotCtx.slotKey); setSlotCtx(null) } }] : []),
+          ]} />
+        })()}
       </div>
       <div className={s.canvasTb}>
         <input value={workspace.name} onChange={e => onUpdateWS({ ...workspace, name: e.target.value })}
@@ -140,9 +173,11 @@ export function CanvasView({ workspace, onUpdateWS, onEditMenu, projects }: Prop
             const p = loadProject(id); return p ? <option key={id} value={id}>{p.name}</option> : null
           })}
         </select>
+        <GlowButton onClick={toggleConnectMode} variant={connectMode ? 'primary' : 'ghost'} title="Режим соединений">⇒ Связи</GlowButton>
         <span style={{ fontSize: 10, color: 'var(--tx3)' }}>{Math.round(zoom * 100)}%</span>
       </div>
-      {connecting && <div className={s.connHint}>Кликните по целевому меню · Esc — отмена</div>}
+      {connectMode && connecting && <div className={s.connHint}>Кликните по целевому меню · Esc — отмена</div>}
+      {connectMode && !connecting && <div className={s.connHint}>Режим связей: кликните по слоту-источнику · Esc — выход</div>}
     </div>
   )
 }
