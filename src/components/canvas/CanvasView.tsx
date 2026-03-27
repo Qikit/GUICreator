@@ -43,6 +43,7 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
   const [showAddPopover, setShowAddPopover] = useState(false)
   const [selBox, setSelBox] = useState<{ x1: number; y1: number; x2: number; y2: number } | null>(null)
   const [selectedMenus, setSelectedMenus] = useState<Set<string>>(new Set())
+  const [painting, setPainting] = useState(false)
   const popoverRef = useRef<HTMLDivElement>(null)
   const surfRef = useRef<HTMLDivElement>(null)
 
@@ -111,8 +112,34 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
     setZoom(nz)
   }
 
+  const SNAP_DISTANCE = 10
+
+  const snapMenu = (idx: number, rawX: number, rawY: number) => {
+    let sx = rawX, sy = rawY
+    const menuW = FRAME_PAD * 2 + 9 * (SLOT_SIZE + SLOT_GAP) - SLOT_GAP
+
+    for (let j = 0; j < workspace.menus.length; j++) {
+      if (j === idx) continue
+      const other = workspace.menus[j]
+      const op = projects[other.projectId]; if (!op) continue
+      const otherH = HEADER_H + FRAME_PAD * 2 + op.rows * (SLOT_SIZE + SLOT_GAP) - SLOT_GAP
+      const otherCenterX = other.x + menuW / 2
+      const myCenterX = rawX + menuW / 2
+
+      if (Math.abs(myCenterX - otherCenterX) < SNAP_DISTANCE) sx = other.x
+      if (Math.abs(rawX - other.x) < SNAP_DISTANCE) sx = other.x
+      if (Math.abs((rawX + menuW) - (other.x + menuW)) < SNAP_DISTANCE) sx = other.x
+
+      if (Math.abs(rawY - (other.y + otherH + 20)) < SNAP_DISTANCE) sy = other.y + otherH + 20
+      if (Math.abs(rawY - other.y) < SNAP_DISTANCE) sy = other.y
+    }
+
+    return { x: Math.round(sx), y: Math.round(sy) }
+  }
+
   const moveMenu = (idx: number, cx: number, cy: number) => {
-    onUpdateWS({ ...workspace, menus: workspace.menus.map((m, i) => i === idx ? { ...m, x: Math.round(cx), y: Math.round(cy) } : m) })
+    const { x, y } = snapMenu(idx, cx, cy)
+    onUpdateWS({ ...workspace, menus: workspace.menus.map((m, i) => i === idx ? { ...m, x, y } : m) })
   }
 
   const onSlotClick = (menuId: string, slot: string) => {
@@ -136,18 +163,23 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
   }
 
   const handleSlotMouseDown = (menuId: string, slot: string, e: React.MouseEvent) => {
-    if (e.altKey) {
+    if (e.altKey && e.button === 0 && palItem) {
+      e.preventDefault(); e.stopPropagation()
+      setPainting(true)
+      onPlaceItem(menuId, slot)
+      return
+    }
+    if (e.altKey && !palItem) {
       const p = projects[menuId]
       if (p?.slots[slot]) {
-        e.preventDefault()
-        e.stopPropagation()
+        e.preventDefault(); e.stopPropagation()
         onBrushPick(p.slots[slot].itemId)
       }
       return
     }
     if (e.button === 2 && palItem) {
-      e.preventDefault()
-      e.stopPropagation()
+      e.preventDefault(); e.stopPropagation()
+      setPainting(true)
       onPlaceItem(menuId, slot)
     }
   }
@@ -209,6 +241,12 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
     setPan({ x: pad - minX * nz, y: pad - minY * nz })
     setZoom(nz)
   }
+
+  useEffect(() => {
+    const stop = () => setPainting(false)
+    window.addEventListener('mouseup', stop)
+    return () => window.removeEventListener('mouseup', stop)
+  }, [])
 
   useEffect(() => {
     if (!showAddPopover) return
@@ -289,6 +327,9 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
             onClearAll={onClearAll}
             onRename={onRenameMenu}
             isMultiSelected={selectedMenus.has(m.projectId)}
+            onSlotEnter={(menuId, slot) => {
+              if (painting && palItem) onPlaceItem(menuId, slot)
+            }}
           />
         })}
         {selBox && (

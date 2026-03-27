@@ -30,11 +30,13 @@ interface Props {
   onClearAll?: (menuId: string) => void
   onRename?: (menuId: string, name: string) => void
   isMultiSelected?: boolean
+  onSlotEnter?: (menuId: string, slot: string) => void
 }
 
-export function MiniMenu({ project, x, y, zoom, onDrag, onSlotClick, onSlotRightClick, onSlotMouseDown, connectingFrom, onCtxMenu, isActive, selectedSlot, showNums, onSlotHover, onActivate, palItem, onDeleteMenu, onResizeMenu, onSetEraser, onClearAll, onRename }: Props) {
+export function MiniMenu({ project, x, y, zoom, onDrag, onSlotClick, onSlotRightClick, onSlotMouseDown, connectingFrom, onCtxMenu, isActive, selectedSlot, showNums, onSlotHover, onActivate, palItem, onDeleteMenu, onResizeMenu, onSetEraser, onClearAll, onRename, onSlotEnter }: Props) {
   const [editingName, setEditingName] = useState(false)
   const [nameText, setNameText] = useState(project.name)
+  const [showSizeMenu, setShowSizeMenu] = useState(false)
 
   const startDrag = (e: React.MouseEvent) => {
     if (e.button !== 0) return; e.stopPropagation()
@@ -74,7 +76,30 @@ export function MiniMenu({ project, x, y, zoom, onDrag, onSlotClick, onSlotRight
               <McText segs={parseMM(project.name)} />
             </span>
           )}
-          <span style={{ fontSize: 9, color: 'var(--tx3)', flexShrink: 0 }}>{project.rows}x9</span>
+          <div style={{ position: 'relative', flexShrink: 0 }}>
+            <span className={s.mmSizeBadge} onClick={e => { e.stopPropagation(); setShowSizeMenu(v => !v) }}>
+              {project.rows}x9
+            </span>
+            {showSizeMenu && (
+              <div className={s.mmSizeMenu} onClick={e => e.stopPropagation()}>
+                <div style={{ fontSize: 9, color: 'var(--tx3)', padding: '4px 8px', textTransform: 'uppercase' }}>Размер</div>
+                {[1,2,3,4,5,6].map(n => (
+                  <button key={n} className={`${s.mmSizeOption} ${project.rows === n ? s.mmSizeOptionActive : ''}`}
+                    onClick={() => { onResizeMenu?.(project.id, n); setShowSizeMenu(false) }}>
+                    {n}x9
+                  </button>
+                ))}
+                <div style={{ height: 1, background: 'var(--glass-border)', margin: '2px 0' }} />
+                <div style={{ fontSize: 9, color: 'var(--tx3)', padding: '4px 8px', textTransform: 'uppercase' }}>Пресеты</div>
+                {[{name:'Сундук',r:3},{name:'Большой сундук',r:6},{name:'Хоппер',r:1},{name:'Раздатчик',r:3}].map(p => (
+                  <button key={p.name} className={s.mmSizeOption}
+                    onClick={() => { onResizeMenu?.(project.id, p.r); setShowSizeMenu(false) }}>
+                    {p.name} ({p.r}x9)
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
         <div className={s.mmBody}>
           <div className={s.mmGrid}>
@@ -91,7 +116,10 @@ export function MiniMenu({ project, x, y, zoom, onDrag, onSlotClick, onSlotRight
                       e.preventDefault(); e.stopPropagation()
                       if (!palItem) onSlotRightClick?.(project.id, k, e.clientX, e.clientY)
                     }}
-                    onMouseEnter={e => { if (d) onSlotHover?.(d, e.clientX, e.clientY) }}
+                    onMouseEnter={e => {
+                      if (d) onSlotHover?.(d, e.clientX, e.clientY)
+                      onSlotEnter?.(project.id, k)
+                    }}
                     onMouseLeave={() => onSlotHover?.(null, 0, 0)}>
                     <div className={s.mmSlotHover} />
                     {showNums && <span className={s.mmSlotNum}>{r * 9 + c}</span>}
@@ -112,11 +140,11 @@ export function MiniMenu({ project, x, y, zoom, onDrag, onSlotClick, onSlotRight
       {isActive && (
         <div className={s.mmToolbar}>
           <button className={s.mmToolBtn} data-tip="Удалить меню"
-            onClick={e => { e.stopPropagation(); onDeleteMenu?.(project.id) }}>
+            onClick={e => { e.stopPropagation(); if (confirm('Удалить меню с canvas?')) onDeleteMenu?.(project.id) }}>
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 4h10M5 4V3a1 1 0 011-1h2a1 1 0 011 1v1M4 4v7a1 1 0 001 1h4a1 1 0 001-1V4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/></svg>
           </button>
           <button className={s.mmToolBtn} data-tip="Изменить размер"
-            onClick={e => { e.stopPropagation(); onResizeMenu?.(project.id, project.rows) }}>
+            onClick={e => { e.stopPropagation(); setShowSizeMenu(v => !v) }}>
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 2h4M2 2v4M12 12H8M12 12V8" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/></svg>
           </button>
           <button className={`${s.mmToolBtn} ${palItem === '__eraser__' ? s.mmToolBtnActive : ''}`} data-tip="Ластик"
