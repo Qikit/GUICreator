@@ -33,7 +33,8 @@ export function CtxMenu({ x, y, items, onClose }: Props) {
         return (
           <button
             key={i}
-            className={`${s.ctxItem} ${it.danger ? s.ctxDanger : ''}`}
+            className={s.ctxItem}
+            style={it.danger ? { color: 'var(--er)' } : undefined}
             onClick={() => { it.fn?.(); onClose() }}
           >
             {it.label}

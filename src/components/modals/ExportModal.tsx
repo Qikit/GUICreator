@@ -2,18 +2,18 @@ import { useState } from 'react'
 import type { Project } from '@/types'
 import { seg2leg, seg2mm, seg2amText } from '@/utils/minimessage'
 import { defaultSegment } from '@/utils/slot'
-import s from '@/styles/shared.module.css'
+import { GlassModal, GlassTabs, GlowButton, glassModalStyles } from '@/components/ui'
 
 const TABS = [
-  { id: 'json', label: 'JSON' },
-  { id: 'yaml', label: 'YAML' },
-  { id: 'legacy', label: '§-Codes' },
-  { id: 'minimessage', label: 'MiniMessage' },
-  { id: 'abstractmenus', label: 'AbstractMenus' },
-  { id: 'funmenu', label: 'FunMenu' },
-] as const
+  { key: 'json', label: 'JSON' },
+  { key: 'yaml', label: 'YAML' },
+  { key: 'legacy', label: '§-Codes' },
+  { key: 'minimessage', label: 'MiniMessage' },
+  { key: 'abstractmenus', label: 'AbstractMenus' },
+  { key: 'funmenu', label: 'FunMenu' },
+]
 
-type TabId = typeof TABS[number]['id']
+type TabId = 'json' | 'yaml' | 'legacy' | 'minimessage' | 'abstractmenus' | 'funmenu'
 
 interface Props {
   project: Project
@@ -121,33 +121,30 @@ export function ExportModal({ project, onClose }: Props) {
   }
 
   return (
-    <div className={s.modalOverlay} onClick={onClose}>
-      <div className={s.modalDialog} onClick={e => e.stopPropagation()}>
-        <div className={s.modalTitle}>Экспорт</div>
-        <div className={s.modalTabs}>
-          {TABS.map(t => (
-            <button key={t.id} className={`${s.modalTab} ${tab === t.id ? s.modalTabActive : ''}`} onClick={() => { setTab(t.id); setCopied(false) }}>{t.label}</button>
-          ))}
+    <GlassModal onClose={onClose} title="Экспорт">
+      <GlassTabs
+        tabs={TABS}
+        active={tab}
+        onChange={key => { setTab(key as TabId); setCopied(false) }}
+      />
+      {tab === 'abstractmenus' && (
+        <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 6 }}>
+          <span style={{ fontSize: 11, color: 'var(--tx2)' }}>Команда:</span>
+          <input value={amCmd} onChange={e => setAmCmd(e.target.value)} style={{ width: 120, fontSize: 12 }} />
         </div>
-        {tab === 'abstractmenus' && (
-          <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 6 }}>
-            <span style={{ fontSize: 11, color: 'var(--tx2)' }}>Команда:</span>
-            <input value={amCmd} onChange={e => setAmCmd(e.target.value)} style={{ width: 120, fontSize: 12 }} />
-          </div>
-        )}
-        {tab === 'funmenu' && (
-          <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 6 }}>
-            <span style={{ fontSize: 11, color: 'var(--tx2)' }}>Класс:</span>
-            <input value={fmClass} onChange={e => setFmClass(e.target.value)} style={{ width: 180, fontSize: 12 }} />
-          </div>
-        )}
-        <div className={s.modalCode}>{txt}</div>
-        <div className={s.modalActions}>
-          <button className={`${s.btn} ${s.btnPrimary}`} onClick={copy}>{copied ? 'Скопировано!' : 'Копировать'}</button>
-          <button className={s.btn} onClick={dl} style={{ border: '1px solid var(--bd2)' }}>Скачать</button>
-          <button className={s.btn} onClick={onClose}>Закрыть</button>
+      )}
+      {tab === 'funmenu' && (
+        <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 6 }}>
+          <span style={{ fontSize: 11, color: 'var(--tx2)' }}>Класс:</span>
+          <input value={fmClass} onChange={e => setFmClass(e.target.value)} style={{ width: 180, fontSize: 12 }} />
         </div>
+      )}
+      <div className={glassModalStyles.code}>{txt}</div>
+      <div className={glassModalStyles.actions}>
+        <GlowButton variant="primary" onClick={copy}>{copied ? 'Скопировано!' : 'Копировать'}</GlowButton>
+        <GlowButton onClick={dl}>Скачать</GlowButton>
+        <GlowButton onClick={onClose}>Закрыть</GlowButton>
       </div>
-    </div>
+    </GlassModal>
   )
 }

@@ -5,6 +5,7 @@ import { newProject } from '@/utils/slot'
 import { saveProject, loadProject, loadProjectList } from '@/storage'
 import { CtxMenu } from '@/components/shared'
 import { MiniMenu } from './MiniMenu'
+import { GlowButton } from '@/components/ui'
 import s from '@/styles/canvas.module.css'
 import ss from '@/styles/shared.module.css'
 
@@ -131,7 +132,7 @@ export function CanvasView({ workspace, onUpdateWS, onEditMenu, projects }: Prop
       <div className={s.canvasTb}>
         <input value={workspace.name} onChange={e => onUpdateWS({ ...workspace, name: e.target.value })}
           style={{ background: 'var(--pan)', border: '1px solid var(--bd)', borderRadius: 'var(--r8)', padding: '4px 8px', color: 'var(--tx1)', fontSize: 12, width: 160, textAlign: 'center' }} />
-        <button className={ss.btn} onClick={addNew}>+ Новое</button>
+        <GlowButton onClick={addNew}>+ Новое</GlowButton>
         <select onChange={e => { if (e.target.value) addExisting(e.target.value); e.target.value = '' }}
           style={{ fontSize: 11, padding: '4px 6px', background: 'var(--pan)', border: '1px solid var(--bd)', color: 'var(--tx1)', borderRadius: 4 }}>
           <option value="">+ Существующее...</option>

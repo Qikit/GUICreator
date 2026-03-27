@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { hexToRgb, rgbToHex, hsv2hex } from '@/utils/color'
 import { MC_COLORS } from '@/data/colors'
-import s from '@/styles/shared.module.css'
+import { GlassModal, GlowButton } from '@/components/ui'
 
 interface Props {
   onClose: () => void
@@ -63,34 +63,31 @@ export function ColorPickerModal({ onClose, onApply }: Props) {
   const copyHex = () => { navigator.clipboard.writeText('<' + hex + '>'); setCopied(true); setTimeout(() => setCopied(false), 1500) }
 
   return (
-    <div className={s.modalOverlay} onClick={e => { if (e.target === e.currentTarget) onClose() }}>
-      <div className={s.modalDialog} onClick={e => e.stopPropagation()} style={{ maxWidth: 420 }}>
-        <div className={s.modalTitle}>Палитра цветов</div>
-        <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-          <div style={{ position: 'relative' }}>
-            <canvas ref={sqRef} width={200} height={200} style={{ borderRadius: 4, cursor: 'crosshair' }} onMouseDown={drag(sqRef, (x, y) => { setSat(Math.round(x * 100)); setVal(Math.round((1 - y) * 100)) })} />
-            <div style={{ position: 'absolute', width: 12, height: 12, border: '2px solid #fff', borderRadius: '50%', boxShadow: '0 0 3px rgba(0,0,0,.5)', pointerEvents: 'none', transform: 'translate(-50%,-50%)', left: sat * 2, top: (100 - val) * 2 }} />
-          </div>
-          <div style={{ position: 'relative' }}>
-            <canvas ref={hueRef} width={20} height={200} style={{ borderRadius: 4, cursor: 'pointer' }} onMouseDown={drag(hueRef, (_, y) => { setHue(Math.round(y * 360)) })} />
-            <div style={{ position: 'absolute', width: 24, height: 6, border: '2px solid #fff', borderRadius: 3, boxShadow: '0 0 3px rgba(0,0,0,.5)', pointerEvents: 'none', left: -2, top: hue / 360 * 200 - 3 }} />
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flex: 1 }}>
-            <div style={{ width: '100%', height: 48, borderRadius: 4, border: '1px solid var(--bd)', background: hex }} />
-            <input value={hex} onChange={e => { const v = e.target.value; setHex(v); if (/^#[0-9A-Fa-f]{6}$/.test(v)) fromHex(v.toUpperCase()) }} style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 13 }} />
-            <button className={`${s.btn} ${s.btnPrimary}`} onClick={copyHex}>{copied ? 'Скопировано!' : 'Копировать <#>'}</button>
-            {onApply && <button className={s.btn} onClick={() => { onApply(hex); onClose() }}>Применить</button>}
-          </div>
+    <GlassModal onClose={onClose} title="Палитра цветов">
+      <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+        <div style={{ position: 'relative' }}>
+          <canvas ref={sqRef} width={200} height={200} style={{ borderRadius: 4, cursor: 'crosshair' }} onMouseDown={drag(sqRef, (x, y) => { setSat(Math.round(x * 100)); setVal(Math.round((1 - y) * 100)) })} />
+          <div style={{ position: 'absolute', width: 12, height: 12, border: '2px solid #fff', borderRadius: '50%', boxShadow: '0 0 3px rgba(0,0,0,.5)', pointerEvents: 'none', transform: 'translate(-50%,-50%)', left: sat * 2, top: (100 - val) * 2 }} />
         </div>
-        <div style={{ marginTop: 10 }}>
-          <div style={{ fontSize: 10, color: 'var(--tx2)', marginBottom: 4 }}>MC ЦВЕТА</div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(8, 1fr)', gap: 3 }}>
-            {MC_COLORS.map((c, i) => (
-              <div key={i} style={{ width: 24, height: 24, borderRadius: 3, cursor: 'pointer', background: c.hex, border: '2px solid transparent' }} onClick={() => fromHex(c.hex)} title={c.name} />
-            ))}
-          </div>
+        <div style={{ position: 'relative' }}>
+          <canvas ref={hueRef} width={20} height={200} style={{ borderRadius: 4, cursor: 'pointer' }} onMouseDown={drag(hueRef, (_, y) => { setHue(Math.round(y * 360)) })} />
+          <div style={{ position: 'absolute', width: 24, height: 6, border: '2px solid #fff', borderRadius: 3, boxShadow: '0 0 3px rgba(0,0,0,.5)', pointerEvents: 'none', left: -2, top: hue / 360 * 200 - 3 }} />
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flex: 1 }}>
+          <div style={{ width: '100%', height: 48, borderRadius: 4, border: '1px solid var(--bd)', background: hex }} />
+          <input value={hex} onChange={e => { const v = e.target.value; setHex(v); if (/^#[0-9A-Fa-f]{6}$/.test(v)) fromHex(v.toUpperCase()) }} style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 13 }} />
+          <GlowButton variant="primary" onClick={copyHex}>{copied ? 'Скопировано!' : 'Копировать <#>'}</GlowButton>
+          {onApply && <GlowButton onClick={() => { onApply(hex); onClose() }}>Применить</GlowButton>}
         </div>
       </div>
-    </div>
+      <div style={{ marginTop: 10 }}>
+        <div style={{ fontSize: 10, color: 'var(--tx2)', marginBottom: 4 }}>MC ЦВЕТА</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(8, 1fr)', gap: 3 }}>
+          {MC_COLORS.map((c, i) => (
+            <div key={i} style={{ width: 24, height: 24, borderRadius: 3, cursor: 'pointer', background: c.hex, border: '2px solid transparent' }} onClick={() => fromHex(c.hex)} title={c.name} />
+          ))}
+        </div>
+      </div>
+    </GlassModal>
   )
 }

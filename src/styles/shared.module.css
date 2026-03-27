@@ -22,29 +22,7 @@
 .hoverTT .prevLine { white-space: pre-wrap; word-break: break-word; }
 
 /* Context menu */
-.ctxMenu { position: fixed; z-index: 200; background: var(--pan); border: 1px solid var(--bd2); border-radius: 4px; padding: 2px; min-width: 140px; box-shadow: 0 6px 16px rgba(0,0,0,.5); }
-.ctxItem { display: flex; align-items: center; gap: 5px; padding: 4px 8px; border-radius: 2px; font-size: 11px; cursor: pointer; width: 100%; border: none; background: none; color: var(--tx1); }
-.ctxItem:hover { background: var(--hov); }
-.ctxDanger { color: var(--er); }
-.ctxSep { height: 1px; background: var(--bd); margin: 2px 0; }
-
-/* Button */
-.btn { display: inline-flex; align-items: center; gap: 4px; padding: 5px 10px; border-radius: var(--r8); border: 1px solid var(--bd); background: var(--pan); color: var(--tx2); font-size: 11px; font-weight: 500; cursor: pointer; transition: all .15s; white-space: nowrap; }
-.btn:hover { background: var(--hov); color: var(--tx1); border-color: var(--ac); }
-.btn:active { transform: scale(.97); }
-.btnPrimary { background: var(--ac); color: #0f0f11; border-color: var(--ac); font-weight: 600; }
-.btnPrimary:hover { background: var(--ac2); border-color: var(--ac2); }
-.btnDanger { border-color: rgba(248,113,113,.25); color: var(--er); }
-.btnDanger:hover { background: rgba(248,113,113,.08); }
-.btn:disabled { opacity: .3; cursor: not-allowed; transform: none; }
-
-/* Modal */
-.modalOverlay { position: fixed; inset: 0; background: rgba(0,0,0,.6); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-.modalDialog { background: var(--pan); border: 1px solid var(--bd2); border-radius: 8px; padding: 18px; min-width: 460px; max-width: 90vw; max-height: 80vh; overflow-y: auto; box-shadow: 0 14px 40px rgba(0,0,0,.5); }
-.modalTitle { font-size: 16px; font-weight: 600; margin-bottom: 12px; }
-.modalTabs { display: flex; gap: 1px; margin-bottom: 12px; }
-.modalTab { padding: 5px 12px; border-radius: 4px; font-size: 11px; color: var(--tx2); cursor: pointer; border: none; background: none; }
-.modalTab:hover { background: var(--hov); }
-.modalTabActive { background: var(--ac); color: #fff; }
-.modalCode { background: #0d1117; border: 1px solid var(--bd); border-radius: 5px; padding: 12px; font-family: 'Minecraft', 'Courier New', monospace; font-size: 11px; white-space: pre-wrap; word-break: break-all; max-height: 350px; overflow-y: auto; color: #c9d1d9; line-height: 1.5; }
-.modalActions { display: flex; gap: 5px; margin-top: 12px; justify-content: flex-end; }
+.ctxMenu { position: fixed; z-index: 200; background: rgba(255,255,255,0.06); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--sp-xs); min-width: 140px; box-shadow: 0 6px 24px rgba(0,0,0,.5), 0 0 16px rgba(139,92,246,0.05); }
+.ctxItem { display: flex; align-items: center; gap: 5px; padding: 5px 10px; border-radius: var(--radius-sm); font-size: 11px; cursor: pointer; width: 100%; border: none; background: none; color: var(--tx1); transition: all 150ms; }
+.ctxItem:hover { background: var(--glass-hover); }
+.ctxSep { height: 1px; background: var(--glass-border); margin: 2px 0; }
