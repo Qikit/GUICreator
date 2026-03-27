@@ -102,24 +102,25 @@ export function Palette({ itemDB, selItem, onSelect, recent }: Props) {
             <button
               className={`${s.viewBtn} ${paletteView === 'grid' ? s.viewBtnActive : ''}`}
               onClick={() => setPaletteView('grid')}
-              data-tip-down="Мелкие значки"
+              title="Мелкие значки"
             >▦</button>
             <button
               className={`${s.viewBtn} ${paletteView === 'largeGrid' ? s.viewBtnActive : ''}`}
               onClick={() => setPaletteView('largeGrid')}
-              data-tip-down="Крупные значки"
+              title="Крупные значки"
             >▣</button>
             <button
               className={`${s.viewBtn} ${paletteView === 'list' ? s.viewBtnActive : ''}`}
               onClick={() => setPaletteView('list')}
-              data-tip-down="Список"
+              title="Список"
             >☰</button>
           </div>
           <button
             className={`${s.eraserBtn} ${selItem === ERASER_ID ? s.eraserBtnSel : ''}`}
             onClick={() => onSelect(ERASER_ID)}
-            data-tip-down="Ластик (E)"
+            title="Ластик (E)"
           >🚫</button>
+          <button className={s.viewBtn} onClick={() => { const allKeys = Object.keys(filtered); const allOpen = allKeys.every(k => openCats[k]); const next = { ...openCats }; for (const k of allKeys) next[k] = !allOpen; next.__r = !allOpen; setOpenCats(next) }} title={Object.keys(filtered).every(k => openCats[k]) ? 'Свернуть все' : 'Развернуть все'}>{Object.keys(filtered).every(k => openCats[k]) ? '▴' : '▾'}</button>
         </div>
       </div>
       <div className={s.search}>

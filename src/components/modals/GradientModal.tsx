@@ -24,7 +24,10 @@ const FORMATS = [
 
 export function GradientModal({ onClose }: Props) {
   const [text, setText] = useState('Пример текста')
-  const [colors, setColors] = useState(['#FF0000', '#00FF00'])
+  const [colors, setColors] = useState(() => {
+    const rnd = () => '#' + Math.floor(Math.random() * 0xFFFFFF).toString(16).padStart(6, '0').toUpperCase()
+    return [rnd(), rnd()]
+  })
   const [bold, setBold] = useState(false)
   const [italic, setItalic] = useState(false)
   const [copied, setCopied] = useState('')

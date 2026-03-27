@@ -216,20 +216,33 @@ export function App() {
         )},
         { id: 'grid', title: 'Workspace', headerExtra: (() => {
           const wsList = loadWorkspaceList()
-          const MAX_TABS = 4
+          const MAX_TABS = 5
           const visible = wsList.slice(0, MAX_TABS)
           const overflow = wsList.length > MAX_TABS
           const switchWS = (id: string) => { const ws = loadWorkspace(id); if (ws) { removedFromCanvas.current.clear(); setActiveWS(ws); refreshCache(ws) } }
+          const createWS = () => { const ws = newWorkspace(); saveWorkspace(ws); removedFromCanvas.current.clear(); removedFromCanvas.current.add(proj.id); setActiveWS(ws); refreshCache(ws) }
+          const deleteWS = (id: string, name: string) => { if (!confirm(`Удалить "${name}"?`)) return; deleteWorkspace(id); if (id === activeWS?.id) { const remaining = loadWorkspaceList(); if (remaining.length) switchWS(remaining[0]); else createWS() } forceRender(x => x + 1) }
           return (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 2, marginLeft: 'auto', flexShrink: 1, minWidth: 0, overflow: 'hidden' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 2, marginLeft: 'auto', flexShrink: 1, minWidth: 0, overflow: 'hidden' }}
+              onDoubleClick={e => { e.stopPropagation(); createWS() }}>
               {visible.map(id => {
                 const ws = loadWorkspace(id)
                 if (!ws) return null
-                return <button key={id} onClick={e => { e.stopPropagation(); switchWS(id) }}
-                  style={{ padding: '1px 6px', fontSize: 9, border: '1px solid ' + (id === activeWS?.id ? 'var(--accent)' : 'var(--glass-border)'), borderRadius: 3, background: id === activeWS?.id ? 'var(--accent-subtle)' : 'none', color: id === activeWS?.id ? 'var(--accent)' : 'var(--tx3)', cursor: 'pointer', whiteSpace: 'nowrap', maxWidth: 80, overflow: 'hidden', textOverflow: 'ellipsis' }}>{ws.name}</button>
+                return <div key={id} style={{ display: 'flex', alignItems: 'center', gap: 0, border: '1px solid ' + (id === activeWS?.id ? 'var(--accent)' : 'var(--glass-border)'), borderRadius: 3, background: id === activeWS?.id ? 'var(--accent-subtle)' : 'none', overflow: 'hidden' }}>
+                  <button onClick={e => { e.stopPropagation(); switchWS(id) }}
+                    style={{ padding: '1px 4px', fontSize: 9, border: 'none', background: 'none', color: id === activeWS?.id ? 'var(--accent)' : 'var(--tx3)', cursor: 'pointer', whiteSpace: 'nowrap', maxWidth: 70, overflow: 'hidden', textOverflow: 'ellipsis' }}>{ws.name}</button>
+                  {wsList.length > 1 && <button onClick={e => { e.stopPropagation(); deleteWS(id, ws.name) }}
+                    style={{ padding: '0 2px', fontSize: 8, border: 'none', background: 'none', color: 'var(--tx3)', cursor: 'pointer', lineHeight: 1, opacity: 0.5 }}
+                    onMouseEnter={e => (e.currentTarget.style.opacity = '1', e.currentTarget.style.color = 'var(--er)')}
+                    onMouseLeave={e => (e.currentTarget.style.opacity = '0.5', e.currentTarget.style.color = 'var(--tx3)')}>✕</button>}
+                </div>
               })}
               {overflow && <button onClick={e => { e.stopPropagation(); setShowWorkspaces(true) }}
                 style={{ padding: '1px 4px', fontSize: 9, border: '1px solid var(--glass-border)', borderRadius: 3, background: 'none', color: 'var(--tx3)', cursor: 'pointer' }}>...</button>}
+              <button onClick={e => { e.stopPropagation(); setShowWorkspaces(true) }}
+                style={{ padding: '1px 3px', fontSize: 9, border: '1px solid var(--glass-border)', borderRadius: 3, background: 'none', color: 'var(--tx3)', cursor: 'pointer' }} title="Все workspaces">☰</button>
+              <button onClick={e => { e.stopPropagation(); createWS() }}
+                style={{ padding: '1px 3px', fontSize: 9, border: '1px solid var(--glass-border)', borderRadius: 3, background: 'none', color: 'var(--tx3)', cursor: 'pointer' }} title="Новый workspace">+</button>
             </div>
           )
         })(), content: activeWS ? (

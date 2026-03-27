@@ -38,7 +38,7 @@ export function useKeyboardShortcuts(params: Params) {
       if (e.ctrlKey && e.key === 'e') { e.preventDefault(); setShowExport(true) }
       if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProject(proj); setSaveStatus('Saved') }
       if (e.key === 'Escape') { setSelSlot(null); setMultiSel(new Set()); setCtxMenu(null); setShowExport(false); setShowTpls(false); setShowProjs(false); setPalItem(null); setPalPreset(null) }
-      if (e.key === 'e' && !e.ctrlKey && !e.metaKey) { e.preventDefault(); if (palItem === '__eraser__') { setPalItem(null); setPalPreset(null) } else { setPalItem('__eraser__'); setPalPreset(null) } }
+      if (e.code === 'KeyE' && !e.ctrlKey && !e.metaKey) { e.preventDefault(); if (palItem === '__eraser__') { setPalItem(null); setPalPreset(null) } else { setPalItem('__eraser__'); setPalPreset(null) } }
       if (e.key === 'Delete' || e.key === 'Backspace') {
         if (multiSel.size > 0) { e.preventDefault(); dispatch({ type: 'RM', keys: [...multiSel] }); setMultiSel(new Set()); setSelSlot(null) }
         else if (selSlot && proj.slots[selSlot]) { e.preventDefault(); dispatch({ type: 'RS', key: selSlot }) }

@@ -105,7 +105,7 @@ export function ColorPickerModal({ onClose, onApply }: Props) {
           <div style={{ width: '100%', height: 48, borderRadius: 4, border: '1px solid var(--glass-border)', background: hex }} />
           <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
             <input value={hex} onChange={e => { const v = e.target.value; setHex(v); if (/^#[0-9A-Fa-f]{6}$/.test(v)) fromHex(v.toUpperCase()) }} style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 13, flex: 1 }} />
-            <button onClick={() => setShowPalette(true)} style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-sm)', background: 'none', color: 'var(--tx2)', cursor: 'pointer', flexShrink: 0 }} data-tip="Палитра цветов">
+            <button onClick={() => setShowPalette(true)} style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-sm)', background: 'none', color: 'var(--tx2)', cursor: 'pointer', flexShrink: 0 }} title="Палитра цветов">
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1.2"/><circle cx="5" cy="5" r="1" fill="#f87171"/><circle cx="9" cy="5" r="1" fill="#4ade80"/><circle cx="5" cy="9" r="1" fill="#60a5fa"/><circle cx="9" cy="9" r="1" fill="#facc15"/></svg>
             </button>
           </div>
