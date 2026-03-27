@@ -38,7 +38,7 @@ export function ItemTexture({ itemId, size, className, potionColor, skullTexture
     return <SkullFace url={skullTexture} size={sz} className={className} />
   }
 
-  if (potionColor && POTION_LAYERS[itemId]) {
+  if (potionColor && (POTION_LAYERS[itemId] || ['leather_helmet','leather_chestplate','leather_leggings','leather_boots','leather_horse_armor'].includes(itemId))) {
     return <TintedTexture itemId={itemId} color={potionColor} size={sz} className={className} />
   }
 

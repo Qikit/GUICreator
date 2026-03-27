@@ -1,4 +1,22 @@
 import { useState } from 'react'
+
+const GUI_PRESETS = [
+  { name: 'Сундук', rows: 3 },
+  { name: 'Большой сундук', rows: 6 },
+  { name: 'Хоппер', rows: 1 },
+  { name: 'Раздатчик', rows: 3 },
+  { name: 'Верстак', rows: 3 },
+  { name: 'Зельеварка', rows: 1 },
+  { name: 'Наковальня', rows: 1 },
+  { name: 'Бочка', rows: 3 },
+  { name: 'Картограф', rows: 1 },
+  { name: 'Стол кузнеца', rows: 1 },
+  { name: 'Стол зачарований', rows: 1 },
+  { name: 'Камнерез', rows: 2 },
+  { name: 'Ткацкий станок', rows: 1 },
+  { name: 'Печь', rows: 1 },
+  { name: 'Воронка', rows: 1 },
+]
 import type { Project } from '@/types'
 import type { SlotData } from '@/types'
 import { ItemTexture } from '@/components/shared'
@@ -91,10 +109,10 @@ export function MiniMenu({ project, x, y, zoom, onDrag, onSlotClick, onSlotRight
                 ))}
                 <div style={{ height: 1, background: 'var(--glass-border)', margin: '2px 0' }} />
                 <div style={{ fontSize: 9, color: 'var(--tx3)', padding: '4px 8px', textTransform: 'uppercase' }}>Пресеты</div>
-                {[{name:'Сундук',r:3},{name:'Большой сундук',r:6},{name:'Хоппер',r:1},{name:'Раздатчик',r:3}].map(p => (
+                {GUI_PRESETS.map(p => (
                   <button key={p.name} className={s.mmSizeOption}
-                    onClick={() => { onResizeMenu?.(project.id, p.r); setShowSizeMenu(false) }}>
-                    {p.name} ({p.r}x9)
+                    onClick={() => { onResizeMenu?.(project.id, p.rows); setShowSizeMenu(false) }}>
+                    {p.name} ({p.rows}x9)
                   </button>
                 ))}
               </div>

@@ -21,6 +21,15 @@ export function LoreEditor({ lore, onChange }: Props) {
     setText(lore.map(line => seg2mm(line)).join('\n'))
   }, [lore])
 
+  useEffect(() => {
+    if (!showTpls) return
+    const h = (e: MouseEvent) => {
+      if (tplBtnRef.current && !tplBtnRef.current.contains(e.target as Node)) setShowTpls(false)
+    }
+    const t = setTimeout(() => document.addEventListener('mousedown', h), 0)
+    return () => { clearTimeout(t); document.removeEventListener('mousedown', h) }
+  }, [showTpls])
+
   const apply = (val: string) => {
     setText(val)
     const lines = val.split('\n')

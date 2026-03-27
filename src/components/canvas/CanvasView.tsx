@@ -26,11 +26,13 @@ interface Props {
   onResizeMenu: (projectId: string, rows: number) => void
   onSetEraser: () => void
   onDeselect: () => void
+  onDeselectPalette: () => void
   onClearAll: (projectId: string) => void
   onRenameMenu?: (projectId: string, name: string) => void
+  onMenuRemoved?: (projectId: string) => void
 }
 
-export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, selSlot, onSlotSelect, palItem, onPlaceItem, onRemoveItem, showNums, onActivateMenu, onBrushPick, onResizeMenu, onSetEraser, onDeselect, onClearAll, onRenameMenu }: Props) {
+export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, selSlot, onSlotSelect, palItem, onPlaceItem, onRemoveItem, showNums, onActivateMenu, onBrushPick, onResizeMenu, onSetEraser, onDeselect, onDeselectPalette, onClearAll, onRenameMenu, onMenuRemoved }: Props) {
   const [pan, setPan] = useState({ x: 0, y: 0 })
   const [zoom, setZoom] = useState(1)
   const [connectMode, setConnectMode] = useState(false)
@@ -95,6 +97,7 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
     if (connecting) { setConnecting(null); return }
     setSelectedMenus(new Set())
     onDeselect()
+    onDeselectPalette()
     setGrabbing(true)
     const sx = e.clientX - pan.x, sy = e.clientY - pan.y
     const mv = (ev: MouseEvent) => setPan({ x: ev.clientX - sx, y: ev.clientY - sy })
@@ -199,6 +202,7 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
   const removeFromCanvas = (idx: number) => {
     const pid = workspace.menus[idx].projectId
     onUpdateWS({ ...workspace, menus: workspace.menus.filter((_, i) => i !== idx), connections: workspace.connections.filter(c => c.fromMenu !== pid && c.toMenu !== pid) })
+    onMenuRemoved?.(pid)
   }
 
   const getSlotCenter = (menuId: string, slot: string) => {

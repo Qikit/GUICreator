@@ -9,7 +9,7 @@
 .catHeader:hover { background: var(--glass-hover); color: var(--tx1); }
 .catHeader .itemTex { width: 14px; height: 14px; flex-shrink: 0; image-rendering: pixelated; }
 .catCount { color: var(--tx3); font-size: 9px; margin-left: 3px; }
-.itemGrid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 3px; padding: 3px 0; }
+.itemGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(34px, 1fr)); gap: 3px; padding: 3px 0; }
 .palItem { display: flex; align-items: center; justify-content: center; padding: 3px; border-radius: var(--radius-sm); cursor: pointer; aspect-ratio: 1; border: 2px solid transparent; transition: all 150ms; position: relative; overflow: hidden; }
 .palItem:hover { background: var(--glass-hover); border-color: var(--glass-border); transform: scale(1.05); }
 .palItemSel { border-color: var(--accent); background: var(--accent-subtle); box-shadow: 0 0 8px rgba(139,92,246,0.2); }
@@ -26,7 +26,7 @@
 .viewBtnActive { background: var(--accent-subtle); color: var(--accent); border-color: var(--accent); }
 
 /* Large grid */
-.itemGridLarge { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; padding: 3px 0; }
+.itemGridLarge { display: grid; grid-template-columns: repeat(auto-fill, minmax(50px, 1fr)); gap: 4px; padding: 3px 0; }
 .itemGridLarge .palItem { padding: 4px; }
 .itemGridLarge .palItem .itemTex { width: 44px; height: 44px; }
 

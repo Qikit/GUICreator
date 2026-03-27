@@ -21,6 +21,15 @@ export function TextEditor({ label, segs, onChange }: Props) {
 
   useEffect(() => { setMmText(seg2mm(segs)) }, [segs])
 
+  useEffect(() => {
+    if (!showSymbols) return
+    const h = (e: MouseEvent) => {
+      if (symBtnRef.current && !symBtnRef.current.contains(e.target as Node)) setShowSymbols(false)
+    }
+    const t = setTimeout(() => document.addEventListener('mousedown', h), 0)
+    return () => { clearTimeout(t); document.removeEventListener('mousedown', h) }
+  }, [showSymbols])
+
   const apply = (text: string) => {
     setMmText(text)
     const parsed = parseMM(text)
@@ -54,7 +63,7 @@ export function TextEditor({ label, segs, onChange }: Props) {
               const r = symBtnRef.current?.getBoundingClientRect()
               if (!r) return null
               return createPortal(
-                <div style={{ position: 'fixed', zIndex: 1000, background: 'rgba(15, 7, 32, 0.95)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-md)', padding: 6, boxShadow: '0 8px 32px rgba(0,0,0,.5)', width: 240, top: r.top, left: Math.min(r.right - 240, window.innerWidth - 250), transform: 'translateY(-100%)' }}>
+                <div style={{ position: 'fixed', zIndex: 1000, background: 'rgba(15, 7, 32, 0.95)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-md)', padding: 6, boxShadow: '0 8px 32px rgba(0,0,0,.5)', width: 240, maxHeight: 300, overflowY: 'auto', top: r.top, left: Math.min(r.right - 240, window.innerWidth - 250), transform: 'translateY(-100%)' }}>
                   {MC_SYMBOLS.map((g, gi) => (
                     <div key={gi} style={{ marginBottom: 4 }}>
                       <div style={{ fontSize: 9, color: 'var(--tx3)', marginBottom: 2 }}>{g.group}</div>

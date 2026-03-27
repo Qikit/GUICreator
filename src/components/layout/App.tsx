@@ -45,6 +45,7 @@ export function App() {
   const saveTpl = (t: unknown) => { const upd = [...uTpls, t]; setUTpls(upd); saveUserTemplates(upd) }
   const [activeWS, setActiveWS] = useState<Workspace | null>(null)
   const [projectCache, setProjectCache] = useState<Record<string, Project>>({})
+  const removedFromCanvas = useRef<Set<string>>(new Set())
 
   const refreshCache = useCallback((ws: Workspace) => {
     const c: Record<string, Project> = {}
@@ -78,7 +79,7 @@ export function App() {
   useEffect(() => {
     if (!activeWS) return
     const alreadyInWS = activeWS.menus.find(m => m.projectId === proj.id)
-    if (!alreadyInWS) {
+    if (!alreadyInWS && !removedFromCanvas.current.has(proj.id)) {
       const updated = { ...activeWS, menus: [...activeWS.menus, { projectId: proj.id, x: 100 + activeWS.menus.length * 250, y: 100 }] }
       updateWS(updated)
     } else {
@@ -240,6 +241,17 @@ export function App() {
               else { setPalItem(ERASER_ID); setPalPreset(null) }
             }}
             onDeselect={() => { setSelSlot(null); setMultiSel(new Set()) }}
+            onDeselectPalette={() => { setPalItem(null); setPalPreset(null) }}
+            onMenuRemoved={(pid) => {
+              removedFromCanvas.current.add(pid)
+              if (pid === proj.id) {
+                const remaining = activeWS?.menus.filter(m => m.projectId !== pid) || []
+                if (remaining.length > 0) {
+                  const p = loadProject(remaining[0].projectId)
+                  if (p) { loadProj(p); setSelSlot(null); setMultiSel(new Set()) }
+                }
+              }
+            }}
             onClearAll={(pid) => {
               if (pid !== proj.id) switchToProject(pid)
               dispatch({ type: 'CA' }); setSelSlot(null); setMultiSel(new Set())
@@ -262,7 +274,7 @@ export function App() {
       {showGrad && <GradientModal onClose={() => setShowGrad(false)} />}
       {showColorPicker && <ColorPickerModal onClose={() => setShowColorPicker(false)} />}
       {showTpls && <TemplateModal builtIn={BUILT_TPLS as never} userTemplates={[]} onApply={(t: any) => { const np = newProject(t.name || proj.name, t.rows); np.slots = JSON.parse(JSON.stringify(t.slots || {})); loadProj(np); setSelSlot(null); setMultiSel(new Set()); setShowTpls(false) }} onDeleteUser={() => {}} onClose={() => setShowTpls(false)} />}
-      {showProjs && <ProjectModal list={loadProjectList()} onOpen={p => { loadProj(p); setSelSlot(null); setMultiSel(new Set()); setShowProjs(false) }} onDelete={id => { deleteProject(id); setShowProjs(false) }} onClose={() => setShowProjs(false)} />}
+      {showProjs && <ProjectModal list={loadProjectList()} onOpen={p => { loadProj(p); setSelSlot(null); setMultiSel(new Set()); setShowProjs(false) }} onDelete={id => { deleteProject(id); forceRender(x => x + 1) }} onClose={() => setShowProjs(false)} />}
       {ctxMenu && <CtxMenu x={ctxMenu.x} y={ctxMenu.y} items={ctxMenu.items} onClose={() => setCtxMenu(null)} />}
       {showWorkspaces && (
         <GlassModal onClose={() => setShowWorkspaces(false)} title="Workspaces">
@@ -270,7 +282,7 @@ export function App() {
             {loadWorkspaceList().map(id => {
               const ws = loadWorkspace(id); if (!ws) return null
               return (
-                <div key={id} onClick={() => { setActiveWS(ws); refreshCache(ws); setShowWorkspaces(false) }}
+                <div key={id} onClick={() => { removedFromCanvas.current.clear(); setActiveWS(ws); refreshCache(ws); setShowWorkspaces(false) }}
                   style={{ position: 'relative', padding: 12, background: id === activeWS?.id ? 'var(--accent-subtle)' : 'var(--glass-surface)', border: `1px solid ${id === activeWS?.id ? 'var(--accent)' : 'var(--glass-border)'}`, borderRadius: 'var(--radius-md)', cursor: 'pointer', transition: 'all 150ms' }}
                   onMouseEnter={e => (e.currentTarget.style.background = id === activeWS?.id ? 'var(--accent-subtle)' : 'var(--glass-hover)')}
                   onMouseLeave={e => (e.currentTarget.style.background = id === activeWS?.id ? 'var(--accent-subtle)' : 'var(--glass-surface)')}>
