@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import type { TextSegment } from '@/types'
 import { parseMM, seg2mm } from '@/utils/minimessage'
 import { defaultSegment } from '@/utils/slot'
@@ -16,6 +16,15 @@ interface Props {
 export function TextEditor({ label, segs, onChange }: Props) {
   const [mmText, setMmText] = useState(() => seg2mm(segs))
   const [showSymbols, setShowSymbols] = useState(false)
+  const symBtnRef = useRef<HTMLButtonElement>(null)
+  const [symPos, setSymPos] = useState<{ top: number; left: number } | null>(null)
+
+  useEffect(() => {
+    if (showSymbols && symBtnRef.current) {
+      const r = symBtnRef.current.getBoundingClientRect()
+      setSymPos({ top: r.top, left: Math.min(r.right - 240, window.innerWidth - 250) })
+    }
+  }, [showSymbols])
 
   useEffect(() => { setMmText(seg2mm(segs)) }, [segs])
 
@@ -46,10 +55,10 @@ export function TextEditor({ label, segs, onChange }: Props) {
         />
         <div style={{ display: 'flex', gap: 4, alignItems: 'center', marginTop: 2 }}>
           <div className={s.mmHelp}>{'<color> <bold> <italic> <gradient:#HEX1:#HEX2>'}</div>
-          <div style={{ position: 'relative', marginLeft: 'auto' }}>
-            <button className={s.addBtn} onClick={() => setShowSymbols(!showSymbols)}>⚝</button>
-            {showSymbols && (
-              <div style={{ position: 'absolute', zIndex: 100, background: 'var(--glass-panel)', border: '1px solid var(--glass-border)', borderRadius: 5, padding: 6, boxShadow: '0 6px 16px rgba(0,0,0,.5)', width: 240, bottom: '100%', right: 0, marginBottom: 4 }}>
+          <div style={{ marginLeft: 'auto' }}>
+            <button ref={symBtnRef} className={s.addBtn} onClick={() => setShowSymbols(!showSymbols)}>⚝</button>
+            {showSymbols && symPos && (
+              <div style={{ position: 'fixed', zIndex: 1000, background: 'rgba(255,255,255,0.06)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-md)', padding: 6, boxShadow: '0 8px 32px rgba(0,0,0,.5)', width: 240, top: symPos.top, left: symPos.left, transform: 'translateY(-100%)' }}>
                 {MC_SYMBOLS.map((g, gi) => (
                   <div key={gi} style={{ marginBottom: 4 }}>
                     <div style={{ fontSize: 9, color: 'var(--tx3)', marginBottom: 2 }}>{g.group}</div>
