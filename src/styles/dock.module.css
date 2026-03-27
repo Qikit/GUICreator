@@ -2,7 +2,6 @@
   display: flex;
   flex: 1;
   overflow: hidden;
-  gap: 1px;
 }
 
 .panel {
@@ -99,6 +98,21 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
+}
+
+.resizeHandle {
+  width: 4px;
+  cursor: col-resize;
+  background: transparent;
+  transition: background 150ms;
+  flex-shrink: 0;
+  z-index: 10;
+}
+.resizeHandle:hover {
+  background: var(--accent);
+}
+.resizeHandle:active {
+  background: var(--accent);
 }
 
 .dropZone {

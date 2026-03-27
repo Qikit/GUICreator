@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, Fragment } from 'react'
 import { usePrefsStore } from '@/store/prefsStore'
 import { DockPanel } from './DockPanel'
 import s from '@/styles/dock.module.css'
@@ -14,13 +14,8 @@ interface Props {
   panels: PanelConfig[]
 }
 
-const PANEL_WIDTHS: Record<string, number> = {
-  palette: 260,
-  editor: 440,
-}
-
 export function DockLayout({ panels }: Props) {
-  const { dockOrder, setDockOrder, collapsed, toggleCollapse } = usePrefsStore()
+  const { dockOrder, setDockOrder, collapsed, toggleCollapse, panelWidths, setPanelWidth, resetPanelWidth } = usePrefsStore()
   const [dragId, setDragId] = useState<string | null>(null)
   const [dropTarget, setDropTarget] = useState<string | null>(null)
 
@@ -45,6 +40,23 @@ export function DockLayout({ panels }: Props) {
     setDropTarget(null)
   }, [dragId, dropTarget, dockOrder, setDockOrder])
 
+  const startResize = (side: 'left' | 'right') => (e: React.MouseEvent) => {
+    e.preventDefault()
+    const startX = e.clientX
+    const startWidth = panelWidths[side]
+    const onMove = (ev: MouseEvent) => {
+      const delta = side === 'left' ? ev.clientX - startX : startX - ev.clientX
+      const newWidth = Math.max(200, Math.min(window.innerWidth * 0.5, startWidth + delta))
+      setPanelWidth(side, newWidth)
+    }
+    const onUp = () => {
+      window.removeEventListener('mousemove', onMove)
+      window.removeEventListener('mouseup', onUp)
+    }
+    window.addEventListener('mousemove', onMove)
+    window.addEventListener('mouseup', onUp)
+  }
+
   const positions: ('left' | 'center' | 'right')[] = ['left', 'center', 'right']
 
   return (
@@ -55,24 +67,39 @@ export function DockLayout({ panels }: Props) {
         if (!panel) return null
 
         const isCollapsed = pos !== 'center' && collapsed[pos as 'left' | 'right']
-        const width = PANEL_WIDTHS[panelId] || panel.width
+        const width = pos !== 'center' ? panelWidths[pos as 'left' | 'right'] : panel.width
 
         return (
-          <DockPanel
-            key={panelId}
-            id={panelId}
-            title={panel.title}
-            position={pos}
-            collapsed={isCollapsed}
-            onCollapse={pos !== 'center' ? () => toggleCollapse(pos as 'left' | 'right') : undefined}
-            onDragStart={setDragId}
-            onDragOver={handleDragOver}
-            onDragEnd={handleDragEnd}
-            isDropTarget={dropTarget === panelId}
-            width={width}
-          >
-            {panel.content}
-          </DockPanel>
+          <Fragment key={panelId}>
+            {pos === 'center' && (
+              <div
+                className={s.resizeHandle}
+                onMouseDown={startResize('left')}
+                onDoubleClick={() => resetPanelWidth('left')}
+              />
+            )}
+            <DockPanel
+              id={panelId}
+              title={panel.title}
+              position={pos}
+              collapsed={isCollapsed}
+              onCollapse={pos !== 'center' ? () => toggleCollapse(pos as 'left' | 'right') : undefined}
+              onDragStart={setDragId}
+              onDragOver={handleDragOver}
+              onDragEnd={handleDragEnd}
+              isDropTarget={dropTarget === panelId}
+              width={width}
+            >
+              {panel.content}
+            </DockPanel>
+            {pos === 'center' && (
+              <div
+                className={s.resizeHandle}
+                onMouseDown={startResize('right')}
+                onDoubleClick={() => resetPanelWidth('right')}
+              />
+            )}
+          </Fragment>
         )
       })}
     </div>
