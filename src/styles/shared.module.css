@@ -26,3 +26,18 @@
 .ctxItem { display: flex; align-items: center; gap: 5px; padding: 5px 10px; border-radius: var(--radius-sm); font-size: 11px; cursor: pointer; width: 100%; border: none; background: none; color: var(--tx1); transition: all 150ms; }
 .ctxItem:hover { background: var(--glass-hover); }
 .ctxSep { height: 1px; background: var(--glass-border); margin: 2px 0; }
+
+/* Gradient action buttons */
+.gradBtn {
+  width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
+  border: 1px solid var(--glass-border); border-radius: var(--radius-sm);
+  background: none; color: var(--tx2); cursor: pointer; transition: all 150ms;
+  position: relative;
+}
+.gradBtn:hover { background: var(--glass-hover); color: var(--tx1); }
+.gradBtn[data-tip]::after {
+  content: attr(data-tip); position: absolute; bottom: calc(100% + 4px); left: 50%; transform: translateX(-50%);
+  background: rgba(15,7,32,0.95); color: var(--tx1); padding: 3px 8px; border-radius: var(--radius-sm);
+  font-size: 10px; white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity 100ms; z-index: 1000;
+}
+.gradBtn:hover[data-tip]::after { opacity: 1; }
