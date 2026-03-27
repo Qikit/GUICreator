@@ -16,6 +16,7 @@ import { HoverTooltip, CtxMenu } from '@/components/shared'
 import type { CtxMenuItem } from '@/components/shared'
 import { ExportModal, GradientModal, ColorPickerModal, TemplateModal, ProjectModal } from '@/components/modals'
 import { CanvasView } from '@/components/canvas'
+import { DockLayout } from './DockLayout'
 import { StatusBar } from './StatusBar'
 import tb from '@/styles/toolbar.module.css'
 import ss from '@/styles/shared.module.css'
@@ -268,15 +269,21 @@ export function App() {
       </div>
 
       {mode === 'editor' ? (
-        <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-          <Palette itemDB={ITEM_DB} selItem={palItem} onSelect={handlePalSelect} recent={recent} />
-          <Grid
-            project={proj} selSlot={selSlot} multiSel={multiSel} showNums={showNums} showRP={showRP}
-            onSlotMD={onSlotMD} onSlotCtx={onSlotCtx} onPaint={onPaint} setHTT={setHTT}
-            dispatch={dispatch as never} onBgClick={() => { setPalItem(null); setPalPreset(null); setSelSlot(null); setMultiSel(new Set()) }}
-          />
-          <ItemEditor data={selSlot ? proj.slots[selSlot] : null} slotKey={selSlot} dispatch={dispatch as never} />
-        </div>
+        <DockLayout panels={[
+          { id: 'palette', title: 'Предметы', content: (
+            <Palette itemDB={ITEM_DB} selItem={palItem} onSelect={handlePalSelect} recent={recent} />
+          )},
+          { id: 'grid', title: proj.name, content: (
+            <Grid
+              project={proj} selSlot={selSlot} multiSel={multiSel} showNums={showNums} showRP={showRP}
+              onSlotMD={onSlotMD} onSlotCtx={onSlotCtx} onPaint={onPaint} setHTT={setHTT}
+              dispatch={dispatch as never} onBgClick={() => { setPalItem(null); setPalPreset(null); setSelSlot(null); setMultiSel(new Set()) }}
+            />
+          )},
+          { id: 'editor', title: 'Редактор', content: (
+            <ItemEditor data={selSlot ? proj.slots[selSlot] : null} slotKey={selSlot} dispatch={dispatch as never} />
+          )},
+        ]} />
       ) : activeWS && (
         <CanvasView workspace={activeWS} onUpdateWS={updateWS} onEditMenu={editMenuFromCanvas} projects={projectCache} />
       )}

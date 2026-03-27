@@ -1,4 +1,4 @@
-.palette { width: 260px; min-width: 260px; background: var(--pan); border-right: 1px solid var(--bd); display: flex; flex-direction: column; overflow: hidden; }
+.palette { display: flex; flex-direction: column; overflow: hidden; height: 100%; }
 .header { padding: 8px 10px; border-bottom: 1px solid var(--bd); font-weight: 600; font-size: 11px; color: var(--tx2); text-transform: uppercase; letter-spacing: .5px; }
 .search { padding: 5px 8px; position: relative; }
 .search input { width: 100%; padding: 4px 7px; border-radius: 5px; font-size: 12px; }
