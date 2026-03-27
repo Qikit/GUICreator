@@ -22,18 +22,22 @@
 .gridBg { position: absolute; inset: 0; background-image: radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; z-index: 0; }
 .miniMenu {
   position: absolute;
+  display: flex;
+  gap: 4px;
+  user-select: none;
+  z-index: 2;
+}
+.mmMain {
   background: var(--glass-panel);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
   box-shadow: 0 4px 20px rgba(0,0,0,.4), 0 0 12px rgba(139,92,246,0.05);
-  user-select: none;
-  min-width: 120px;
-  z-index: 2;
   transition: border-color 150ms;
+  min-width: 120px;
 }
-.miniMenu:hover { border-color: rgba(255,255,255,0.12); }
+.mmMain:hover { border-color: rgba(255,255,255,0.12); }
 .mmHeader {
   padding: 5px 10px;
   font-size: 11px;
@@ -139,10 +143,57 @@
 .connLine { stroke: var(--accent); stroke-width: 2; fill: none; marker-end: url(#arrowhead); filter: drop-shadow(0 0 4px rgba(139,92,246,0.3)); }
 .connLine:hover { stroke: #f87171; stroke-width: 3; cursor: pointer; filter: drop-shadow(0 0 6px rgba(248,113,113,0.4)); }
 .connHint { position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: #fff; padding: 5px 14px; border-radius: var(--radius-md); font-size: 11px; font-weight: 600; z-index: 10; box-shadow: var(--accent-glow); }
-.mmActive {
+.mmActive .mmMain {
   border-color: var(--accent) !important;
   box-shadow: 0 4px 20px rgba(0,0,0,.4), 0 0 20px rgba(139,92,246,0.15);
 }
+.mmToolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px;
+  background: rgba(15, 7, 32, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  align-self: flex-start;
+}
+.mmToolBtn {
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--tx2);
+  cursor: pointer;
+  transition: all 100ms;
+  position: relative;
+}
+.mmToolBtn:hover { background: var(--glass-hover); color: var(--tx1); }
+.mmToolBtnActive { background: var(--accent-subtle) !important; color: var(--accent) !important; }
+.mmToolBtn::after {
+  content: attr(data-tip);
+  position: absolute;
+  left: calc(100% + 6px);
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(15, 7, 32, 0.95);
+  color: var(--tx1);
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 10px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 100ms;
+  z-index: 100;
+  border: 1px solid var(--glass-border);
+}
+.mmToolBtn:hover::after { opacity: 1; }
 .mmSlotSel {
   outline: 2px solid var(--accent) !important;
   outline-offset: -1px;

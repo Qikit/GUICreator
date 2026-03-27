@@ -23,9 +23,12 @@ interface Props {
   showNums: boolean
   onActivateMenu: (projectId: string) => void
   onBrushPick: (itemId: string) => void
+  onResizeMenu: (projectId: string, rows: number) => void
+  onSetEraser: () => void
+  onDeselect: () => void
 }
 
-export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, selSlot, onSlotSelect, palItem, onPlaceItem, onRemoveItem, showNums, onActivateMenu, onBrushPick }: Props) {
+export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, selSlot, onSlotSelect, palItem, onPlaceItem, onRemoveItem, showNums, onActivateMenu, onBrushPick, onResizeMenu, onSetEraser, onDeselect }: Props) {
   const [pan, setPan] = useState({ x: 0, y: 0 })
   const [zoom, setZoom] = useState(1)
   const [connectMode, setConnectMode] = useState(false)
@@ -43,6 +46,7 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
     if ((e.target as HTMLElement).closest(`.${s.miniMenu}`) || (e.target as HTMLElement).closest(`.${s.canvasBottomBar}`) || (e.target as HTMLElement).closest(`.${s.wsName}`) || (e.target as HTMLElement).closest(`.${ss.ctxMenu}`)) return
     if (e.button !== 0) return
     if (connecting) { setConnecting(null); return }
+    onDeselect()
     setGrabbing(true)
     const sx = e.clientX - pan.x, sy = e.clientY - pan.y
     const mv = (ev: MouseEvent) => setPan({ x: ev.clientX - sx, y: ev.clientY - sy })
@@ -223,6 +227,20 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
             selectedSlot={m.projectId === activeProjectId ? selSlot : null}
             showNums={showNums}
             onSlotHover={(data, x, y) => data ? setHoverData({ data, x, y }) : setHoverData(null)}
+            palItem={palItem}
+            onDeleteMenu={pid => {
+              const idx = workspace.menus.findIndex(mm => mm.projectId === pid)
+              if (idx >= 0) removeFromCanvas(idx)
+            }}
+            onResizeMenu={pid => {
+              const p2 = projects[pid]; if (!p2) return
+              const rows = prompt('Количество рядов (1-6):', String(p2.rows))
+              if (rows) {
+                const nr = Math.max(1, Math.min(6, parseInt(rows) || p2.rows))
+                onResizeMenu(pid, nr)
+              }
+            }}
+            onSetEraser={onSetEraser}
           />
         })}
       </div>

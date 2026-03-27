@@ -240,6 +240,15 @@ export function App() {
             showNums={showNums}
             onActivateMenu={switchToProject}
             onBrushPick={id => { setPalItem(id); setPalPreset(null) }}
+            onResizeMenu={(pid, rows) => {
+              if (pid !== proj.id) switchToProject(pid)
+              dispatch({ type: 'SR', rows })
+            }}
+            onSetEraser={() => {
+              if (palItem === ERASER_ID) { setPalItem(null); setPalPreset(null) }
+              else { setPalItem(ERASER_ID); setPalPreset(null) }
+            }}
+            onDeselect={() => { setSelSlot(null); setMultiSel(new Set()) }}
           />
         ) : <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--tx3)' }}>Загрузка...</div>},
         { id: 'editor', title: 'Редактор', content: (
