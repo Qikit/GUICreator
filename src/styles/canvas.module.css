@@ -62,14 +62,14 @@
 .mmSlotNum { position: absolute; top: 0; left: 1px; font-size: 8px; color: rgba(255,255,255,.4); font-family: monospace; z-index: 5; pointer-events: none; }
 .canvasBottomBar {
   position: absolute;
-  bottom: var(--sp-lg);
+  bottom: 16px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   align-items: center;
-  gap: var(--sp-sm);
-  padding: var(--sp-xs) var(--sp-sm);
-  background: rgba(255,255,255,0.06);
+  gap: 4px;
+  padding: 4px 8px;
+  background: rgba(15, 7, 32, 0.85);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--glass-border);

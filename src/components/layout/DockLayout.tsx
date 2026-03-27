@@ -18,6 +18,7 @@ export function DockLayout({ panels }: Props) {
   const { dockOrder, setDockOrder, collapsed, toggleCollapse, panelWidths, setPanelWidth, resetPanelWidth } = usePrefsStore()
   const [dragId, setDragId] = useState<string | null>(null)
   const [dropTarget, setDropTarget] = useState<string | null>(null)
+  const [resizing, setResizing] = useState<{ side: 'left' | 'right'; width: number } | null>(null)
 
   const panelMap = Object.fromEntries(panels.map(p => [p.id, p]))
 
@@ -40,6 +41,11 @@ export function DockLayout({ panels }: Props) {
     setDropTarget(null)
   }, [dragId, dropTarget, dockOrder, setDockOrder])
 
+  const getWidth = (side: 'left' | 'right') => {
+    if (resizing && resizing.side === side) return resizing.width
+    return panelWidths[side]
+  }
+
   const startResize = (side: 'left' | 'right') => (e: React.MouseEvent) => {
     e.preventDefault()
     const startX = e.clientX
@@ -47,9 +53,13 @@ export function DockLayout({ panels }: Props) {
     const onMove = (ev: MouseEvent) => {
       const delta = side === 'left' ? ev.clientX - startX : startX - ev.clientX
       const newWidth = Math.max(200, Math.min(window.innerWidth * 0.5, startWidth + delta))
-      setPanelWidth(side, newWidth)
+      setResizing({ side, width: newWidth })
     }
     const onUp = () => {
+      setResizing(prev => {
+        if (prev) setPanelWidth(prev.side, prev.width)
+        return null
+      })
       window.removeEventListener('mousemove', onMove)
       window.removeEventListener('mouseup', onUp)
     }
@@ -67,7 +77,7 @@ export function DockLayout({ panels }: Props) {
         if (!panel) return null
 
         const isCollapsed = pos !== 'center' && collapsed[pos as 'left' | 'right']
-        const width = pos !== 'center' ? panelWidths[pos as 'left' | 'right'] : panel.width
+        const width = pos !== 'center' ? getWidth(pos as 'left' | 'right') : panel.width
 
         return (
           <Fragment key={panelId}>

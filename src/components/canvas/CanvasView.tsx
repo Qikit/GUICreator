@@ -1,11 +1,10 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import type { Workspace, Project, SlotData } from '@/types'
 import { gid } from '@/utils/id'
 import { newProject } from '@/utils/slot'
 import { saveProject, loadProject, loadProjectList } from '@/storage'
 import { CtxMenu, HoverTooltip } from '@/components/shared'
 import { MiniMenu } from './MiniMenu'
-import { GlowButton } from '@/components/ui'
 import s from '@/styles/canvas.module.css'
 import ss from '@/styles/shared.module.css'
 
@@ -22,9 +21,11 @@ interface Props {
   onPlaceItem: (projectId: string, slotKey: string) => void
   onRemoveItem: (projectId: string, slotKey: string) => void
   showNums: boolean
+  onActivateMenu: (projectId: string) => void
+  onBrushPick: (itemId: string) => void
 }
 
-export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, selSlot, onSlotSelect, palItem, onPlaceItem, onRemoveItem, showNums }: Props) {
+export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, selSlot, onSlotSelect, palItem, onPlaceItem, onRemoveItem, showNums, onActivateMenu, onBrushPick }: Props) {
   const [pan, setPan] = useState({ x: 0, y: 0 })
   const [zoom, setZoom] = useState(1)
   const [connectMode, setConnectMode] = useState(false)
@@ -34,10 +35,12 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
   const [mmCtx, setMmCtx] = useState<{ x: number; y: number; idx: number } | null>(null)
   const [slotCtx, setSlotCtx] = useState<{ x: number; y: number; menuId: string; slotKey: string } | null>(null)
   const [hoverData, setHoverData] = useState<{ data: SlotData; x: number; y: number } | null>(null)
+  const [showAddPopover, setShowAddPopover] = useState(false)
+  const popoverRef = useRef<HTMLDivElement>(null)
   const surfRef = useRef<HTMLDivElement>(null)
 
   const onBgDown = (e: React.MouseEvent) => {
-    if ((e.target as HTMLElement).closest(`.${s.miniMenu}`) || (e.target as HTMLElement).closest(`.${s.canvasTb}`) || (e.target as HTMLElement).closest(`.${ss.ctxMenu}`)) return
+    if ((e.target as HTMLElement).closest(`.${s.miniMenu}`) || (e.target as HTMLElement).closest(`.${s.canvasBottomBar}`) || (e.target as HTMLElement).closest(`.${s.wsName}`) || (e.target as HTMLElement).closest(`.${ss.ctxMenu}`)) return
     if (e.button !== 0) return
     if (connecting) { setConnecting(null); return }
     setGrabbing(true)
@@ -57,8 +60,8 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
     setZoom(nz)
   }
 
-  const moveMenu = (idx: number, nx: number, ny: number) => {
-    onUpdateWS({ ...workspace, menus: workspace.menus.map((m, i) => i === idx ? { ...m, x: Math.round((nx - pan.x) / zoom), y: Math.round((ny - pan.y) / zoom) } : m) })
+  const moveMenu = (idx: number, cx: number, cy: number) => {
+    onUpdateWS({ ...workspace, menus: workspace.menus.map((m, i) => i === idx ? { ...m, x: Math.round(cx), y: Math.round(cy) } : m) })
   }
 
   const onSlotClick = (menuId: string, slot: string) => {
@@ -78,7 +81,24 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
 
   const onSlotRightClick = (menuId: string, slotKey: string, cx: number, cy: number) => {
     onSlotSelect(menuId, slotKey)
-    setSlotCtx({ x: (cx - pan.x) / zoom, y: (cy - pan.y) / zoom, menuId, slotKey })
+    setSlotCtx({ x: cx, y: cy, menuId, slotKey })
+  }
+
+  const handleSlotMouseDown = (menuId: string, slot: string, e: React.MouseEvent) => {
+    if (e.altKey) {
+      const p = projects[menuId]
+      if (p?.slots[slot]) {
+        e.preventDefault()
+        e.stopPropagation()
+        onBrushPick(p.slots[slot].itemId)
+      }
+      return
+    }
+    if (e.button === 2 && palItem) {
+      e.preventDefault()
+      e.stopPropagation()
+      onPlaceItem(menuId, slot)
+    }
   }
 
   const delConn = (id: string) => onUpdateWS({ ...workspace, connections: workspace.connections.filter(c => c.id !== id) })
@@ -124,10 +144,43 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
     setConnecting(null)
   }
 
+  const fitAll = () => {
+    if (!surfRef.current || workspace.menus.length === 0) return
+    const rect = surfRef.current.getBoundingClientRect()
+    const SLOT_SIZE = 48, SLOT_GAP = 2, FRAME_PAD = 10, HEADER_H = 32
+    const menuW = FRAME_PAD * 2 + 9 * (SLOT_SIZE + SLOT_GAP) - SLOT_GAP
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity
+    for (const m of workspace.menus) {
+      const p = projects[m.projectId]; if (!p) continue
+      const menuH = HEADER_H + FRAME_PAD * 2 + p.rows * (SLOT_SIZE + SLOT_GAP) - SLOT_GAP
+      minX = Math.min(minX, m.x); minY = Math.min(minY, m.y)
+      maxX = Math.max(maxX, m.x + menuW); maxY = Math.max(maxY, m.y + menuH)
+    }
+    const pad = 40
+    const scaleX = (rect.width - pad * 2) / (maxX - minX)
+    const scaleY = (rect.height - pad * 2) / (maxY - minY)
+    const nz = Math.max(0.2, Math.min(3, Math.min(scaleX, scaleY)))
+    setPan({ x: pad - minX * nz, y: pad - minY * nz })
+    setZoom(nz)
+  }
+
+  useEffect(() => {
+    if (!showAddPopover) return
+    const h = (e: MouseEvent) => { if (popoverRef.current && !popoverRef.current.contains(e.target as Node)) setShowAddPopover(false) }
+    document.addEventListener('mousedown', h)
+    return () => document.removeEventListener('mousedown', h)
+  }, [showAddPopover])
+
   return (
     <div className={`${s.canvasWrap} ${grabbing ? s.grabbing : ''}`} onMouseDown={onBgDown} onWheel={onWheel}
       onMouseMove={e => setMousePos({ x: (e.clientX - pan.x) / zoom, y: (e.clientY - pan.y) / zoom })} ref={surfRef}
-      onKeyDown={e => { if (e.key === 'Escape') { setConnecting(null); setConnectMode(false) } }} tabIndex={0}>
+      onKeyDown={e => {
+        if (e.key === 'Escape') { setConnecting(null); setConnectMode(false) }
+        if (e.key === 'Delete' && !selSlot) {
+          const idx = workspace.menus.findIndex(m => m.projectId === activeProjectId)
+          if (idx >= 0) removeFromCanvas(idx)
+        }
+      }} tabIndex={0}>
       <div className={s.gridBg} style={{ backgroundPosition: `${pan.x}px ${pan.y}px`, backgroundSize: `${40 * zoom}px ${40 * zoom}px` }} />
       <div className={s.canvasSurf} style={{ transform: `translate(${pan.x}px,${pan.y}px) scale(${zoom})` }}>
         <svg style={{ position: 'absolute', top: 0, left: 0, width: 1, height: 1, overflow: 'visible', pointerEvents: 'none', zIndex: 5 }}>
@@ -136,12 +189,18 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
             const from = getSlotCenter(c.fromMenu, c.fromSlot); const to = getMenuTop(c.toMenu)
             if (!from || !to) return null
             const dy = to.y - from.y
+            const pathD = `M${from.x},${from.y} C${from.x},${from.y + dy * 0.5} ${to.x},${to.y - Math.abs(dy) * 0.3} ${to.x},${to.y}`
+            const midX = (from.x + to.x) / 2
+            const midY = (from.y + to.y) / 2
             return (
               <g key={c.id} style={{ pointerEvents: 'auto' }}>
-                <path className={s.connLine} d={`M${from.x},${from.y} C${from.x},${from.y + dy * 0.5} ${to.x},${to.y - Math.abs(dy) * 0.3} ${to.x},${to.y}`} />
-                <circle cx={(from.x + to.x) / 2} cy={(from.y + to.y) / 2} r={7} fill="var(--glass-surface)" stroke="var(--er)" strokeWidth={1.5}
-                  style={{ cursor: 'pointer', opacity: 0 }} onClick={() => delConn(c.id)}
-                  onMouseEnter={e => (e.currentTarget.style.opacity = '1')} onMouseLeave={e => (e.currentTarget.style.opacity = '0')} />
+                <path d={pathD} stroke="transparent" strokeWidth={12} fill="none" style={{ cursor: 'pointer', pointerEvents: 'stroke' }} onClick={() => delConn(c.id)} />
+                <path className={s.connLine} d={pathD} style={{ pointerEvents: 'none' }} />
+                <circle cx={midX} cy={midY} r={8} fill="var(--glass-surface)" stroke="var(--er)" strokeWidth={1.5}
+                  style={{ cursor: 'pointer', opacity: 0.4, transition: 'opacity 150ms' }}
+                  onClick={() => delConn(c.id)}
+                  onMouseEnter={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.setAttribute('fill', 'rgba(248,113,113,0.9)') }}
+                  onMouseLeave={e => { e.currentTarget.style.opacity = '0.4'; e.currentTarget.setAttribute('fill', 'var(--glass-surface)') }} />
               </g>
             )
           })}
@@ -152,42 +211,69 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
         </svg>
         {workspace.menus.map((m, i) => {
           const p = projects[m.projectId]; if (!p) return null
-          return <MiniMenu key={m.projectId} project={p} x={m.x} y={m.y}
+          return <MiniMenu key={m.projectId} project={p} x={m.x} y={m.y} zoom={zoom}
             onDrag={(nx, ny) => moveMenu(i, nx, ny)}
             onSlotClick={onSlotClick}
             onSlotRightClick={onSlotRightClick}
             connectingFrom={connectMode ? connecting : null}
-            onCtxMenu={(cx, cy) => setMmCtx({ x: (cx - pan.x) / zoom, y: (cy - pan.y) / zoom, idx: i })}
+            onCtxMenu={(cx, cy) => setMmCtx({ x: cx, y: cy, idx: i })}
+            onSlotMouseDown={handleSlotMouseDown}
+            onActivate={onActivateMenu}
             isActive={m.projectId === activeProjectId}
             selectedSlot={m.projectId === activeProjectId ? selSlot : null}
             showNums={showNums}
             onSlotHover={(data, x, y) => data ? setHoverData({ data, x, y }) : setHoverData(null)}
           />
         })}
-        {mmCtx && <CtxMenu x={mmCtx.x} y={mmCtx.y} onClose={() => setMmCtx(null)} items={[
-          { label: 'Убрать с canvas', danger: true, fn: () => removeFromCanvas(mmCtx.idx) },
-        ]} />}
-        {slotCtx && (() => {
-          const p = projects[slotCtx.menuId]
-          const hasItem = p?.slots[slotCtx.slotKey]
-          return <CtxMenu x={slotCtx.x} y={slotCtx.y} onClose={() => setSlotCtx(null)} items={[
-            ...(hasItem ? [{ label: 'Удалить предмет', danger: true, fn: () => { onRemoveItem(slotCtx.menuId, slotCtx.slotKey); setSlotCtx(null) } }] : []),
-          ]} />
-        })()}
       </div>
-      <div className={s.canvasTb}>
-        <input value={workspace.name} onChange={e => onUpdateWS({ ...workspace, name: e.target.value })}
-          style={{ background: 'var(--glass-panel)', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-md)', padding: '4px 8px', color: 'var(--tx1)', fontSize: 12, width: 160, textAlign: 'center' }} />
-        <GlowButton onClick={addNew}>+ Новое</GlowButton>
-        <select onChange={e => { if (e.target.value) addExisting(e.target.value); e.target.value = '' }}
-          style={{ fontSize: 11, padding: '4px 6px', background: 'var(--glass-panel)', border: '1px solid var(--glass-border)', color: 'var(--tx1)', borderRadius: 4 }}>
-          <option value="">Существующее...</option>
-          {loadProjectList().filter(id => !workspace.menus.find(m => m.projectId === id)).map(id => {
-            const p = loadProject(id); return p ? <option key={id} value={id}>{p.name}</option> : null
-          })}
-        </select>
-        <GlowButton onClick={toggleConnectMode} variant={connectMode ? 'primary' : 'ghost'} title="Режим соединений">⇒ Связи</GlowButton>
-        <span style={{ fontSize: 10, color: 'var(--tx3)' }}>{Math.round(zoom * 100)}%</span>
+      {mmCtx && <CtxMenu x={mmCtx.x} y={mmCtx.y} onClose={() => setMmCtx(null)} items={[
+        { label: 'Убрать с canvas', danger: true, fn: () => removeFromCanvas(mmCtx.idx) },
+      ]} />}
+      {slotCtx && (() => {
+        const p = projects[slotCtx.menuId]
+        const hasItem = p?.slots[slotCtx.slotKey]
+        return <CtxMenu x={slotCtx.x} y={slotCtx.y} onClose={() => setSlotCtx(null)} items={[
+          ...(hasItem ? [{ label: 'Удалить предмет', danger: true, fn: () => { onRemoveItem(slotCtx.menuId, slotCtx.slotKey); setSlotCtx(null) } }] : []),
+        ]} />
+      })()}
+      <input
+        className={s.wsName}
+        value={workspace.name}
+        onChange={e => onUpdateWS({ ...workspace, name: e.target.value })}
+        title="Название workspace"
+      />
+      <div className={s.canvasBottomBar}>
+        <div className={s.bottomBarGroup}>
+          <button className={s.bottomBtn} onClick={addNew} title="Новое меню">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
+          </button>
+          <div style={{ position: 'relative' }} ref={popoverRef}>
+            <button className={s.bottomBtn} onClick={() => setShowAddPopover(v => !v)} title="Добавить существующее">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 4h3l2-2h6a1 1 0 011 1v9a1 1 0 01-1 1H3a1 1 0 01-1-1V4z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/></svg>
+            </button>
+            {showAddPopover && (
+              <div className={s.addExistingPopover}>
+                {loadProjectList().filter(id => !workspace.menus.find(m => m.projectId === id)).map(id => {
+                  const p = loadProject(id); return p ? <button key={id} onClick={() => { addExisting(id); setShowAddPopover(false) }}>{p.name}</button> : null
+                })}
+                {loadProjectList().filter(id => !workspace.menus.find(m => m.projectId === id)).length === 0 && (
+                  <div style={{ padding: '6px 10px', fontSize: 11, color: 'var(--tx3)' }}>Нет проектов</div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+        <div style={{ width: 1, height: 20, background: 'var(--glass-border)' }} />
+        <div className={s.bottomBarGroup}>
+          <button className={`${s.bottomBtn} ${connectMode ? s.bottomBtnActive : ''}`} onClick={toggleConnectMode} title="Режим соединений">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M10 5l3 3-3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          </button>
+          <button className={s.bottomBtn} onClick={fitAll} title="Уместить всё">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="2" stroke="currentColor" strokeWidth="1.5"/><path d="M8 2v2M8 12v2M2 8h2M12 8h2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
+          </button>
+        </div>
+        <div style={{ width: 1, height: 20, background: 'var(--glass-border)' }} />
+        <span className={s.bottomZoom}>{Math.round(zoom * 100)}%</span>
       </div>
       {connectMode && connecting && <div className={s.connHint}>Кликните по целевому меню · Esc — отмена</div>}
       {connectMode && !connecting && <div className={s.connHint}>Режим связей: кликните по слоту-источнику · Esc — выход</div>}
