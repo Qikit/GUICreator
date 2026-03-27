@@ -15,6 +15,7 @@ export interface GuiType {
   texture: string | null
   containerWidth: number
   containerHeight: number
+  cropY?: number
   slots: SlotPosition[]
 }
 
@@ -105,11 +106,12 @@ export const GUI_TYPES: GuiType[] = [
     name: 'Наковальня',
     texture: TEX + 'anvil.png',
     containerWidth: 176,
-    containerHeight: 84,
+    containerHeight: 54,
+    cropY: 30,
     slots: [
-      { key: '0', x: 26, y: 46 },
-      { key: '1', x: 75, y: 46 },
-      { key: '2', x: 133, y: 46 },
+      { key: '0', x: 26, y: 16 },
+      { key: '1', x: 75, y: 16 },
+      { key: '2', x: 133, y: 16 },
     ],
   },
   {

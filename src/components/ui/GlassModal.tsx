@@ -15,7 +15,7 @@ export function GlassModal({ children, onClose, title }: Props) {
   }, [onClose])
 
   return (
-    <div className={s.overlay} onMouseDown={e => { if (e.target === e.currentTarget) onClose() }}>
+    <div className={s.overlay} onMouseDown={e => { if (e.target === e.currentTarget) onClose() }} onWheel={e => e.stopPropagation()}>
       <div className={s.dialog}>
         {title && <div className={s.title}>{title}</div>}
         {children}

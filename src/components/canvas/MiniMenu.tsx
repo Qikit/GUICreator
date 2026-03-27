@@ -98,6 +98,99 @@ export function MiniMenu({ project, x, y, zoom, onDrag, onSlotClick, onSlotRight
     )
   }
 
+  const drawItem = async (ctx: CanvasRenderingContext2D, d: SlotData, x: number, y: number, size: number) => {
+    const base = import.meta.env.BASE_URL
+    const tryLoad = (src: string): Promise<HTMLImageElement | null> => new Promise(resolve => {
+      const img = new Image()
+      img.crossOrigin = 'anonymous'
+      img.onload = () => resolve(img)
+      img.onerror = () => resolve(null)
+      img.src = src
+    })
+    let img = await tryLoad(`${base}assets/minecraft/textures/item/${d.itemId}.png`)
+    if (!img) img = await tryLoad(`${base}assets/minecraft/renders/${d.itemId}.png`)
+    if (img) ctx.drawImage(img, x, y, size, size)
+    if (d.amount > 1) {
+      ctx.fillStyle = '#FFFFFF'
+      ctx.font = `bold ${size * 0.35}px monospace`
+      ctx.textAlign = 'right'
+      ctx.fillText(String(d.amount), x + size - 1, y + size - 1)
+      ctx.textAlign = 'left'
+    }
+  }
+
+  const downloadPng = async () => {
+    const DL_SCALE = 4
+    const gt = getGuiType(project.guiType)
+    const canvas = document.createElement('canvas')
+    const ctx = canvas.getContext('2d')!
+    ctx.imageSmoothingEnabled = false
+
+    if (gt && gt.texture) {
+      const cropY = gt.cropY ?? 0
+      const w = gt.containerWidth
+      const h = gt.containerHeight
+      canvas.width = w * DL_SCALE
+      canvas.height = h * DL_SCALE
+      const img = new Image()
+      img.crossOrigin = 'anonymous'
+      await new Promise<void>(resolve => {
+        img.onload = () => {
+          ctx.drawImage(img, 0, cropY, w, h, 0, 0, w * DL_SCALE, h * DL_SCALE)
+          resolve()
+        }
+        img.onerror = () => resolve()
+        img.src = `${import.meta.env.BASE_URL}${gt.texture}`
+      })
+      for (const sl of gt.slots) {
+        const d = project.slots[sl.key]
+        if (!d) continue
+        await drawItem(ctx, d, (sl.x + 1) * DL_SCALE, (sl.y + 1) * DL_SCALE, 16 * DL_SCALE)
+      }
+    } else {
+      const PAD = 7, BORDER = 3, SLOT = 18
+      const cols = 9, rows = project.rows
+      const w = PAD * 2 + cols * SLOT
+      const h = PAD * 2 + rows * SLOT + 14
+      canvas.width = w * DL_SCALE
+      canvas.height = h * DL_SCALE
+      ctx.scale(DL_SCALE, DL_SCALE)
+      ctx.fillStyle = '#C6C6C6'
+      ctx.fillRect(0, 14, w, h - 14)
+      ctx.fillStyle = '#3F3F3F'
+      ctx.font = 'bold 8px monospace'
+      ctx.fillText(project.name, PAD + BORDER, 10)
+      ctx.fillStyle = '#FFFFFF'
+      ctx.fillRect(0, 14, w, 3)
+      ctx.fillRect(0, 14, 3, h - 14)
+      ctx.fillStyle = '#555555'
+      ctx.fillRect(0, h - 3, w, 3)
+      ctx.fillRect(w - 3, 14, 3, h - 14)
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const sx = BORDER + PAD + c * SLOT
+          const sy = 14 + BORDER + PAD + r * SLOT
+          ctx.fillStyle = '#8B8B8B'
+          ctx.fillRect(sx, sy, SLOT, SLOT)
+          ctx.fillStyle = '#373737'
+          ctx.fillRect(sx, sy, SLOT, 2)
+          ctx.fillRect(sx, sy, 2, SLOT)
+          ctx.fillStyle = '#FFFFFF'
+          ctx.fillRect(sx, sy + SLOT - 2, SLOT, 2)
+          ctx.fillRect(sx + SLOT - 2, sy, 2, SLOT)
+          const k = `${r}-${c}`
+          const d = project.slots[k]
+          if (d) await drawItem(ctx, d, sx + 1, sy + 1, 16)
+        }
+      }
+    }
+
+    const link = document.createElement('a')
+    link.download = `${project.name || 'menu'}.png`
+    link.href = canvas.toDataURL('image/png')
+    link.click()
+  }
+
   const sizeBadgeText = guiType ? guiType.name : `${project.rows}x9`
 
   const header = (
@@ -158,6 +251,10 @@ export function MiniMenu({ project, x, y, zoom, onDrag, onSlotClick, onSlotRight
         onClick={e => { e.stopPropagation(); onSetEraser?.() }}>
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M8.5 2.5l3 3-6 6H3L1.5 10l7-7.5z" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/><path d="M3 13h8" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/></svg>
       </button>
+      <button className={s.mmToolBtn} data-tip="Скачать PNG"
+        onClick={e => { e.stopPropagation(); downloadPng() }}>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 2v7M4 6l3 3 3-3M2 11h10" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></svg>
+      </button>
     </div>
   ) : null
 
@@ -186,6 +283,7 @@ export function MiniMenu({ project, x, y, zoom, onDrag, onSlotClick, onSlotRight
   ) : null
 
   if (guiType && guiType.texture) {
+    const cropY = guiType.cropY ?? 0
     const w = guiType.containerWidth * SCALE
     const h = guiType.containerHeight * SCALE
     const texUrl = assetUrl(guiType.texture)
@@ -201,7 +299,7 @@ export function MiniMenu({ project, x, y, zoom, onDrag, onSlotClick, onSlotRight
               height: h,
               backgroundImage: `url(${texUrl})`,
               backgroundSize: `${256 * SCALE}px ${256 * SCALE}px`,
-              backgroundPosition: '0 0',
+              backgroundPosition: `0 ${-cropY * SCALE}px`,
               imageRendering: 'pixelated',
             }}>
               {guiType.slots.map(sl => {
