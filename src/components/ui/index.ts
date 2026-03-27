@@ -1,3 +1,6 @@
 export { GlassPanel } from './GlassPanel'
 export { GlowButton } from './GlowButton'
 export { GlassInput } from './GlassInput'
+export { GlassModal, glassModalStyles } from './GlassModal'
+export { GlassTabs } from './GlassTabs'
+export { GlassToggle } from './GlassToggle'
