@@ -6,8 +6,8 @@ import { itemName } from '@/utils/slot'
 import { defaultSegment } from '@/utils/slot'
 import { TextEditor } from './TextEditor'
 import { LoreEditor } from './LoreEditor'
+import { GlassToggle, GlowButton } from '@/components/ui'
 import s from '@/styles/editor.module.css'
-import ss from '@/styles/shared.module.css'
 
 interface Props {
   data: SlotData | null
@@ -38,21 +38,14 @@ export function ItemEditor({ data, slotKey, dispatch }: Props) {
           <div className={s.props}>
             <label>Количество</label>
             <div className={s.amount}>
-              <button onClick={() => upd({ amount: Math.max(1, data.amount - 1) })}>-</button>
-              <input
-                type="number"
-                value={data.amount}
-                min={1} max={64}
-                onChange={e => upd({ amount: Math.max(1, Math.min(64, parseInt(e.target.value) || 1)) })}
-              />
-              <button onClick={() => upd({ amount: Math.min(64, data.amount + 1) })}>+</button>
+              <GlowButton size="sm" onClick={() => upd({ amount: Math.max(1, data.amount - 1) })}>-</GlowButton>
+              <input type="number" value={data.amount} min={1} max={64}
+                onChange={e => upd({ amount: Math.max(1, Math.min(64, parseInt(e.target.value) || 1)) })} />
+              <GlowButton size="sm" onClick={() => upd({ amount: Math.min(64, data.amount + 1) })}>+</GlowButton>
             </div>
 
             <label>Зачарование</label>
-            <div
-              className={`${s.toggle} ${data.enchanted ? s.toggleOn : ''}`}
-              onClick={() => upd({ enchanted: !data.enchanted })}
-            />
+            <GlassToggle checked={data.enchanted} onChange={v => upd({ enchanted: v })} />
 
             <label>CMD</label>
             <input
@@ -71,7 +64,7 @@ export function ItemEditor({ data, slotKey, dispatch }: Props) {
                     type="color"
                     value={data.potionColor || '#FF0000'}
                     onChange={e => upd({ potionColor: e.target.value.toUpperCase() })}
-                    style={{ width: 28, height: 28, padding: 0, border: '1px solid var(--bd)', borderRadius: 3, cursor: 'pointer' }}
+                    style={{ width: 28, height: 28, padding: 0, border: '1px solid var(--glass-border)', borderRadius: 3, cursor: 'pointer' }}
                   />
                   <input
                     value={data.potionColor || ''}
@@ -83,7 +76,7 @@ export function ItemEditor({ data, slotKey, dispatch }: Props) {
                     }}
                     style={{ width: 80, fontSize: 11 }}
                   />
-                  {data.potionColor && <button className={ss.btn} style={{ padding: '2px 5px', fontSize: 10 }} onClick={() => upd({ potionColor: null })}>✕</button>}
+                  {data.potionColor && <GlowButton size="sm" onClick={() => upd({ potionColor: null })}>✕</GlowButton>}
                 </div>
               </>
             )}
@@ -93,7 +86,7 @@ export function ItemEditor({ data, slotKey, dispatch }: Props) {
                 <label>Текстура головы</label>
                 <div style={{ display: 'flex', gap: 4, alignItems: 'center', flexWrap: 'wrap' }}>
                   {data.skullTexture && <SkullFace url={data.skullTexture} size={24} />}
-                  <button className={ss.btn} style={{ padding: '2px 5px', fontSize: 10 }} onClick={() => {
+                  <GlowButton size="sm" onClick={() => {
                     const v = prompt('Вставьте base64 текстуру или URL скина:')
                     if (!v) return
                     if (v.startsWith('http')) { upd({ skullTexture: v }); return }
@@ -103,8 +96,8 @@ export function ItemEditor({ data, slotKey, dispatch }: Props) {
                       if (u) upd({ skullTexture: u })
                       else alert('Не найден URL скина')
                     } catch (e) { alert('Ошибка парсинга') }
-                  }}>{data.skullTexture ? 'Заменить' : 'Вставить'}</button>
-                  {data.skullTexture && <button className={ss.btn} style={{ padding: '2px 5px', fontSize: 10 }} onClick={() => upd({ skullTexture: null })}>✕</button>}
+                  }}>{data.skullTexture ? 'Заменить' : 'Вставить'}</GlowButton>
+                  {data.skullTexture && <GlowButton size="sm" onClick={() => upd({ skullTexture: null })}>✕</GlowButton>}
                 </div>
               </>
             )}
@@ -117,11 +110,8 @@ export function ItemEditor({ data, slotKey, dispatch }: Props) {
         </div>
 
         <div className={s.actions}>
-          <button className={ss.btn} onClick={() => upd({
-            displayName: [defaultSegment(itemName(data.itemId), '#FFFFFF')],
-            lore: [], amount: 1, enchanted: false, customModelData: null, potionColor: null, skullTexture: null,
-          })}>Сбросить</button>
-          <button className={`${ss.btn} ${ss.btnDanger}`} onClick={() => dispatch({ type: 'RS', key: slotKey })}>Удалить</button>
+          <GlowButton onClick={() => upd({ displayName: [defaultSegment(itemName(data.itemId), '#FFFFFF')], lore: [], amount: 1, enchanted: false, customModelData: null, potionColor: null, skullTexture: null })}>Сбросить</GlowButton>
+          <GlowButton variant="danger" onClick={() => dispatch({ type: 'RS', key: slotKey })}>Удалить</GlowButton>
         </div>
       </div>
     </div>
