@@ -1,0 +1,84 @@
+.ambient {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+}
+.blob1 {
+  width: 600px;
+  height: 400px;
+  background: rgba(124,58,237,0.12);
+  top: -10%;
+  right: -5%;
+  animation: drift1 30s ease-in-out infinite;
+}
+.blob2 {
+  width: 500px;
+  height: 350px;
+  background: rgba(59,130,246,0.08);
+  bottom: -10%;
+  left: -5%;
+  animation: drift2 35s ease-in-out infinite;
+}
+.blob3 {
+  width: 400px;
+  height: 300px;
+  background: rgba(139,92,246,0.06);
+  top: 40%;
+  left: 30%;
+  animation: drift3 40s ease-in-out infinite;
+}
+
+.static .blob { animation: none !important; }
+
+@keyframes drift1 {
+  0%, 100% { transform: translate(0, 0); }
+  25% { transform: translate(-30px, 20px); }
+  50% { transform: translate(-15px, -25px); }
+  75% { transform: translate(20px, 10px); }
+}
+@keyframes drift2 {
+  0%, 100% { transform: translate(0, 0); }
+  25% { transform: translate(25px, -15px); }
+  50% { transform: translate(10px, 30px); }
+  75% { transform: translate(-20px, -10px); }
+}
+@keyframes drift3 {
+  0%, 100% { transform: translate(0, 0); }
+  33% { transform: translate(-20px, -20px); }
+  66% { transform: translate(15px, 25px); }
+}
+
+.particles {
+  position: absolute;
+  inset: 0;
+}
+.particle {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: rgba(139,92,246,0.4);
+  border-radius: 50%;
+  animation: rise linear infinite;
+}
+@keyframes rise {
+  0% { opacity: 0; transform: translateY(0); }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-100vh); }
+}
+
+.parallax {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  transition: transform 100ms ease-out;
+}

@@ -19,6 +19,7 @@ import { CanvasView } from '@/components/canvas'
 import { DockLayout } from './DockLayout'
 import { StatusBar } from './StatusBar'
 import { GlowButton } from '@/components/ui'
+import { AmbientBackground } from './AmbientBackground'
 import tb from '@/styles/toolbar.module.css'
 
 export function App() {
@@ -210,7 +211,8 @@ export function App() {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', position: 'relative', zIndex: 1 }}>
+      <AmbientBackground />
       <div className={tb.toolbar}>
         <div className={tb.group}>
           <input className={tb.projName} value={proj.name} onChange={e => setName(e.target.value)} />
