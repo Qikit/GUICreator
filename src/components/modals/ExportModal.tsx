@@ -11,10 +11,9 @@ const TABS = [
   { key: 'legacy', label: '§-Codes' },
   { key: 'minimessage', label: 'MiniMessage' },
   { key: 'abstractmenus', label: 'AbstractMenus' },
-  { key: 'funmenu', label: 'FunMenu' },
 ]
 
-type TabId = 'json' | 'yaml' | 'legacy' | 'minimessage' | 'abstractmenus' | 'funmenu'
+type TabId = 'json' | 'yaml' | 'legacy' | 'minimessage' | 'abstractmenus'
 
 interface Props {
   project: Project
@@ -25,8 +24,6 @@ export function ExportModal({ project, onClose }: Props) {
   const [tab, setTab] = useState<TabId>('json')
   const [copied, setCopied] = useState(false)
   const [amCmd, setAmCmd] = useState(project.name.toLowerCase().replace(/[^a-z0-9]/g, '') || 'menu')
-  const [fmClass, setFmClass] = useState(project.name.replace(/[^a-zA-Z0-9]/g, '') + 'GUI' || 'PreviewGUI')
-
   const gt = getGuiType(project.guiType)
 
   const filled = (() => {
@@ -92,46 +89,13 @@ export function ExportModal({ project, onClose }: Props) {
       }
       return c + `]\n`
     }
-    if (tab === 'funmenu') {
-      const chars = '123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuv'
-      let ci = 0; const sc: Record<string, string> = {}; const pat: string[] = []
-      if (gt) {
-        for (const sl of gt.slots) { if (project.slots[sl.key]) { sc[sl.key] = chars[ci++] || '?'; } }
-        pat.push(Object.values(sc).join('') || '.')
-      } else {
-        for (let r = 0; r < project.rows; r++) {
-          let line = ''
-          for (let c = 0; c < 9; c++) { const k = `${r}-${c}`; if (project.slots[k]) { const ch = chars[ci++] || '?'; sc[k] = ch; line += ch } else line += '.' }
-          pat.push(line)
-        }
-      }
-      const rowCount = gt ? 1 : project.rows
-      let code = `package su.funtime.menu.menus.preview\n\nimport org.bukkit.Material\nimport su.funtime.agui.*\nimport su.funtime.menu.FunMenu\n\nclass ${fmClass}(inst: FunMenu) : SingleGUISurface(${rowCount}, inst) {\n\n    override fun onUpdateNodes() {\n        with(newPattern("""\n`
-      for (const l of pat) code += `            ${l}\n`
-      code += `        """.trimIndent())) {\n            title { !"${project.name.replace(/"/g, '\\"')}" }\n\n`
-      for (const [k, ch] of Object.entries(sc)) {
-        const d = project.slots[k]; if (!d) continue
-        code += `            iconAt(pos('${ch}')) {\n                type(Material.${d.itemId.toUpperCase()})\n`
-        const ns = d.displayName || []
-        if (ns.length && ns.some(seg => seg.text.trim())) {
-          code += `                name(${ns.map(seg => `"${seg.color.replace('#', '').toUpperCase()}".hex + "${seg.text.replace(/"/g, '\\"')}"`).join(' + ')})\n`
-        } else code += `                name(!" ")\n`
-        for (const ll of d.lore || []) {
-          if (!ll?.length) { code += `                loreLine(!F_BONE + "")\n`; continue }
-          code += `                loreLine(${ll.map(seg => `"${seg.color.replace('#', '').toUpperCase()}".hex + "${seg.text.replace(/"/g, '\\"')}"`).join(' + ')})\n`
-        }
-        if (d.enchanted) code += `                glow()\n`
-        code += `                allFlags()\n            }\n`
-      }
-      return code + `        }\n    }\n}\n`
-    }
     return ''
   }
 
   const txt = gen()
   const copy = () => navigator.clipboard.writeText(txt).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000) })
   const dl = () => {
-    const ext = tab === 'yaml' ? 'yml' : tab === 'json' ? 'json' : tab === 'abstractmenus' ? 'conf' : tab === 'funmenu' ? 'kt' : 'txt'
+    const ext = tab === 'yaml' ? 'yml' : tab === 'json' ? 'json' : tab === 'abstractmenus' ? 'conf' : 'txt'
     const blob = new Blob([txt], { type: 'text/plain;charset=utf-8' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a'); a.href = url; a.download = `${project.name.replace(/[^a-zA-Z0-9\u0400-\u04FF]/g, '_')}.${ext}`; a.click()
@@ -149,12 +113,6 @@ export function ExportModal({ project, onClose }: Props) {
         <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 6 }}>
           <span style={{ fontSize: 11, color: 'var(--tx2)' }}>Команда:</span>
           <input value={amCmd} onChange={e => setAmCmd(e.target.value)} style={{ width: 120, fontSize: 12 }} />
-        </div>
-      )}
-      {tab === 'funmenu' && (
-        <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 6 }}>
-          <span style={{ fontSize: 11, color: 'var(--tx2)' }}>Класс:</span>
-          <input value={fmClass} onChange={e => setFmClass(e.target.value)} style={{ width: 180, fontSize: 12 }} />
         </div>
       )}
       <div className={glassModalStyles.code}>{txt}</div>
