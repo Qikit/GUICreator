@@ -27,10 +27,12 @@ interface Props {
   onDeleteMenu?: (menuId: string) => void
   onResizeMenu?: (menuId: string, rows: number) => void
   onSetEraser?: () => void
+  onClearAll?: (menuId: string) => void
   onRename?: (menuId: string, name: string) => void
+  isMultiSelected?: boolean
 }
 
-export function MiniMenu({ project, x, y, zoom, onDrag, onSlotClick, onSlotRightClick, onSlotMouseDown, connectingFrom, onCtxMenu, isActive, selectedSlot, showNums, onSlotHover, onActivate, palItem, onDeleteMenu, onResizeMenu, onSetEraser, onRename }: Props) {
+export function MiniMenu({ project, x, y, zoom, onDrag, onSlotClick, onSlotRightClick, onSlotMouseDown, connectingFrom, onCtxMenu, isActive, selectedSlot, showNums, onSlotHover, onActivate, palItem, onDeleteMenu, onResizeMenu, onSetEraser, onClearAll, onRename }: Props) {
   const [editingName, setEditingName] = useState(false)
   const [nameText, setNameText] = useState(project.name)
 

@@ -1,7 +1,18 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useMemo } from 'react'
 import { hexToRgb, rgbToHex, hsv2hex } from '@/utils/color'
 import { MC_COLORS } from '@/data/colors'
 import { GlassModal, GlowButton } from '@/components/ui'
+
+function hslToHex(h: number, s: number, l: number): string {
+  s /= 100; l /= 100
+  const a = s * Math.min(l, 1 - l)
+  const f = (n: number) => {
+    const k = (n + h / 30) % 12
+    const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1)
+    return Math.round(255 * color).toString(16).padStart(2, '0')
+  }
+  return `#${f(0)}${f(8)}${f(4)}`.toUpperCase()
+}
 
 interface Props {
   onClose: () => void
@@ -14,8 +25,25 @@ export function ColorPickerModal({ onClose, onApply }: Props) {
   const [val, setVal] = useState(100)
   const [hex, setHex] = useState('#FF0000')
   const [copied, setCopied] = useState(false)
+  const [showPalette, setShowPalette] = useState(false)
   const sqRef = useRef<HTMLCanvasElement>(null)
   const hueRef = useRef<HTMLCanvasElement>(null)
+
+  const colorGrid = useMemo(() => {
+    const hues = [0, 15, 30, 45, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330]
+    const rows: string[][] = []
+    rows.push(Array.from({ length: 14 }, (_, i) => {
+      const v = Math.round((i / 13) * 255)
+      return `#${v.toString(16).padStart(2, '0').repeat(3).toUpperCase()}`
+    }))
+    for (let l = 90; l >= 10; l -= 10) {
+      rows.push(hues.map(h => hslToHex(h, 100, l)))
+    }
+    for (let s = 75; s >= 25; s -= 25) {
+      rows.push(hues.map(h => hslToHex(h, s, 50)))
+    }
+    return rows
+  }, [])
 
   useEffect(() => { setHex(hsv2hex(hue, sat, val)) }, [hue, sat, val])
 
@@ -88,6 +116,25 @@ export function ColorPickerModal({ onClose, onApply }: Props) {
           ))}
         </div>
       </div>
+      <div style={{ marginTop: 8 }}>
+        <GlowButton size="md" onClick={() => setShowPalette(true)}>Палитра цветов</GlowButton>
+      </div>
+      {showPalette && (
+        <GlassModal onClose={() => setShowPalette(false)} title="Палитра цветов">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+            {colorGrid.map((row, ri) => (
+              <div key={ri} style={{ display: 'flex', gap: 1 }}>
+                {row.map((color, ci) => (
+                  <div key={ci} style={{ width: 28, height: 20, background: color, cursor: 'pointer', borderRadius: 2, border: '1px solid rgba(0,0,0,0.2)' }}
+                    onClick={() => { navigator.clipboard.writeText(color); setShowPalette(false) }}
+                    title={color} />
+                ))}
+              </div>
+            ))}
+          </div>
+          <div style={{ marginTop: 8, fontSize: 11, color: 'var(--tx3)' }}>Клик = копировать HEX</div>
+        </GlassModal>
+      )}
     </GlassModal>
   )
 }

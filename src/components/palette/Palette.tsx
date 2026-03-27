@@ -3,7 +3,6 @@ import type { SlotPreset, ItemDatabase } from '@/types'
 import { ItemTexture } from '@/components/shared'
 import { ruName, ERASER_ID } from '@/utils/slot'
 import { PalItem } from './PalItem'
-import { GlowButton } from '@/components/ui'
 import { usePrefsStore } from '@/store/prefsStore'
 import s from '@/styles/palette.module.css'
 
@@ -17,7 +16,6 @@ interface Props {
 export function Palette({ itemDB, selItem, onSelect, recent }: Props) {
   const [search, setSearch] = useState('')
   const [openCats, setOpenCats] = useState<Record<string, boolean>>({ glass_panes: true, functional: true })
-  const [customId, setCustomId] = useState('')
   const { paletteView, setPaletteView } = usePrefsStore()
 
   const toggle = (k: string) => setOpenCats(p => ({ ...p, [k]: !p[k] }))
@@ -100,7 +98,6 @@ export function Palette({ itemDB, selItem, onSelect, recent }: Props) {
   return (
     <div className={s.palette}>
       <div className={s.header}>
-        <span>Предметы</span>
         <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
           <div style={{ display: 'flex', gap: 2 }}>
             <button
@@ -135,7 +132,7 @@ export function Palette({ itemDB, selItem, onSelect, recent }: Props) {
         />
         {search && <button className={s.clearBtn} onClick={() => setSearch('')}>✕</button>}
       </div>
-      <div className={s.body}>
+      <div className={`${s.body} ${paletteView === 'largeGrid' ? s.bodyLarge : ''}`}>
         {recent.length > 0 && (
           <div className={s.category}>
             <div className={s.catHeader} onClick={() => toggle('__r')}>
@@ -161,17 +158,6 @@ export function Palette({ itemDB, selItem, onSelect, recent }: Props) {
             {(openCats[k] || search) && renderItems(cat.items, k)}
           </div>
         ))}
-      </div>
-      <div className={s.footer}>
-        <input
-          value={customId}
-          onChange={e => setCustomId(e.target.value)}
-          placeholder="custom_id"
-          onKeyDown={e => { if (e.key === 'Enter' && customId) { onSelect(customId); setCustomId('') } }}
-        />
-        <GlowButton variant="primary" size="sm" style={{ padding: '2px 6px' }}
-          onClick={() => { if (customId) { onSelect(customId); setCustomId('') } }}
-        >+</GlowButton>
       </div>
     </div>
   )

@@ -26,10 +26,11 @@ interface Props {
   onResizeMenu: (projectId: string, rows: number) => void
   onSetEraser: () => void
   onDeselect: () => void
-  onRenameMenu: (projectId: string, name: string) => void
+  onClearAll: (projectId: string) => void
+  onRenameMenu?: (projectId: string, name: string) => void
 }
 
-export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, selSlot, onSlotSelect, palItem, onPlaceItem, onRemoveItem, showNums, onActivateMenu, onBrushPick, onResizeMenu, onSetEraser, onDeselect, onRenameMenu }: Props) {
+export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, selSlot, onSlotSelect, palItem, onPlaceItem, onRemoveItem, showNums, onActivateMenu, onBrushPick, onResizeMenu, onSetEraser, onDeselect, onClearAll, onRenameMenu }: Props) {
   const [pan, setPan] = useState({ x: 0, y: 0 })
   const [zoom, setZoom] = useState(1)
   const [connectMode, setConnectMode] = useState(false)
@@ -40,13 +41,58 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
   const [slotCtx, setSlotCtx] = useState<{ x: number; y: number; menuId: string; slotKey: string } | null>(null)
   const [hoverData, setHoverData] = useState<{ data: SlotData; x: number; y: number } | null>(null)
   const [showAddPopover, setShowAddPopover] = useState(false)
+  const [selBox, setSelBox] = useState<{ x1: number; y1: number; x2: number; y2: number } | null>(null)
+  const [selectedMenus, setSelectedMenus] = useState<Set<string>>(new Set())
   const popoverRef = useRef<HTMLDivElement>(null)
   const surfRef = useRef<HTMLDivElement>(null)
 
+  const SLOT_SIZE = 48
+  const SLOT_GAP = 2
+  const FRAME_PAD = 7 + 3
+  const HEADER_H = 32
+
   const onBgDown = (e: React.MouseEvent) => {
     if ((e.target as HTMLElement).closest(`.${s.miniMenu}`) || (e.target as HTMLElement).closest(`.${s.canvasBottomBar}`) || (e.target as HTMLElement).closest(`.${s.wsName}`) || (e.target as HTMLElement).closest(`.${ss.ctxMenu}`)) return
+
+    if (e.button === 2) {
+      e.preventDefault()
+      const startX = (e.clientX - pan.x) / zoom
+      const startY = (e.clientY - pan.y) / zoom
+      setSelBox({ x1: startX, y1: startY, x2: startX, y2: startY })
+      const mv = (ev: MouseEvent) => {
+        const cx = (ev.clientX - pan.x) / zoom
+        const cy = (ev.clientY - pan.y) / zoom
+        setSelBox(prev => prev ? { ...prev, x2: cx, y2: cy } : null)
+      }
+      const up = () => {
+        setSelBox(prev => {
+          if (prev) {
+            const minX = Math.min(prev.x1, prev.x2), maxX = Math.max(prev.x1, prev.x2)
+            const minY = Math.min(prev.y1, prev.y2), maxY = Math.max(prev.y1, prev.y2)
+            const menuW = FRAME_PAD * 2 + 9 * (SLOT_SIZE + SLOT_GAP) - SLOT_GAP
+            const sel = new Set<string>()
+            for (const m of workspace.menus) {
+              const p = projects[m.projectId]; if (!p) continue
+              const menuH = HEADER_H + FRAME_PAD * 2 + p.rows * (SLOT_SIZE + SLOT_GAP) - SLOT_GAP
+              if (m.x + menuW > minX && m.x < maxX && m.y + menuH > minY && m.y < maxY) {
+                sel.add(m.projectId)
+              }
+            }
+            setSelectedMenus(sel)
+          }
+          return null
+        })
+        window.removeEventListener('mousemove', mv)
+        window.removeEventListener('mouseup', up)
+      }
+      window.addEventListener('mousemove', mv)
+      window.addEventListener('mouseup', up)
+      return
+    }
+
     if (e.button !== 0) return
     if (connecting) { setConnecting(null); return }
+    setSelectedMenus(new Set())
     onDeselect()
     setGrabbing(true)
     const sx = e.clientX - pan.x, sy = e.clientY - pan.y
@@ -123,11 +169,6 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
     onUpdateWS({ ...workspace, menus: workspace.menus.filter((_, i) => i !== idx), connections: workspace.connections.filter(c => c.fromMenu !== pid && c.toMenu !== pid) })
   }
 
-  const SLOT_SIZE = 48
-  const SLOT_GAP = 2
-  const FRAME_PAD = 7 + 3
-  const HEADER_H = 32
-
   const getSlotCenter = (menuId: string, slot: string) => {
     const mi = workspace.menus.findIndex(m => m.projectId === menuId); if (mi < 0) return null
     const mm = workspace.menus[mi]; const [r, c] = slot.split('-').map(Number)
@@ -178,12 +219,22 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
 
   return (
     <div className={`${s.canvasWrap} ${grabbing ? s.grabbing : ''}`} onMouseDown={onBgDown} onWheel={onWheel}
+      onContextMenu={e => e.preventDefault()}
       onMouseMove={e => setMousePos({ x: (e.clientX - pan.x) / zoom, y: (e.clientY - pan.y) / zoom })} ref={surfRef}
       onKeyDown={e => {
         if (e.key === 'Escape') { setConnecting(null); setConnectMode(false) }
-        if (e.key === 'Delete' && !selSlot) {
-          const idx = workspace.menus.findIndex(m => m.projectId === activeProjectId)
-          if (idx >= 0) removeFromCanvas(idx)
+        if (e.key === 'Delete') {
+          if (selectedMenus.size > 0) {
+            const updated = { ...workspace,
+              menus: workspace.menus.filter(m => !selectedMenus.has(m.projectId)),
+              connections: workspace.connections.filter(c => !selectedMenus.has(c.fromMenu) && !selectedMenus.has(c.toMenu))
+            }
+            onUpdateWS(updated)
+            setSelectedMenus(new Set())
+          } else if (!selSlot) {
+            const idx = workspace.menus.findIndex(m => m.projectId === activeProjectId)
+            if (idx >= 0) removeFromCanvas(idx)
+          }
         }
       }} tabIndex={0}>
       <div className={s.gridBg} style={{ backgroundPosition: `${pan.x}px ${pan.y}px`, backgroundSize: `${40 * zoom}px ${40 * zoom}px` }} />
@@ -233,15 +284,27 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
               const idx = workspace.menus.findIndex(mm => mm.projectId === pid)
               if (idx >= 0) removeFromCanvas(idx)
             }}
-            onResizeMenu={(pid, _cur) => {
-              const r = prompt('Количество строк (1-6):', String(projects[pid]?.rows ?? _cur ?? 3))
-              const rows = r ? parseInt(r) : NaN
-              if (!isNaN(rows) && rows >= 1 && rows <= 6) onResizeMenu(pid, rows)
-            }}
+            onResizeMenu={onResizeMenu}
             onSetEraser={onSetEraser}
+            onClearAll={onClearAll}
             onRename={onRenameMenu}
+            isMultiSelected={selectedMenus.has(m.projectId)}
           />
         })}
+        {selBox && (
+          <div style={{
+            position: 'absolute',
+            left: Math.min(selBox.x1, selBox.x2),
+            top: Math.min(selBox.y1, selBox.y2),
+            width: Math.abs(selBox.x2 - selBox.x1),
+            height: Math.abs(selBox.y2 - selBox.y1),
+            border: '2px dashed var(--accent)',
+            background: 'rgba(139,92,246,0.08)',
+            borderRadius: 4,
+            pointerEvents: 'none',
+            zIndex: 10,
+          }} />
+        )}
       </div>
       {mmCtx && <CtxMenu x={mmCtx.x} y={mmCtx.y} onClose={() => setMmCtx(null)} items={[
         { label: 'Убрать с canvas', danger: true, fn: () => removeFromCanvas(mmCtx.idx) },

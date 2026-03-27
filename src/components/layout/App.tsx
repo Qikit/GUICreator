@@ -4,7 +4,7 @@ import { useProjectStore } from '@/store/projectStore'
 import { usePrefsStore } from '@/store/prefsStore'
 import { ITEM_DB } from '@/data/items'
 import { BUILT_TPLS } from '@/data/templates'
-import { saveProject, loadProject, loadProjectList, deleteProject, loadPrefs, savePrefs, saveWorkspace, loadWorkspace, loadWorkspaceList, newWorkspace, saveUserTemplates } from '@/storage'
+import { saveProject, loadProject, loadProjectList, deleteProject, loadPrefs, savePrefs, saveWorkspace, loadWorkspace, loadWorkspaceList, newWorkspace, saveUserTemplates, deleteWorkspace } from '@/storage'
 import { loadLocale, loadFunItems, loadResourcepackIndex } from '@/loaders'
 import { makeSlot, newProject, ERASER_ID } from '@/utils/slot'
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
@@ -177,13 +177,6 @@ export function App() {
         </div>
         <div className={tb.sep} />
         <div className={tb.group}>
-          <label className={tb.label}>Ряды</label>
-          <select value={proj.rows} onChange={e => { const nr = parseInt(e.target.value); dispatch({ type: 'SR', rows: nr }) }} style={{ fontSize: 12 }}>
-            {[1, 2, 3, 4, 5, 6].map(n => <option key={n} value={n}>{n}</option>)}
-          </select>
-        </div>
-        <div className={tb.sep} />
-        <div className={tb.group}>
           <GlowButton onClick={undo} disabled={!past.length} title="Ctrl+Z">↩</GlowButton>
           <GlowButton onClick={redo} disabled={!future.length} title="Ctrl+Y">↪</GlowButton>
         </div>
@@ -192,7 +185,6 @@ export function App() {
           <GlowButton onClick={toggleNums} variant={showNums ? 'primary' : 'ghost'} title="Номера слотов">#</GlowButton>
           <GlowButton onClick={toggleRP} variant={showRP ? 'primary' : 'ghost'} title="Ресурспак">RP</GlowButton>
           <GlowButton onClick={toggleAnimations} variant={animations ? 'primary' : 'ghost'} title="Анимации">✦</GlowButton>
-          <GlowButton variant="danger" onClick={() => { if (confirm('Очистить всё?')) { dispatch({ type: 'CA' }); setSelSlot(null); setMultiSel(new Set()) } }}>Очистить</GlowButton>
         </div>
         <div className={tb.spacer} />
         <div className={tb.group}>
@@ -248,6 +240,10 @@ export function App() {
               else { setPalItem(ERASER_ID); setPalPreset(null) }
             }}
             onDeselect={() => { setSelSlot(null); setMultiSel(new Set()) }}
+            onClearAll={(pid) => {
+              if (pid !== proj.id) switchToProject(pid)
+              dispatch({ type: 'CA' }); setSelSlot(null); setMultiSel(new Set())
+            }}
             onRenameMenu={(pid, name) => {
               if (pid !== proj.id) switchToProject(pid)
               setName(name)
@@ -275,11 +271,15 @@ export function App() {
               const ws = loadWorkspace(id); if (!ws) return null
               return (
                 <div key={id} onClick={() => { setActiveWS(ws); refreshCache(ws); setShowWorkspaces(false) }}
-                  style={{ padding: 12, background: id === activeWS?.id ? 'var(--accent-subtle)' : 'var(--glass-surface)', border: `1px solid ${id === activeWS?.id ? 'var(--accent)' : 'var(--glass-border)'}`, borderRadius: 'var(--radius-md)', cursor: 'pointer', transition: 'all 150ms' }}
+                  style={{ position: 'relative', padding: 12, background: id === activeWS?.id ? 'var(--accent-subtle)' : 'var(--glass-surface)', border: `1px solid ${id === activeWS?.id ? 'var(--accent)' : 'var(--glass-border)'}`, borderRadius: 'var(--radius-md)', cursor: 'pointer', transition: 'all 150ms' }}
                   onMouseEnter={e => (e.currentTarget.style.background = id === activeWS?.id ? 'var(--accent-subtle)' : 'var(--glass-hover)')}
                   onMouseLeave={e => (e.currentTarget.style.background = id === activeWS?.id ? 'var(--accent-subtle)' : 'var(--glass-surface)')}>
                   <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 4 }}>{ws.name}</div>
                   <div style={{ fontSize: 11, color: 'var(--tx3)' }}>{ws.menus.length} меню · {ws.connections.length} связей</div>
+                  {id !== activeWS?.id && (
+                    <button onClick={e => { e.stopPropagation(); if (confirm(`Удалить "${ws.name}"?`)) { deleteWorkspace(id); forceRender(x => x + 1) } }}
+                      style={{ position: 'absolute', top: 6, right: 6, background: 'none', border: 'none', color: 'var(--er)', cursor: 'pointer', fontSize: 14 }}>✕</button>
+                  )}
                 </div>
               )
             })}
