@@ -176,14 +176,27 @@
 }
 .mmToolBtn:hover { background: var(--glass-hover); color: var(--tx1); }
 .mmToolBtnActive { background: var(--accent-subtle) !important; color: var(--accent) !important; }
-.mmToolBtn::after {
+.mmToolBtn[data-tip]::after {
+  content: attr(data-tip);
+  position: absolute;
   bottom: auto;
-  left: calc(100% + 6px);
+  left: calc(100% + 8px);
   top: 50%;
   transform: translateY(-50%);
+  background: rgba(15, 7, 32, 0.95);
+  color: #e4e4e7;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 10px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 100ms;
+  z-index: 10000;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
   border: 1px solid var(--glass-border);
 }
-.mmToolBtn:hover::after { opacity: 1; }
+.mmToolBtn:hover[data-tip]::after { opacity: 1; }
 .mmSlotSel {
   outline: 2px solid var(--accent) !important;
   outline-offset: -1px;

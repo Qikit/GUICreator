@@ -194,8 +194,8 @@ export const GUI_TYPES: GuiType[] = [
     containerHeight: 84,
     slots: [
       { key: '0', x: 48, y: 18 },
-      { key: '1', x: 48, y: 52 },
-      { key: '2', x: 129, y: 34 },
+      { key: '1', x: 48, y: 39 },
+      { key: '2', x: 129, y: 29 },
     ],
   },
 ]

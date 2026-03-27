@@ -400,11 +400,11 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
       />
       <div className={s.canvasBottomBar}>
         <div className={s.bottomBarGroup}>
-          <button className={s.bottomBtn} onClick={addNew} title="Новое меню">
+          <button className={s.bottomBtn} onClick={addNew} data-tip="Новое меню">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
           </button>
           <div style={{ position: 'relative' }} ref={popoverRef}>
-            <button className={s.bottomBtn} onClick={() => setShowAddPopover(v => !v)} title="Добавить существующее">
+            <button className={s.bottomBtn} onClick={() => setShowAddPopover(v => !v)} data-tip="Добавить существующее">
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 4h3l2-2h6a1 1 0 011 1v9a1 1 0 01-1 1H3a1 1 0 01-1-1V4z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/></svg>
             </button>
             {showAddPopover && (
@@ -421,10 +421,10 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
         </div>
         <div style={{ width: 1, height: 20, background: 'var(--glass-border)' }} />
         <div className={s.bottomBarGroup}>
-          <button className={`${s.bottomBtn} ${connectMode ? s.bottomBtnActive : ''}`} onClick={toggleConnectMode} title="Режим соединений">
+          <button className={`${s.bottomBtn} ${connectMode ? s.bottomBtnActive : ''}`} onClick={toggleConnectMode} data-tip="Режим соединений">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M10 5l3 3-3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
           </button>
-          <button className={s.bottomBtn} onClick={fitAll} title="Уместить всё">
+          <button className={s.bottomBtn} onClick={fitAll} data-tip="Уместить всё">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="2" stroke="currentColor" strokeWidth="1.5"/><path d="M8 2v2M8 12v2M2 8h2M12 8h2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
           </button>
         </div>
