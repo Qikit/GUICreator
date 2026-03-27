@@ -2,3 +2,7 @@ node_modules
 dist
 *.local
 .superpowers/
+
+# Private FunTime assets (only in FunTimeMC/GUICreator)
+public/assets/funitems/
+public/assets/resourcepack/
