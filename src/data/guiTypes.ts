@@ -42,7 +42,7 @@ export const GUI_TYPES: GuiType[] = [
     name: 'Сундук (3x9)',
     texture: TEX + 'generic_54.png',
     containerWidth: 176,
-    containerHeight: 68,
+    containerHeight: 84,
     slots: grid(7, 17, 9, 3),
   },
   {
@@ -50,7 +50,7 @@ export const GUI_TYPES: GuiType[] = [
     name: 'Большой сундук (6x9)',
     texture: TEX + 'generic_54.png',
     containerWidth: 176,
-    containerHeight: 122,
+    containerHeight: 140,
     slots: grid(7, 17, 9, 6),
   },
   {
@@ -58,7 +58,7 @@ export const GUI_TYPES: GuiType[] = [
     name: 'Воронка',
     texture: TEX + 'hopper.png',
     containerWidth: 176,
-    containerHeight: 35,
+    containerHeight: 51,
     slots: [
       { key: '0', x: 43, y: 19 },
       { key: '1', x: 61, y: 19 },
@@ -72,15 +72,17 @@ export const GUI_TYPES: GuiType[] = [
     name: 'Раздатчик',
     texture: TEX + 'dispenser.png',
     containerWidth: 176,
-    containerHeight: 68,
-    slots: grid(61, 16, 3, 3),
+    containerHeight: 84,
+    slots: [
+      ...grid(61, 16, 3, 3),
+    ],
   },
   {
     id: 'crafting',
     name: 'Верстак',
     texture: TEX + 'crafting_table.png',
     containerWidth: 176,
-    containerHeight: 68,
+    containerHeight: 84,
     slots: [
       ...grid(29, 16, 3, 3),
       { key: '9', x: 123, y: 34 },
@@ -91,7 +93,7 @@ export const GUI_TYPES: GuiType[] = [
     name: 'Печь',
     texture: TEX + 'furnace.png',
     containerWidth: 176,
-    containerHeight: 68,
+    containerHeight: 84,
     slots: [
       { key: '0', x: 55, y: 16 },
       { key: '1', x: 55, y: 52 },
@@ -103,7 +105,7 @@ export const GUI_TYPES: GuiType[] = [
     name: 'Наковальня',
     texture: TEX + 'anvil.png',
     containerWidth: 176,
-    containerHeight: 68,
+    containerHeight: 84,
     slots: [
       { key: '0', x: 26, y: 46 },
       { key: '1', x: 75, y: 46 },
@@ -115,12 +117,12 @@ export const GUI_TYPES: GuiType[] = [
     name: 'Зельеварка',
     texture: TEX + 'brewing_stand.png',
     containerWidth: 176,
-    containerHeight: 68,
+    containerHeight: 84,
     slots: [
       { key: '0', x: 55, y: 50 },
       { key: '1', x: 78, y: 58 },
       { key: '2', x: 101, y: 50 },
-      { key: '3', x: 78, y: 16 },
+      { key: '3', x: 78, y: 6 },
       { key: '4', x: 16, y: 16 },
     ],
   },
@@ -129,10 +131,10 @@ export const GUI_TYPES: GuiType[] = [
     name: 'Стол зачарований',
     texture: TEX + 'enchanting_table.png',
     containerWidth: 176,
-    containerHeight: 68,
+    containerHeight: 84,
     slots: [
       { key: '0', x: 14, y: 46 },
-      { key: '1', x: 14, y: 16 },
+      { key: '1', x: 34, y: 46 },
     ],
   },
   {
@@ -140,7 +142,7 @@ export const GUI_TYPES: GuiType[] = [
     name: 'Камнерез',
     texture: TEX + 'stonecutter.png',
     containerWidth: 176,
-    containerHeight: 68,
+    containerHeight: 84,
     slots: [
       { key: '0', x: 19, y: 32 },
       { key: '1', x: 143, y: 32 },
@@ -151,7 +153,7 @@ export const GUI_TYPES: GuiType[] = [
     name: 'Картограф',
     texture: TEX + 'cartography_table.png',
     containerWidth: 176,
-    containerHeight: 68,
+    containerHeight: 84,
     slots: [
       { key: '0', x: 14, y: 16 },
       { key: '1', x: 14, y: 52 },
@@ -163,7 +165,7 @@ export const GUI_TYPES: GuiType[] = [
     name: 'Стол кузнеца',
     texture: TEX + 'smithing.png',
     containerWidth: 176,
-    containerHeight: 68,
+    containerHeight: 84,
     slots: [
       { key: '0', x: 7, y: 46 },
       { key: '1', x: 25, y: 46 },
@@ -176,11 +178,11 @@ export const GUI_TYPES: GuiType[] = [
     name: 'Ткацкий станок',
     texture: TEX + 'loom.png',
     containerWidth: 176,
-    containerHeight: 68,
+    containerHeight: 84,
     slots: [
       { key: '0', x: 12, y: 25 },
-      { key: '1', x: 12, y: 43 },
-      { key: '2', x: 32, y: 43 },
+      { key: '1', x: 32, y: 25 },
+      { key: '2', x: 12, y: 43 },
       { key: '3', x: 143, y: 34 },
     ],
   },
@@ -189,7 +191,7 @@ export const GUI_TYPES: GuiType[] = [
     name: 'Точило',
     texture: TEX + 'grindstone.png',
     containerWidth: 176,
-    containerHeight: 68,
+    containerHeight: 84,
     slots: [
       { key: '0', x: 48, y: 18 },
       { key: '1', x: 48, y: 52 },

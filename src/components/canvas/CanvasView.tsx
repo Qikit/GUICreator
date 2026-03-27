@@ -201,14 +201,23 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
 
   const delConn = (id: string) => onUpdateWS({ ...workspace, connections: workspace.connections.filter(c => c.id !== id) })
 
+  const viewportCenter = () => {
+    const rect = surfRef.current?.getBoundingClientRect()
+    const cx = rect ? ((rect.width / 2 - pan.x) / zoom) : 200
+    const cy = rect ? ((rect.height / 2 - pan.y) / zoom) : 200
+    return { cx, cy }
+  }
+
   const addNew = () => {
     const p = newProject('Меню ' + (workspace.menus.length + 1), 3); saveProject(p)
-    onUpdateWS({ ...workspace, menus: [...workspace.menus, { projectId: p.id, x: 200 + workspace.menus.length * 60, y: 200 + workspace.menus.length * 40 }] })
+    const { cx, cy } = viewportCenter()
+    onUpdateWS({ ...workspace, menus: [...workspace.menus, { projectId: p.id, x: Math.round(cx - 200), y: Math.round(cy - 100) }] })
   }
 
   const addExisting = (id: string) => {
     if (workspace.menus.find(m => m.projectId === id)) return
-    onUpdateWS({ ...workspace, menus: [...workspace.menus, { projectId: id, x: 200 + workspace.menus.length * 60, y: 200 + workspace.menus.length * 40 }] })
+    const { cx, cy } = viewportCenter()
+    onUpdateWS({ ...workspace, menus: [...workspace.menus, { projectId: id, x: Math.round(cx - 200), y: Math.round(cy - 100) }] })
   }
 
   const removeFromCanvas = (idx: number) => {

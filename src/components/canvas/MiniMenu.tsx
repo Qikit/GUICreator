@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import type { Project } from '@/types'
 import type { SlotData } from '@/types'
 import { ItemTexture } from '@/components/shared'
@@ -6,6 +7,7 @@ import { McText } from '@/components/shared'
 import { parseMM } from '@/utils/minimessage'
 import { GUI_TYPES, getGuiType } from '@/data/guiTypes'
 import { assetUrl } from '@/utils/paths'
+import { GlassModal } from '@/components/ui'
 import s from '@/styles/canvas.module.css'
 
 interface ConnectingFrom { menuId: string; slot: string }
@@ -42,8 +44,16 @@ export function MiniMenu({ project, x, y, zoom, onDrag, onSlotClick, onSlotRight
   const [editingName, setEditingName] = useState(false)
   const [nameText, setNameText] = useState(project.name)
   const [showSizeMenu, setShowSizeMenu] = useState(false)
+  const [showContainerModal, setShowContainerModal] = useState(false)
 
   const guiType = getGuiType(project.guiType)
+
+  useEffect(() => {
+    if (!showSizeMenu) return
+    const h = (e: MouseEvent) => setShowSizeMenu(false)
+    const t = setTimeout(() => document.addEventListener('mousedown', h), 0)
+    return () => { clearTimeout(t); document.removeEventListener('mousedown', h) }
+  }, [showSizeMenu])
 
   const startDrag = (e: React.MouseEvent) => {
     if (e.button !== 0) return; e.stopPropagation()
@@ -59,7 +69,7 @@ export function MiniMenu({ project, x, y, zoom, onDrag, onSlotClick, onSlotRight
     window.addEventListener('mousemove', mv); window.addEventListener('mouseup', up)
   }
 
-  const renderSlot = (key: string, d: SlotData | undefined, extraClass?: string) => {
+  const renderSlot = (key: string, d: SlotData | undefined, displayNum?: number | string, extraClass?: string) => {
     const isSrc = connectingFrom && connectingFrom.menuId === project.id && connectingFrom.slot === key
     const isSel = selectedSlot === key
     return (
@@ -76,7 +86,7 @@ export function MiniMenu({ project, x, y, zoom, onDrag, onSlotClick, onSlotRight
         }}
         onMouseLeave={() => onSlotHover?.(null, 0, 0)}>
         {!extraClass && <div className={s.mmSlotHover} />}
-        {showNums && <span className={s.mmSlotNum}>{key}</span>}
+        {showNums && <span className={s.mmSlotNum}>{displayNum !== undefined ? displayNum : key}</span>}
         {d && (
           <div className={s.mmSlotContent}>
             <ItemTexture itemId={d.itemId} potionColor={d.potionColor} skullTexture={d.skullTexture} rpTexture={d.rpTexture} />
@@ -89,8 +99,6 @@ export function MiniMenu({ project, x, y, zoom, onDrag, onSlotClick, onSlotRight
   }
 
   const sizeBadgeText = guiType ? guiType.name : `${project.rows}x9`
-
-  const containerTypes = GUI_TYPES.filter(t => t.id !== 'generic')
 
   const header = (
     <div className={s.mmHeader} onMouseDown={editingName ? undefined : startDrag} onContextMenu={e => { e.preventDefault(); e.stopPropagation(); onCtxMenu?.(e.clientX, e.clientY) }}>
@@ -119,7 +127,6 @@ export function MiniMenu({ project, x, y, zoom, onDrag, onSlotClick, onSlotRight
         </span>
         {showSizeMenu && (
           <div className={s.mmSizeMenu} onClick={e => e.stopPropagation()}>
-            <div style={{ fontSize: 9, color: 'var(--tx3)', padding: '4px 8px', textTransform: 'uppercase' }}>Стандартное меню</div>
             {[1,2,3,4,5,6].map(n => (
               <button key={n} className={`${s.mmSizeOption} ${!guiType && project.rows === n ? s.mmSizeOptionActive : ''}`}
                 onClick={() => { onResizeMenu?.(project.id, n); setShowSizeMenu(false) }}>
@@ -127,13 +134,10 @@ export function MiniMenu({ project, x, y, zoom, onDrag, onSlotClick, onSlotRight
               </button>
             ))}
             <div style={{ height: 1, background: 'var(--glass-border)', margin: '2px 0' }} />
-            <div style={{ fontSize: 9, color: 'var(--tx3)', padding: '4px 8px', textTransform: 'uppercase' }}>Типы контейнеров</div>
-            {containerTypes.map(t => (
-              <button key={t.id} className={`${s.mmSizeOption} ${project.guiType === t.id ? s.mmSizeOptionActive : ''}`}
-                onClick={() => { onSetGuiType?.(project.id, t.id); setShowSizeMenu(false) }}>
-                {t.name} ({t.slots.length})
-              </button>
-            ))}
+            <button className={s.mmSizeOption}
+              onClick={() => { setShowSizeMenu(false); setShowContainerModal(true) }}>
+              Другие контейнеры...
+            </button>
           </div>
         )}
       </div>
@@ -157,65 +161,96 @@ export function MiniMenu({ project, x, y, zoom, onDrag, onSlotClick, onSlotRight
     </div>
   ) : null
 
+  const containerModal = showContainerModal ? createPortal(
+    <GlassModal onClose={() => setShowContainerModal(false)} title="Типы контейнеров">
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 8, maxHeight: '60vh', overflowY: 'auto', padding: 4 }}>
+        {GUI_TYPES.filter(t => t.id !== 'generic').map(t => (
+          <div key={t.id}
+            onClick={() => { onSetGuiType?.(project.id, t.id); setShowContainerModal(false) }}
+            style={{ padding: 8, background: 'var(--glass-surface)', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-sm)', cursor: 'pointer', textAlign: 'center' }}
+            onMouseEnter={e => (e.currentTarget.style.background = 'var(--glass-hover)')}
+            onMouseLeave={e => (e.currentTarget.style.background = 'var(--glass-surface)')}>
+            {t.texture && (
+              <img
+                src={`${import.meta.env.BASE_URL}${t.texture}`}
+                style={{ width: '100%', height: 60, objectFit: 'contain', imageRendering: 'pixelated', marginBottom: 4, display: 'block' }}
+              />
+            )}
+            <div style={{ fontSize: 11, color: 'var(--tx1)' }}>{t.name}</div>
+            <div style={{ fontSize: 9, color: 'var(--tx3)' }}>{t.slots.length} слотов</div>
+          </div>
+        ))}
+      </div>
+    </GlassModal>,
+    document.body
+  ) : null
+
   if (guiType && guiType.texture) {
     const w = guiType.containerWidth * SCALE
     const h = guiType.containerHeight * SCALE
     const texUrl = assetUrl(guiType.texture)
 
     return (
-      <div className={`${s.miniMenu} ${isActive ? s.mmActive : ''}`} style={{ left: x, top: y }}
-        onMouseDown={e => { e.stopPropagation(); onActivate?.(project.id) }}>
-        <div className={s.mmMain}>
-          {header}
-          <div className={s.mmTexturedBody} style={{
-            width: w,
-            height: h,
-            backgroundImage: `url(${texUrl})`,
-            backgroundSize: `${256 * SCALE}px ${256 * SCALE}px`,
-            backgroundPosition: '0 0',
-          }}>
-            {guiType.slots.map(sl => {
-              const d = project.slots[sl.key]
-              return (
-                <div key={sl.key}
-                  className={`${s.mmTexSlot} ${selectedSlot === sl.key ? s.mmSlotSel : ''} ${connectingFrom && connectingFrom.menuId === project.id && connectingFrom.slot === sl.key ? s.mmSlotConn : ''}`}
-                  style={{ left: sl.x * SCALE, top: sl.y * SCALE, width: 18 * SCALE, height: 18 * SCALE }}
-                  onClick={e => { e.stopPropagation(); onSlotClick(project.id, sl.key) }}
-                  onMouseDown={e => { onSlotMouseDown?.(project.id, sl.key, e) }}
-                  onContextMenu={e => { e.preventDefault(); e.stopPropagation(); if (!palItem) onSlotRightClick?.(project.id, sl.key, e.clientX, e.clientY) }}
-                  onMouseEnter={e => { if (d) onSlotHover?.(d, e.clientX, e.clientY); onSlotEnter?.(project.id, sl.key) }}
-                  onMouseLeave={() => onSlotHover?.(null, 0, 0)}>
-                  {showNums && <span className={s.mmSlotNum}>{sl.key}</span>}
-                  {d && <div className={s.mmSlotContent}><ItemTexture itemId={d.itemId} potionColor={d.potionColor} skullTexture={d.skullTexture} rpTexture={d.rpTexture} /></div>}
-                  {d?.enchanted && <div className={s.mmSlotEnchant} />}
-                  {d && d.amount > 1 && <span className={s.mmSlotAmount}>{d.amount}</span>}
-                </div>
-              )
-            })}
+      <>
+        <div className={`${s.miniMenu} ${isActive ? s.mmActive : ''}`} style={{ left: x, top: y }}
+          onMouseDown={e => { e.stopPropagation(); onActivate?.(project.id) }}>
+          <div className={s.mmMain}>
+            {header}
+            <div className={s.mmTexturedBody} style={{
+              width: w,
+              height: h,
+              backgroundImage: `url(${texUrl})`,
+              backgroundSize: `${256 * SCALE}px ${256 * SCALE}px`,
+              backgroundPosition: '0 0',
+              imageRendering: 'pixelated',
+            }}>
+              {guiType.slots.map(sl => {
+                const d = project.slots[sl.key]
+                return (
+                  <div key={sl.key}
+                    className={`${s.mmTexSlot} ${selectedSlot === sl.key ? s.mmSlotSel : ''} ${connectingFrom && connectingFrom.menuId === project.id && connectingFrom.slot === sl.key ? s.mmSlotConn : ''}`}
+                    style={{ left: sl.x * SCALE, top: sl.y * SCALE, width: 18 * SCALE, height: 18 * SCALE }}
+                    onClick={e => { e.stopPropagation(); onSlotClick(project.id, sl.key) }}
+                    onMouseDown={e => { onSlotMouseDown?.(project.id, sl.key, e) }}
+                    onContextMenu={e => { e.preventDefault(); e.stopPropagation(); if (!palItem) onSlotRightClick?.(project.id, sl.key, e.clientX, e.clientY) }}
+                    onMouseEnter={e => { if (d) onSlotHover?.(d, e.clientX, e.clientY); onSlotEnter?.(project.id, sl.key) }}
+                    onMouseLeave={() => onSlotHover?.(null, 0, 0)}>
+                    {showNums && <span className={s.mmSlotNum}>{sl.key}</span>}
+                    {d && <div className={s.mmSlotContent}><ItemTexture itemId={d.itemId} potionColor={d.potionColor} skullTexture={d.skullTexture} rpTexture={d.rpTexture} /></div>}
+                    {d?.enchanted && <div className={s.mmSlotEnchant} />}
+                    {d && d.amount > 1 && <span className={s.mmSlotAmount}>{d.amount}</span>}
+                  </div>
+                )
+              })}
+            </div>
           </div>
+          {toolbar}
         </div>
-        {toolbar}
-      </div>
+        {containerModal}
+      </>
     )
   }
 
   return (
-    <div className={`${s.miniMenu} ${isActive ? s.mmActive : ''}`} style={{ left: x, top: y }}
-      onMouseDown={e => { e.stopPropagation(); onActivate?.(project.id) }}>
-      <div className={s.mmMain}>
-        {header}
-        <div className={s.mmBody}>
-          <div className={s.mmGrid}>
-            {Array.from({ length: project.rows }, (_, r) =>
-              Array.from({ length: 9 }, (_, c) => {
-                const k = `${r}-${c}`; const d = project.slots[k]
-                return renderSlot(k, d)
-              })
-            )}
+    <>
+      <div className={`${s.miniMenu} ${isActive ? s.mmActive : ''}`} style={{ left: x, top: y }}
+        onMouseDown={e => { e.stopPropagation(); onActivate?.(project.id) }}>
+        <div className={s.mmMain}>
+          {header}
+          <div className={s.mmBody}>
+            <div className={s.mmGrid}>
+              {Array.from({ length: project.rows }, (_, r) =>
+                Array.from({ length: 9 }, (_, c) => {
+                  const k = `${r}-${c}`; const d = project.slots[k]
+                  return renderSlot(k, d, r * 9 + c)
+                })
+              )}
+            </div>
           </div>
         </div>
+        {toolbar}
       </div>
-      {toolbar}
-    </div>
+      {containerModal}
+    </>
   )
 }

@@ -177,21 +177,10 @@
 .mmToolBtn:hover { background: var(--glass-hover); color: var(--tx1); }
 .mmToolBtnActive { background: var(--accent-subtle) !important; color: var(--accent) !important; }
 .mmToolBtn::after {
-  content: attr(data-tip);
-  position: absolute;
+  bottom: auto;
   left: calc(100% + 6px);
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(15, 7, 32, 0.95);
-  color: var(--tx1);
-  padding: 3px 8px;
-  border-radius: var(--radius-sm);
-  font-size: 10px;
-  white-space: nowrap;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 100ms;
-  z-index: 1000;
   border: 1px solid var(--glass-border);
 }
 .mmToolBtn:hover::after { opacity: 1; }
@@ -246,8 +235,8 @@
 .mmTexturedBody {
   position: relative;
   image-rendering: pixelated;
-  overflow: hidden;
   border-radius: 0 0 var(--radius-md) var(--radius-md);
+  overflow: visible;
 }
 .mmTexSlot {
   position: absolute;
