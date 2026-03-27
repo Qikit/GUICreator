@@ -103,7 +103,12 @@ export function ColorPickerModal({ onClose, onApply }: Props) {
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flex: 1 }}>
           <div style={{ width: '100%', height: 48, borderRadius: 4, border: '1px solid var(--glass-border)', background: hex }} />
-          <input value={hex} onChange={e => { const v = e.target.value; setHex(v); if (/^#[0-9A-Fa-f]{6}$/.test(v)) fromHex(v.toUpperCase()) }} style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 13 }} />
+          <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+            <input value={hex} onChange={e => { const v = e.target.value; setHex(v); if (/^#[0-9A-Fa-f]{6}$/.test(v)) fromHex(v.toUpperCase()) }} style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 13, flex: 1 }} />
+            <button onClick={() => setShowPalette(true)} style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-sm)', background: 'none', color: 'var(--tx2)', cursor: 'pointer', flexShrink: 0 }} data-tip="Палитра цветов">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1.2"/><circle cx="5" cy="5" r="1" fill="#f87171"/><circle cx="9" cy="5" r="1" fill="#4ade80"/><circle cx="5" cy="9" r="1" fill="#60a5fa"/><circle cx="9" cy="9" r="1" fill="#facc15"/></svg>
+            </button>
+          </div>
           <GlowButton variant="primary" onClick={copyHex}>{copied ? 'Скопировано!' : 'Копировать <#>'}</GlowButton>
           {onApply && <GlowButton onClick={() => { onApply(hex); onClose() }}>Применить</GlowButton>}
         </div>
@@ -116,9 +121,6 @@ export function ColorPickerModal({ onClose, onApply }: Props) {
           ))}
         </div>
       </div>
-      <div style={{ marginTop: 8 }}>
-        <GlowButton size="md" onClick={() => setShowPalette(true)}>Палитра цветов</GlowButton>
-      </div>
       {showPalette && (
         <GlassModal onClose={() => setShowPalette(false)} title="Палитра цветов">
           <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
@@ -126,13 +128,13 @@ export function ColorPickerModal({ onClose, onApply }: Props) {
               <div key={ri} style={{ display: 'flex', gap: 1 }}>
                 {row.map((color, ci) => (
                   <div key={ci} style={{ width: 28, height: 20, background: color, cursor: 'pointer', borderRadius: 2, border: '1px solid rgba(0,0,0,0.2)' }}
-                    onClick={() => { navigator.clipboard.writeText(color); setShowPalette(false) }}
+                    onClick={() => { fromHex(color); setShowPalette(false) }}
                     title={color} />
                 ))}
               </div>
             ))}
           </div>
-          <div style={{ marginTop: 8, fontSize: 11, color: 'var(--tx3)' }}>Клик = копировать HEX</div>
+          <div style={{ marginTop: 8, fontSize: 11, color: 'var(--tx3)' }}>Клик = выбрать цвет</div>
         </GlassModal>
       )}
     </GlassModal>

@@ -16,6 +16,7 @@ export function LoreEditor({ lore, onChange }: Props) {
   const [text, setText] = useState(() => lore.map(line => seg2mm(line)).join('\n'))
   const [showTpls, setShowTpls] = useState(false)
   const tplBtnRef = useRef<HTMLButtonElement>(null)
+  const tplPopupRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     setText(lore.map(line => seg2mm(line)).join('\n'))
@@ -24,7 +25,9 @@ export function LoreEditor({ lore, onChange }: Props) {
   useEffect(() => {
     if (!showTpls) return
     const h = (e: MouseEvent) => {
-      if (tplBtnRef.current && !tplBtnRef.current.contains(e.target as Node)) setShowTpls(false)
+      if (tplBtnRef.current?.contains(e.target as Node)) return
+      if (tplPopupRef.current?.contains(e.target as Node)) return
+      setShowTpls(false)
     }
     const t = setTimeout(() => document.addEventListener('mousedown', h), 0)
     return () => { clearTimeout(t); document.removeEventListener('mousedown', h) }
@@ -64,8 +67,11 @@ export function LoreEditor({ lore, onChange }: Props) {
           {showTpls && (() => {
             const r = tplBtnRef.current?.getBoundingClientRect()
             if (!r) return null
+            const above = r.top > 260
+            const top = above ? r.top : r.bottom + 4
+            const transform = above ? 'translateY(-100%)' : 'none'
             return createPortal(
-              <div style={{ position: 'fixed', zIndex: 1000, background: 'rgba(15, 7, 32, 0.95)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-md)', padding: 2, boxShadow: '0 8px 32px rgba(0,0,0,.5)', width: 220, maxHeight: 240, overflowY: 'auto', top: r.top, left: Math.min(r.right - 220, window.innerWidth - 230), transform: 'translateY(-100%)' }}>
+              <div ref={tplPopupRef} style={{ position: 'fixed', zIndex: 1000, background: 'rgba(15, 7, 32, 0.95)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-md)', padding: 2, boxShadow: '0 8px 32px rgba(0,0,0,.5)', width: 220, maxHeight: 240, overflowY: 'auto', top, left: Math.min(r.right - 220, window.innerWidth - 230), transform }}>
                 {LORE_TPLS.map((t, i) => (
                   <button key={i} style={{ display: 'block', width: '100%', padding: '5px 8px', borderRadius: 2, cursor: 'pointer', fontSize: 11, border: 'none', background: 'none', color: 'var(--tx1)', textAlign: 'left' }}
                     onMouseEnter={e => (e.currentTarget.style.background = 'var(--glass-hover)')}
