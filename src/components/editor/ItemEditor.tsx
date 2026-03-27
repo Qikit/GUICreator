@@ -38,10 +38,17 @@ export function ItemEditor({ data, slotKey, dispatch }: Props) {
           <div className={s.props}>
             <label>Количество</label>
             <div className={s.amount}>
-              <GlowButton size="sm" onClick={() => upd({ amount: Math.max(1, data.amount - 1) })}>-</GlowButton>
-              <input type="number" value={data.amount} min={1} max={64}
-                onChange={e => upd({ amount: Math.max(1, Math.min(64, parseInt(e.target.value) || 1)) })} />
-              <GlowButton size="sm" onClick={() => upd({ amount: Math.min(64, data.amount + 1) })}>+</GlowButton>
+              <GlowButton size="md" style={{ width: 32, padding: 0, justifyContent: 'center' }}
+                onClick={() => upd({ amount: Math.max(1, data.amount - 1) })}>−</GlowButton>
+              <input
+                type="number"
+                value={data.amount}
+                min={1} max={64}
+                onChange={e => upd({ amount: Math.max(1, Math.min(64, parseInt(e.target.value) || 1)) })}
+                style={{ width: 50, textAlign: 'center', fontSize: 14, fontWeight: 600 }}
+              />
+              <GlowButton size="md" style={{ width: 32, padding: 0, justifyContent: 'center' }}
+                onClick={() => upd({ amount: Math.min(64, data.amount + 1) })}>+</GlowButton>
             </div>
 
             <label>Зачарование</label>
@@ -53,7 +60,7 @@ export function ItemEditor({ data, slotKey, dispatch }: Props) {
               value={data.customModelData || ''}
               placeholder="Custom Model Data"
               onChange={e => upd({ customModelData: e.target.value ? parseInt(e.target.value) : null })}
-              style={{ width: 100, fontSize: 11 }}
+              style={{ width: 120, fontSize: 12 }}
             />
 
             {TINTABLE.has(data.itemId) && (

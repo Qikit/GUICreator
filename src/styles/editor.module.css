@@ -8,8 +8,8 @@
 .sectionTitle { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--tx3); margin-bottom: var(--sp-sm); font-weight: 600; }
 .props { display: grid; grid-template-columns: auto 1fr; gap: 6px var(--sp-md); align-items: center; }
 .props label { font-size: 10px; color: var(--tx2); text-transform: uppercase; letter-spacing: 0.5px; }
-.amount { display: flex; align-items: center; gap: var(--sp-xs); }
-.amount input { width: 42px; text-align: center; font-size: 12px; }
+.amount { display: flex; align-items: center; gap: var(--sp-sm); }
+.amount input { width: 50px; text-align: center; font-size: 14px; font-weight: 600; padding: 4px; }
 .actions { display: flex; gap: var(--sp-sm); padding-top: var(--sp-md); border-top: 1px solid var(--glass-border); margin-top: var(--sp-sm); }
 
 .segRow { display: flex; gap: 3px; align-items: center; margin-bottom: 3px; }

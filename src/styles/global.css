@@ -63,7 +63,7 @@ body {
 input, select, button, textarea { font-family: inherit; font-size: inherit; color: inherit; }
 button { cursor: pointer; border: none; background: none; }
 
-input, textarea, select {
+input, textarea {
   background: var(--glass-surface);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-sm);
@@ -72,11 +72,32 @@ input, textarea, select {
   outline: none;
   transition: border-color 150ms ease, box-shadow 150ms ease;
 }
-input:focus, textarea:focus, select:focus {
+input:focus, textarea:focus {
   border-color: var(--accent);
   box-shadow: 0 0 12px rgba(139,92,246,0.15);
 }
 textarea { resize: vertical; min-height: 60px; }
+
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  background: var(--glass-surface);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  padding: 6px 28px 6px 10px;
+  color: var(--tx1);
+  font-size: 12px;
+  font-family: inherit;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M3 5l3 3 3-3' stroke='%238b8b96' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+}
+select:hover { border-color: rgba(255,255,255,0.15); }
+select:focus { border-color: var(--accent); box-shadow: 0 0 12px rgba(139,92,246,0.15); }
+option { background: #1a1028; color: var(--tx1); padding: 6px; }
 
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
