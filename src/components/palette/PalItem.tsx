@@ -11,9 +11,10 @@ interface Props {
   selected: boolean
   preset?: SlotPreset
   onSelect: (id: string, preset?: SlotPreset) => void
+  size?: number
 }
 
-export function PalItem({ id, selected, preset, onSelect }: Props) {
+export function PalItem({ id, selected, preset, onSelect, size = 28 }: Props) {
   const [hover, setHover] = useState<{ x: number; y: number } | null>(null)
 
   return (
@@ -28,7 +29,7 @@ export function PalItem({ id, selected, preset, onSelect }: Props) {
     >
       <ItemTexture
         itemId={id}
-        size={28}
+        size={size}
         potionColor={preset?.potionColor}
         skullTexture={preset?.skullTexture}
         rpTexture={preset?.rpTexture}

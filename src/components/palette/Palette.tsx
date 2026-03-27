@@ -4,6 +4,7 @@ import { ItemTexture } from '@/components/shared'
 import { ruName, ERASER_ID } from '@/utils/slot'
 import { PalItem } from './PalItem'
 import { GlowButton } from '@/components/ui'
+import { usePrefsStore } from '@/store/prefsStore'
 import s from '@/styles/palette.module.css'
 
 interface Props {
@@ -17,6 +18,7 @@ export function Palette({ itemDB, selItem, onSelect, recent }: Props) {
   const [search, setSearch] = useState('')
   const [openCats, setOpenCats] = useState<Record<string, boolean>>({ glass_panes: true, functional: true })
   const [customId, setCustomId] = useState('')
+  const { paletteView, setPaletteView } = usePrefsStore()
 
   const toggle = (k: string) => setOpenCats(p => ({ ...p, [k]: !p[k] }))
 
@@ -38,15 +40,91 @@ export function Palette({ itemDB, selItem, onSelect, recent }: Props) {
     return r
   }, [search, itemDB])
 
+  const gridClass = paletteView === 'largeGrid' ? s.itemGridLarge : s.itemGrid
+
+  const renderItems = (items: ItemDatabase[string]['items'], keyPrefix: string, isRecent = false) => {
+    if (paletteView === 'list') {
+      return (
+        <div className={s.itemList}>
+          {items.map((it, i) => {
+            const id = typeof it === 'string' ? it : it.id
+            const preset = typeof it === 'string' ? undefined : it.preset as SlotPreset | undefined
+            const selected = selItem === id && (isRecent || !preset)
+            return (
+              <div
+                key={`${id}-${i}`}
+                className={`${s.listItem} ${selected ? s.listItemSel : ''}`}
+                onClick={() => onSelect(id, preset)}
+              >
+                <ItemTexture
+                  itemId={id}
+                  size={20}
+                  potionColor={preset?.potionColor}
+                  skullTexture={preset?.skullTexture}
+                  rpTexture={preset?.rpTexture}
+                />
+                <span>{ruName(id) || (typeof it === 'string' ? id : it.name)}</span>
+              </div>
+            )
+          })}
+        </div>
+      )
+    }
+
+    if (isRecent) {
+      return (
+        <div className={gridClass}>
+          {(items as unknown as string[]).map(id => (
+            <PalItem key={id} id={id} selected={selItem === id} onSelect={onSelect} size={paletteView === 'largeGrid' ? 44 : 28} />
+          ))}
+        </div>
+      )
+    }
+
+    return (
+      <div className={gridClass}>
+        {items.map((it, i) => (
+          <PalItem
+            key={`${keyPrefix}-${it.id}-${i}`}
+            id={it.id}
+            selected={selItem === it.id && !it.preset}
+            preset={it.preset as SlotPreset | undefined}
+            onSelect={onSelect}
+            size={paletteView === 'largeGrid' ? 44 : 28}
+          />
+        ))}
+      </div>
+    )
+  }
+
   return (
     <div className={s.palette}>
       <div className={s.header}>
         <span>Предметы</span>
-        <button
-          className={`${s.eraserBtn} ${selItem === ERASER_ID ? s.eraserBtnSel : ''}`}
-          onClick={() => onSelect(ERASER_ID)}
-          title="Ластик"
-        >🚫</button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          <div style={{ display: 'flex', gap: 2 }}>
+            <button
+              className={`${s.viewBtn} ${paletteView === 'grid' ? s.viewBtnActive : ''}`}
+              onClick={() => setPaletteView('grid')}
+              title="Мелкие значки"
+            >▦</button>
+            <button
+              className={`${s.viewBtn} ${paletteView === 'largeGrid' ? s.viewBtnActive : ''}`}
+              onClick={() => setPaletteView('largeGrid')}
+              title="Крупные значки"
+            >▣</button>
+            <button
+              className={`${s.viewBtn} ${paletteView === 'list' ? s.viewBtnActive : ''}`}
+              onClick={() => setPaletteView('list')}
+              title="Список"
+            >☰</button>
+          </div>
+          <button
+            className={`${s.eraserBtn} ${selItem === ERASER_ID ? s.eraserBtnSel : ''}`}
+            onClick={() => onSelect(ERASER_ID)}
+            title="Ластик"
+          >🚫</button>
+        </div>
       </div>
       <div className={s.search}>
         <input
@@ -64,11 +142,7 @@ export function Palette({ itemDB, selItem, onSelect, recent }: Props) {
               <ItemTexture itemId={recent[0] || 'clock'} size={14} />
               Недавние
             </div>
-            {openCats.__r !== false && (
-              <div className={s.itemGrid}>
-                {recent.map(id => <PalItem key={id} id={id} selected={selItem === id} onSelect={onSelect} />)}
-              </div>
-            )}
+            {openCats.__r !== false && renderItems(recent as any, '__r', true)}
           </div>
         )}
 
@@ -84,19 +158,7 @@ export function Palette({ itemDB, selItem, onSelect, recent }: Props) {
               {cat.label}
               <span className={s.catCount}>({cat.items.length})</span>
             </div>
-            {(openCats[k] || search) && (
-              <div className={s.itemGrid}>
-                {cat.items.map((it, i) => (
-                  <PalItem
-                    key={`${it.id}-${i}`}
-                    id={it.id}
-                    selected={selItem === it.id && !it.preset}
-                    preset={it.preset as SlotPreset | undefined}
-                    onSelect={onSelect}
-                  />
-                ))}
-              </div>
-            )}
+            {(openCats[k] || search) && renderItems(cat.items, k)}
           </div>
         ))}
       </div>
