@@ -3,7 +3,7 @@ import type { Workspace, Project, SlotData } from '@/types'
 import { gid } from '@/utils/id'
 import { newProject } from '@/utils/slot'
 import { saveProject, loadProject, loadProjectList } from '@/storage'
-import { CtxMenu, HoverTooltip } from '@/components/shared'
+import { ItemTexture, CtxMenu, HoverTooltip } from '@/components/shared'
 import { getGuiType } from '@/data/guiTypes'
 import { MiniMenu } from './MiniMenu'
 import s from '@/styles/canvas.module.css'
@@ -21,6 +21,7 @@ interface Props {
   palItem: string | null
   onPlaceItem: (projectId: string, slotKey: string) => void
   onRemoveItem: (projectId: string, slotKey: string) => void
+  onMoveSlot: (projectId: string, from: string, to: string) => void
   showNums: boolean
   showRP: boolean
   onActivateMenu: (projectId: string) => void
@@ -35,7 +36,7 @@ interface Props {
   onMenuRemoved?: (projectId: string) => void
 }
 
-export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, selSlot, onSlotSelect, palItem, onPlaceItem, onRemoveItem, showNums, showRP, onActivateMenu, onBrushPick, onResizeMenu, onSetGuiType, onSetEraser, onDeselect, onDeselectPalette, onClearAll, onRenameMenu, onMenuRemoved }: Props) {
+export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, selSlot, onSlotSelect, palItem, onPlaceItem, onRemoveItem, onMoveSlot, showNums, showRP, onActivateMenu, onBrushPick, onResizeMenu, onSetGuiType, onSetEraser, onDeselect, onDeselectPalette, onClearAll, onRenameMenu, onMenuRemoved }: Props) {
   const [pan, setPan] = useState({ x: 0, y: 0 })
   const [zoom, setZoom] = useState(1)
   const [connectMode, setConnectMode] = useState(false)
@@ -49,6 +50,9 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
   const [selBox, setSelBox] = useState<{ x1: number; y1: number; x2: number; y2: number } | null>(null)
   const [selectedMenus, setSelectedMenus] = useState<Set<string>>(new Set())
   const [painting, setPainting] = useState(false)
+  const [draggingSlot, setDraggingSlot] = useState<{ menuId: string; key: string; data: SlotData } | null>(null)
+  const [dragMousePos, setDragMousePos] = useState({ x: 0, y: 0 })
+  const wasDraggingRef = useRef(false)
   const popoverRef = useRef<HTMLDivElement>(null)
   const surfRef = useRef<HTMLDivElement>(null)
 
@@ -159,6 +163,7 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
   }
 
   const onSlotClick = (menuId: string, slot: string) => {
+    if (wasDraggingRef.current) return
     if (connectMode) {
       if (!connecting) { setConnecting({ menuId, slot }) }
       else {
@@ -197,6 +202,45 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
       e.preventDefault(); e.stopPropagation()
       setPainting(true)
       onPlaceItem(menuId, slot)
+      return
+    }
+    if (e.button === 0 && !palItem && !connectMode) {
+      const p = projects[menuId]
+      if (p?.slots[slot]) {
+        e.stopPropagation()
+        const startX = e.clientX, startY = e.clientY
+        let started = false
+        const mv = (ev: MouseEvent) => {
+          if (!started && (Math.abs(ev.clientX - startX) > 4 || Math.abs(ev.clientY - startY) > 4)) {
+            started = true
+            wasDraggingRef.current = true
+            setDraggingSlot({ menuId, key: slot, data: p.slots[slot] })
+            setDragMousePos({ x: ev.clientX, y: ev.clientY })
+          }
+          if (started) setDragMousePos({ x: ev.clientX, y: ev.clientY })
+        }
+        const up = (ev: MouseEvent) => {
+          window.removeEventListener('mousemove', mv)
+          window.removeEventListener('mouseup', up)
+          if (started) {
+            setDraggingSlot(null)
+            const el = document.elementFromPoint(ev.clientX, ev.clientY)
+            const slotEl = el?.closest('[data-slot-key]') as HTMLElement | null
+            if (slotEl) {
+              const targetKey = slotEl.getAttribute('data-slot-key')!
+              const targetMenu = slotEl.getAttribute('data-menu-id')!
+              if (targetMenu === menuId && targetKey !== slot) {
+                onMoveSlot(menuId, slot, targetKey)
+              }
+            }
+            setTimeout(() => { wasDraggingRef.current = false }, 0)
+          } else {
+            wasDraggingRef.current = false
+          }
+        }
+        window.addEventListener('mousemove', mv)
+        window.addEventListener('mouseup', up)
+      }
     }
   }
 
@@ -295,7 +339,7 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
   }, [showAddPopover])
 
   return (
-    <div className={`${s.canvasWrap} ${grabbing ? s.grabbing : ''}`} onMouseDown={onBgDown} onWheel={onWheel}
+    <div className={`${s.canvasWrap} ${grabbing || draggingSlot ? s.grabbing : ''}`} onMouseDown={onBgDown} onWheel={onWheel}
       onContextMenu={e => e.preventDefault()}
       onMouseMove={e => setMousePos({ x: (e.clientX - pan.x) / zoom, y: (e.clientY - pan.y) / zoom })} ref={surfRef}
       onKeyDown={e => {
@@ -371,6 +415,7 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
             onSlotEnter={(menuId, slot) => {
               if (painting && palItem) onPlaceItem(menuId, slot)
             }}
+            dragSourceKey={draggingSlot?.menuId === m.projectId ? draggingSlot.key : null}
           />
         })}
         {selBox && (
@@ -439,7 +484,12 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
       </div>
       {connectMode && connecting && <div className={s.connHint}>Кликните по целевому меню · Esc — отмена</div>}
       {connectMode && !connecting && <div className={s.connHint}>Режим связей: кликните по слоту-источнику · Esc — выход</div>}
-      {hoverData && <HoverTooltip data={hoverData.data} x={hoverData.x} y={hoverData.y} />}
+      {hoverData && !draggingSlot && <HoverTooltip data={hoverData.data} x={hoverData.x} y={hoverData.y} />}
+      {draggingSlot && (
+        <div style={{ position: 'fixed', left: dragMousePos.x - 20, top: dragMousePos.y - 20, width: 40, height: 40, pointerEvents: 'none', zIndex: 9999, opacity: 0.85, filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.5))' }}>
+          <ItemTexture itemId={draggingSlot.data.itemId} potionColor={draggingSlot.data.potionColor} skullTexture={draggingSlot.data.skullTexture} armorTrim={draggingSlot.data.armorTrim} showRP={showRP} />
+        </div>
+      )}
     </div>
   )
 }

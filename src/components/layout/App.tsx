@@ -157,6 +157,16 @@ export function App() {
     setSelSlot(key); setMultiSel(new Set())
   }
 
+  const handleMoveSlot = (pid: string, from: string, to: string) => {
+    if (pid !== proj.id) {
+      saveProject(proj)
+      const p = loadProject(pid)
+      if (p) { loadProj(p) }
+    }
+    dispatch({ type: 'MV', from, to })
+    setSelSlot(to); setMultiSel(new Set())
+  }
+
   const handleRemoveItem = (pid: string, key: string) => {
     if (pid !== proj.id) {
       saveProject(proj)
@@ -257,6 +267,7 @@ export function App() {
             palItem={palItem}
             onPlaceItem={handlePlaceItem}
             onRemoveItem={handleRemoveItem}
+            onMoveSlot={handleMoveSlot}
             showNums={showNums}
             showRP={showRP}
             onActivateMenu={switchToProject}

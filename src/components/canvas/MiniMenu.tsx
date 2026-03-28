@@ -37,11 +37,12 @@ interface Props {
   onRename?: (menuId: string, name: string) => void
   isMultiSelected?: boolean
   onSlotEnter?: (menuId: string, slot: string) => void
+  dragSourceKey?: string | null
 }
 
 const SCALE = 2
 
-export function MiniMenu({ project, x, y, zoom, onDrag, onSlotClick, onSlotRightClick, onSlotMouseDown, connectingFrom, onCtxMenu, isActive, selectedSlot, showNums, showRP, onSlotHover, onActivate, palItem, onDeleteMenu, onResizeMenu, onSetGuiType, onSetEraser, onClearAll, onRename, onSlotEnter }: Props) {
+export function MiniMenu({ project, x, y, zoom, onDrag, onSlotClick, onSlotRightClick, onSlotMouseDown, connectingFrom, onCtxMenu, isActive, selectedSlot, showNums, showRP, onSlotHover, onActivate, palItem, onDeleteMenu, onResizeMenu, onSetGuiType, onSetEraser, onClearAll, onRename, onSlotEnter, dragSourceKey }: Props) {
   const [editingName, setEditingName] = useState(false)
   const [nameText, setNameText] = useState(project.name)
   const [showSizeMenu, setShowSizeMenu] = useState(false)
@@ -73,8 +74,10 @@ export function MiniMenu({ project, x, y, zoom, onDrag, onSlotClick, onSlotRight
   const renderSlot = (key: string, d: SlotData | undefined, displayNum?: number | string, extraClass?: string) => {
     const isSrc = connectingFrom && connectingFrom.menuId === project.id && connectingFrom.slot === key
     const isSel = selectedSlot === key
+    const isDragSrc = dragSourceKey === key
     return (
-      <div key={key} className={`${extraClass || s.mmSlot} ${isSrc ? s.mmSlotConn : ''} ${isSel ? s.mmSlotSel : ''}`}
+      <div key={key} className={`${extraClass || s.mmSlot} ${isSrc ? s.mmSlotConn : ''} ${isSel ? s.mmSlotSel : ''} ${isDragSrc ? s.mmSlotDragSrc : ''}`}
+        data-slot-key={key} data-menu-id={project.id}
         onClick={e => { e.stopPropagation(); onSlotClick(project.id, key) }}
         onMouseDown={e => { onSlotMouseDown?.(project.id, key, e) }}
         onContextMenu={e => {
@@ -308,7 +311,8 @@ export function MiniMenu({ project, x, y, zoom, onDrag, onSlotClick, onSlotRight
                 const d = project.slots[sl.key]
                 return (
                   <div key={sl.key}
-                    className={`${s.mmTexSlot} ${selectedSlot === sl.key ? s.mmSlotSel : ''} ${connectingFrom && connectingFrom.menuId === project.id && connectingFrom.slot === sl.key ? s.mmSlotConn : ''}`}
+                    className={`${s.mmTexSlot} ${selectedSlot === sl.key ? s.mmSlotSel : ''} ${connectingFrom && connectingFrom.menuId === project.id && connectingFrom.slot === sl.key ? s.mmSlotConn : ''} ${dragSourceKey === sl.key ? s.mmSlotDragSrc : ''}`}
+                    data-slot-key={sl.key} data-menu-id={project.id}
                     style={{ left: sl.x * SCALE, top: sl.y * SCALE, width: 18 * SCALE, height: 18 * SCALE }}
                     onClick={e => { e.stopPropagation(); onSlotClick(project.id, sl.key) }}
                     onMouseDown={e => { onSlotMouseDown?.(project.id, sl.key, e) }}
