@@ -134,7 +134,8 @@ export function seg2mm(segs: TextSegment[]): string {
     if (s.underlined) inner = `<underlined>${inner}</underlined>`
     if (s.italic) inner = `<italic>${inner}</italic>`
     if (s.bold) inner = `<bold>${inner}</bold>`
-    r += `<${cn}>${inner}</${cn}>`
+    if (cn === 'white' || cn === '#FFFFFF') r += inner
+    else r += `<${cn}>${inner}</${cn}>`
   }
   return r
 }
