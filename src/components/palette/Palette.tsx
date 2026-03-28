@@ -93,6 +93,7 @@ export function Palette({ itemDB, selItem, onSelect, recent }: Props) {
                 key={`${id}-${i}`}
                 className={`${s.listItem} ${selected ? s.listItemSel : ''}`}
                 onClick={() => onSelect(id, preset)}
+                onMouseDown={e => { if (e.button === 1) { e.preventDefault(); onSelect(id, preset) } }}
               >
                 <ItemTexture
                   itemId={id}

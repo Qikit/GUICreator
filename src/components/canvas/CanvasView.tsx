@@ -27,6 +27,7 @@ interface Props {
   showRP: boolean
   onActivateMenu: (projectId: string) => void
   onBrushPick: (itemId: string) => void
+  onSlotPickup: (projectId: string, slotKey: string) => void
   onResizeMenu: (projectId: string, rows: number) => void
   onSetGuiType: (projectId: string, guiType: string) => void
   onSetEraser: () => void
@@ -37,7 +38,7 @@ interface Props {
   onMenuRemoved?: (projectId: string) => void
 }
 
-export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, selSlot, onSlotSelect, palItem, onPlaceItem, onRemoveItem, onMoveSlot, showNums, showRP, onActivateMenu, onBrushPick, onResizeMenu, onSetGuiType, onSetEraser, onDeselect, onDeselectPalette, onClearAll, onRenameMenu, onMenuRemoved }: Props) {
+export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, selSlot, onSlotSelect, palItem, onPlaceItem, onRemoveItem, onMoveSlot, showNums, showRP, onActivateMenu, onBrushPick, onSlotPickup, onResizeMenu, onSetGuiType, onSetEraser, onDeselect, onDeselectPalette, onClearAll, onRenameMenu, onMenuRemoved }: Props) {
   const [pan, setPan] = useState({ x: 0, y: 0 })
   const [zoom, setZoom] = useState(1)
   const [connectMode, setConnectMode] = useState(false)
@@ -185,6 +186,12 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
   }
 
   const handleSlotMouseDown = (menuId: string, slot: string, e: React.MouseEvent) => {
+    if (e.button === 1) {
+      e.preventDefault()
+      const p = projects[menuId]
+      if (p?.slots[slot]) onSlotPickup(menuId, slot)
+      return
+    }
     if (e.altKey && e.button === 0 && palItem) {
       e.preventDefault(); e.stopPropagation()
       setPainting(true)

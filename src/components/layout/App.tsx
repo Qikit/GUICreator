@@ -157,6 +157,23 @@ export function App() {
     setSelSlot(key); setMultiSel(new Set())
   }
 
+  const handleSlotPickup = (pid: string, key: string) => {
+    const p = pid === proj.id ? proj : loadProject(pid)
+    if (!p?.slots[key]) return
+    const d = p.slots[key]
+    setPalItem(d.itemId)
+    setPalPreset({
+      displayName: JSON.parse(JSON.stringify(d.displayName)),
+      lore: JSON.parse(JSON.stringify(d.lore)),
+      enchanted: d.enchanted,
+      amount: d.amount,
+      customModelData: d.customModelData,
+      potionColor: d.potionColor,
+      skullTexture: d.skullTexture,
+      armorTrim: d.armorTrim ? { ...d.armorTrim } : null,
+    })
+  }
+
   const handleMoveSlot = (pid: string, from: string, to: string) => {
     if (pid !== proj.id) {
       saveProject(proj)
@@ -272,6 +289,7 @@ export function App() {
             showRP={showRP}
             onActivateMenu={switchToProject}
             onBrushPick={id => { setPalItem(id); setPalPreset(null) }}
+            onSlotPickup={handleSlotPickup}
             onResizeMenu={(pid, rows) => {
               if (pid !== proj.id) switchToProject(pid)
               dispatch({ type: 'SR', rows })

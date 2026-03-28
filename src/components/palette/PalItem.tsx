@@ -21,6 +21,7 @@ export function PalItem({ id, selected, preset, onSelect, size = 28 }: Props) {
     <div
       className={`${ps.palItem} ${selected ? ps.palItemSel : ''}`}
       onClick={() => onSelect(id, preset)}
+      onMouseDown={e => { if (e.button === 1) { e.preventDefault(); onSelect(id, preset) } }}
       onMouseEnter={e => {
         const r = e.currentTarget.getBoundingClientRect()
         setHover({ x: r.right + 4, y: r.top })
