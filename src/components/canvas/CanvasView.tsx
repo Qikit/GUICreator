@@ -278,6 +278,10 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
   }
 
   useEffect(() => {
+    requestAnimationFrame(() => fitAll())
+  }, [workspace.id])
+
+  useEffect(() => {
     const stop = () => setPainting(false)
     window.addEventListener('mouseup', stop)
     return () => window.removeEventListener('mouseup', stop)
