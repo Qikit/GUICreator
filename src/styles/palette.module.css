@@ -16,12 +16,12 @@
 .palItem .itemTex { width: 28px; height: 28px; image-rendering: pixelated; pointer-events: none; }
 .footer { padding: var(--sp-sm) var(--sp-md); border-top: 1px solid var(--glass-border); display: flex; gap: var(--sp-xs); }
 .footer input { flex: 1; min-width: 0; font-size: 11px; }
-.eraserBtn { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-sm); border: 1px solid rgba(248,113,113,0.25); background: none; color: var(--er); cursor: pointer; font-size: 12px; transition: all 150ms; flex-shrink: 0; }
+.eraserBtn { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-sm); border: 1px solid rgba(248,113,113,0.25); background: none; color: var(--er); cursor: pointer; font-size: 13px; transition: all 150ms; flex-shrink: 0; }
 .eraserBtn:hover { background: rgba(248,113,113,0.1); border-color: var(--er); }
 .eraserBtnSel { background: rgba(248,113,113,0.2); border-color: var(--er); box-shadow: 0 0 8px rgba(248,113,113,0.2); }
 
 /* View mode buttons */
-.viewBtn { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--glass-border); border-radius: var(--radius-sm); background: none; color: var(--tx3); cursor: pointer; font-size: 10px; transition: all 150ms; }
+.viewBtn { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--glass-border); border-radius: var(--radius-sm); background: none; color: var(--tx3); cursor: pointer; font-size: 13px; transition: all 150ms; }
 .viewBtn:hover { background: var(--glass-hover); color: var(--tx1); }
 .viewBtnActive { background: var(--accent-subtle); color: var(--accent); border-color: var(--accent); }
 

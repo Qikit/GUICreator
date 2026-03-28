@@ -9,51 +9,51 @@
 .blob {
   position: absolute;
   border-radius: 50%;
-  filter: blur(80px);
+  filter: blur(70px);
 }
 .blob1 {
-  width: 600px;
-  height: 400px;
-  background: rgba(124,58,237,0.12);
+  width: 650px;
+  height: 450px;
+  background: rgba(124,58,237,0.18);
   top: -10%;
   right: -5%;
-  animation: drift1 30s ease-in-out infinite;
+  animation: drift1 18s ease-in-out infinite;
 }
 .blob2 {
-  width: 500px;
-  height: 350px;
-  background: rgba(59,130,246,0.08);
+  width: 550px;
+  height: 400px;
+  background: rgba(59,130,246,0.12);
   bottom: -10%;
   left: -5%;
-  animation: drift2 35s ease-in-out infinite;
+  animation: drift2 22s ease-in-out infinite;
 }
 .blob3 {
-  width: 400px;
-  height: 300px;
-  background: rgba(139,92,246,0.06);
+  width: 450px;
+  height: 350px;
+  background: rgba(139,92,246,0.10);
   top: 40%;
   left: 30%;
-  animation: drift3 40s ease-in-out infinite;
+  animation: drift3 25s ease-in-out infinite;
 }
 
 .static .blob { animation: none !important; }
 
 @keyframes drift1 {
-  0%, 100% { transform: translate(0, 0); }
-  25% { transform: translate(-30px, 20px); }
-  50% { transform: translate(-15px, -25px); }
-  75% { transform: translate(20px, 10px); }
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(-60px, 40px) scale(1.05); }
+  50% { transform: translate(-30px, -50px) scale(0.95); }
+  75% { transform: translate(40px, 20px) scale(1.02); }
 }
 @keyframes drift2 {
-  0%, 100% { transform: translate(0, 0); }
-  25% { transform: translate(25px, -15px); }
-  50% { transform: translate(10px, 30px); }
-  75% { transform: translate(-20px, -10px); }
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(50px, -30px) scale(1.04); }
+  50% { transform: translate(20px, 60px) scale(0.96); }
+  75% { transform: translate(-40px, -20px) scale(1.03); }
 }
 @keyframes drift3 {
-  0%, 100% { transform: translate(0, 0); }
-  33% { transform: translate(-20px, -20px); }
-  66% { transform: translate(15px, 25px); }
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(-40px, -40px) scale(1.06); }
+  66% { transform: translate(30px, 50px) scale(0.94); }
 }
 
 .particles {
@@ -64,8 +64,9 @@
   position: absolute;
   width: 2px;
   height: 2px;
-  background: rgba(139,92,246,0.4);
+  background: rgba(139,92,246,0.5);
   border-radius: 50%;
+  box-shadow: 0 0 4px rgba(139,92,246,0.3);
   animation: rise linear infinite;
 }
 @keyframes rise {
@@ -80,5 +81,5 @@
   inset: 0;
   pointer-events: none;
   z-index: 0;
-  transition: transform 100ms ease-out;
+  transition: transform 80ms ease-out;
 }

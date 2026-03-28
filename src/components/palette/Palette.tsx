@@ -1,4 +1,5 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import type { SlotPreset, ItemDatabase } from '@/types'
 import { ItemTexture } from '@/components/shared'
 import { ruName, ERASER_ID } from '@/utils/slot'
@@ -11,6 +12,35 @@ interface Props {
   selItem: string | null
   onSelect: (id: string, preset?: SlotPreset) => void
   recent: string[]
+}
+
+function TipBtn({ className, onClick, tip, children, style }: {
+  className?: string; onClick: () => void; tip: string; children: React.ReactNode; style?: React.CSSProperties
+}) {
+  const [pos, setPos] = useState<{ x: number; y: number } | null>(null)
+  return (
+    <button
+      className={className}
+      onClick={onClick}
+      style={style}
+      onMouseEnter={e => {
+        const r = e.currentTarget.getBoundingClientRect()
+        setPos({ x: r.left + r.width / 2, y: r.bottom + 6 })
+      }}
+      onMouseLeave={() => setPos(null)}
+    >
+      {children}
+      {pos && createPortal(
+        <div style={{
+          position: 'fixed', left: pos.x, top: pos.y, transform: 'translateX(-50%)',
+          background: 'rgba(15,7,32,0.95)', color: '#e4e4e7', padding: '4px 10px',
+          borderRadius: 6, fontSize: 10, whiteSpace: 'nowrap', pointerEvents: 'none',
+          zIndex: 10000, boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+        }}>{tip}</div>,
+        document.body,
+      )}
+    </button>
+  )
 }
 
 export function Palette({ itemDB, selItem, onSelect, recent }: Props) {
@@ -39,6 +69,16 @@ export function Palette({ itemDB, selItem, onSelect, recent }: Props) {
   }, [search, itemDB])
 
   const gridClass = paletteView === 'largeGrid' ? s.itemGridLarge : s.itemGrid
+  const allOpen = Object.keys(filtered).every(k => openCats[k])
+
+  const toggleAll = useCallback(() => {
+    const allKeys = Object.keys(filtered)
+    const shouldOpen = !allKeys.every(k => openCats[k])
+    const next: Record<string, boolean> = { ...openCats }
+    for (const k of allKeys) next[k] = shouldOpen
+    next.__r = shouldOpen
+    setOpenCats(next)
+  }, [filtered, openCats])
 
   const renderItems = (items: ItemDatabase[string]['items'], keyPrefix: string, isRecent = false) => {
     if (paletteView === 'list') {
@@ -97,30 +137,17 @@ export function Palette({ itemDB, selItem, onSelect, recent }: Props) {
   return (
     <div className={s.palette}>
       <div className={s.header}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-          <div style={{ display: 'flex', gap: 2 }}>
-            <button
-              className={`${s.viewBtn} ${paletteView === 'grid' ? s.viewBtnActive : ''}`}
-              onClick={() => setPaletteView('grid')}
-              title="Мелкие значки"
-            >▦</button>
-            <button
-              className={`${s.viewBtn} ${paletteView === 'largeGrid' ? s.viewBtnActive : ''}`}
-              onClick={() => setPaletteView('largeGrid')}
-              title="Крупные значки"
-            >▣</button>
-            <button
-              className={`${s.viewBtn} ${paletteView === 'list' ? s.viewBtnActive : ''}`}
-              onClick={() => setPaletteView('list')}
-              title="Список"
-            >☰</button>
-          </div>
-          <button
-            className={`${s.eraserBtn} ${selItem === ERASER_ID ? s.eraserBtnSel : ''}`}
-            onClick={() => onSelect(ERASER_ID)}
-            title="Ластик (E)"
-          >🚫</button>
-          <button className={s.viewBtn} onClick={() => { const allKeys = Object.keys(filtered); const allOpen = allKeys.every(k => openCats[k]); const next = { ...openCats }; for (const k of allKeys) next[k] = !allOpen; next.__r = !allOpen; setOpenCats(next) }} title={Object.keys(filtered).every(k => openCats[k]) ? 'Свернуть все' : 'Развернуть все'}>{Object.keys(filtered).every(k => openCats[k]) ? '▴' : '▾'}</button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+          <TipBtn className={`${s.viewBtn} ${paletteView === 'grid' ? s.viewBtnActive : ''}`}
+            onClick={() => setPaletteView('grid')} tip="Мелкие значки">▦</TipBtn>
+          <TipBtn className={`${s.viewBtn} ${paletteView === 'largeGrid' ? s.viewBtnActive : ''}`}
+            onClick={() => setPaletteView('largeGrid')} tip="Крупные значки">▣</TipBtn>
+          <TipBtn className={`${s.viewBtn} ${paletteView === 'list' ? s.viewBtnActive : ''}`}
+            onClick={() => setPaletteView('list')} tip="Список">☰</TipBtn>
+          <TipBtn className={`${s.eraserBtn} ${selItem === ERASER_ID ? s.eraserBtnSel : ''}`}
+            onClick={() => onSelect(ERASER_ID)} tip="Ластик (E)">🚫</TipBtn>
+          <TipBtn className={s.viewBtn} onClick={toggleAll}
+            tip={allOpen ? 'Свернуть все' : 'Развернуть все'}>{allOpen ? '▴' : '▾'}</TipBtn>
         </div>
       </div>
       <div className={s.search}>
