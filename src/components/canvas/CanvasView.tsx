@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import type { Workspace, Project, SlotData } from '@/types'
 import { gid } from '@/utils/id'
 import { newProject } from '@/utils/slot'
@@ -485,10 +486,11 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
       {connectMode && connecting && <div className={s.connHint}>Кликните по целевому меню · Esc — отмена</div>}
       {connectMode && !connecting && <div className={s.connHint}>Режим связей: кликните по слоту-источнику · Esc — выход</div>}
       {hoverData && !draggingSlot && <HoverTooltip data={hoverData.data} x={hoverData.x} y={hoverData.y} />}
-      {draggingSlot && (
+      {draggingSlot && createPortal(
         <div style={{ position: 'fixed', left: dragMousePos.x - 20, top: dragMousePos.y - 20, width: 40, height: 40, pointerEvents: 'none', zIndex: 9999, opacity: 0.85, filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.5))' }}>
           <ItemTexture itemId={draggingSlot.data.itemId} potionColor={draggingSlot.data.potionColor} skullTexture={draggingSlot.data.skullTexture} armorTrim={draggingSlot.data.armorTrim} showRP={showRP} />
-        </div>
+        </div>,
+        document.body,
       )}
     </div>
   )
