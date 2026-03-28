@@ -22,6 +22,7 @@ interface Props {
   onPlaceItem: (projectId: string, slotKey: string) => void
   onRemoveItem: (projectId: string, slotKey: string) => void
   showNums: boolean
+  showRP: boolean
   onActivateMenu: (projectId: string) => void
   onBrushPick: (itemId: string) => void
   onResizeMenu: (projectId: string, rows: number) => void
@@ -34,7 +35,7 @@ interface Props {
   onMenuRemoved?: (projectId: string) => void
 }
 
-export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, selSlot, onSlotSelect, palItem, onPlaceItem, onRemoveItem, showNums, onActivateMenu, onBrushPick, onResizeMenu, onSetGuiType, onSetEraser, onDeselect, onDeselectPalette, onClearAll, onRenameMenu, onMenuRemoved }: Props) {
+export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, selSlot, onSlotSelect, palItem, onPlaceItem, onRemoveItem, showNums, showRP, onActivateMenu, onBrushPick, onResizeMenu, onSetGuiType, onSetEraser, onDeselect, onDeselectPalette, onClearAll, onRenameMenu, onMenuRemoved }: Props) {
   const [pan, setPan] = useState({ x: 0, y: 0 })
   const [zoom, setZoom] = useState(1)
   const [connectMode, setConnectMode] = useState(false)
@@ -350,6 +351,7 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
             isActive={m.projectId === activeProjectId}
             selectedSlot={m.projectId === activeProjectId ? selSlot : null}
             showNums={showNums}
+            showRP={showRP}
             onSlotHover={(data, x, y) => data ? setHoverData({ data, x, y }) : setHoverData(null)}
             palItem={palItem}
             onDeleteMenu={pid => {

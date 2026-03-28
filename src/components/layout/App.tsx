@@ -23,7 +23,7 @@ import tb from '@/styles/toolbar.module.css'
 
 export function App() {
   const { present: proj, past, future, dispatch, undo, redo, setName, loadProject: loadProj } = useProjectStore()
-  const { showNums, toggleNums, animations, toggleAnimations } = usePrefsStore()
+  const { showNums, showRP, toggleNums, animations, toggleAnimations } = usePrefsStore()
 
   const [selSlot, setSelSlot] = useState<string | null>(null)
   const [multiSel, setMultiSel] = useState<Set<string>>(new Set())
@@ -258,6 +258,7 @@ export function App() {
             onPlaceItem={handlePlaceItem}
             onRemoveItem={handleRemoveItem}
             showNums={showNums}
+            showRP={showRP}
             onActivateMenu={switchToProject}
             onBrushPick={id => { setPalItem(id); setPalPreset(null) }}
             onResizeMenu={(pid, rows) => {
