@@ -21,8 +21,11 @@ export function LoreEditor({ lore, onChange }: Props) {
   const symBtnRef = useRef<HTMLButtonElement>(null)
   const symPopupRef = useRef<HTMLDivElement>(null)
 
+  const selfEdit = useRef(false)
+
   useEffect(() => {
-    setText(lore.map(line => seg2mm(line)).join('\n'))
+    if (!selfEdit.current) setText(lore.map(line => seg2mm(line)).join('\n'))
+    selfEdit.current = false
   }, [lore])
 
   useEffect(() => {
@@ -48,6 +51,7 @@ export function LoreEditor({ lore, onChange }: Props) {
   }, [showSymbols])
 
   const apply = (val: string) => {
+    selfEdit.current = true
     setText(val)
     const lines = val.split('\n')
     onChange(lines.map(line => {

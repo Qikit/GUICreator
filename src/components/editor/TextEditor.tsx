@@ -20,7 +20,9 @@ export function TextEditor({ label, segs, onChange }: Props) {
   const symBtnRef = useRef<HTMLButtonElement>(null)
   const symPopupRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => { setMmText(seg2mm(segs)) }, [segs])
+  const selfEdit = useRef(false)
+
+  useEffect(() => { if (!selfEdit.current) setMmText(seg2mm(segs)); selfEdit.current = false }, [segs])
 
   useEffect(() => {
     if (!showSymbols) return
@@ -34,6 +36,7 @@ export function TextEditor({ label, segs, onChange }: Props) {
   }, [showSymbols])
 
   const apply = (text: string) => {
+    selfEdit.current = true
     setMmText(text)
     const parsed = parseMM(text)
     if (parsed.length) onChange(parsed)
