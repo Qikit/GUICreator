@@ -116,6 +116,13 @@ export function GradientModal({ onClose }: Props) {
       </div>
 
       <div style={{ marginBottom: 8 }}>
+        <div style={{ fontSize: 10, color: 'var(--tx3)', marginBottom: 4, fontWeight: 600, textTransform: 'uppercase' }}>Превью</div>
+        <div className={s.prevBox} style={{ padding: '10px 14px' }}>
+          <div className={s.prevLine} style={{ fontSize: 18 }}><McText segs={segs} /></div>
+        </div>
+      </div>
+
+      <div style={{ marginBottom: 8 }}>
         <div style={{ fontSize: 10, color: 'var(--tx3)', marginBottom: 4, fontWeight: 600, textTransform: 'uppercase' }}>Цвета</div>
         <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', alignItems: 'center' }}>
           {colors.map((c, i) => (
@@ -180,13 +187,6 @@ export function GradientModal({ onClose }: Props) {
           <GlowButton size="md" onClick={() => copy(generateFormatted(), 'fmt')} style={{ minWidth: 80 }}>
             {copied === 'fmt' ? 'Скопировано' : 'Копировать'}
           </GlowButton>
-        </div>
-      </div>
-
-      <div style={{ marginBottom: 8 }}>
-        <div style={{ fontSize: 10, color: 'var(--tx3)', marginBottom: 4, fontWeight: 600, textTransform: 'uppercase' }}>Превью</div>
-        <div className={s.prevBox} style={{ padding: '10px 14px' }}>
-          <div className={s.prevLine} style={{ fontSize: 18 }}><McText segs={segs} /></div>
         </div>
       </div>
 
