@@ -68,10 +68,10 @@ export class ComponentGenerator implements CommandGenerator {
     const parts: string[] = []
 
     if (slot.displayName.length > 0) {
-      parts.push(`"minecraft:custom_name":'${segmentsToJson(slot.displayName)}'`)
+      parts.push(`"minecraft:custom_name":${segmentsToJson(slot.displayName)}`)
     }
     if (slot.lore.length > 0) {
-      const lines = slot.lore.map(line => `'${segmentsToJson(line, { lore: true })}'`).join(',')
+      const lines = slot.lore.map(line => segmentsToJson(line, { lore: true })).join(',')
       parts.push(`"minecraft:lore":[${lines}]`)
     }
     if (slot.enchanted) {
@@ -105,10 +105,10 @@ export class ComponentGenerator implements CommandGenerator {
     }
 
     if (slot.displayName.length > 0) {
-      parts.push(`"minecraft:custom_name":'${segmentsToJson(slot.displayName)}'`)
+      parts.push(`"minecraft:custom_name":${segmentsToJson(slot.displayName)}`)
     }
     if (slot.lore.length > 0) {
-      const lines = slot.lore.map(line => `'${segmentsToJson(line, { lore: true })}'`).join(',')
+      const lines = slot.lore.map(line => segmentsToJson(line, { lore: true })).join(',')
       parts.push(`"minecraft:lore":[${lines}]`)
     }
     if (slot.funItemEnchantments && Object.keys(slot.funItemEnchantments).length > 0) {
@@ -141,10 +141,10 @@ export class ComponentGenerator implements CommandGenerator {
     const parts: string[] = []
 
     if (slot.displayName.length > 0) {
-      parts.push(`"minecraft:custom_name":'${segmentsToJson(slot.displayName)}'`)
+      parts.push(`"minecraft:custom_name":${segmentsToJson(slot.displayName)}`)
     }
     if (slot.lore.length > 0) {
-      const lines = slot.lore.map(line => `'${segmentsToJson(line, { lore: true })}'`).join(',')
+      const lines = slot.lore.map(line => segmentsToJson(line, { lore: true })).join(',')
       parts.push(`"minecraft:lore":[${lines}]`)
     }
     if (slot.funItemTags && Object.keys(slot.funItemTags).length > 0) {

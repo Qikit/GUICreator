@@ -117,6 +117,21 @@ describe('ComponentGenerator.formatContainer', () => {
     expect(cmd).not.toContain('enchantment_glint_override=')
   })
 
+  it('container items use SNBT compound for text components, not JSON strings', () => {
+    const slots: Record<string, SlotData> = {
+      '0-0': slot({
+        displayName: [{ text: 'Test', color: '#FF0000', bold: false, italic: false, underlined: false, strikethrough: false, obfuscated: false }],
+        lore: [[{ text: 'Line', color: '#AAAAAA', bold: false, italic: true, underlined: false, strikethrough: false, obfuscated: false }]],
+      }),
+    }
+    const containerDef = { id: 'chest', label: 'Chest', maxSlots: 27, doubleAllowed: true }
+    const result = gen.formatContainer(slots, 3, { ...baseOpts, container: containerDef })
+    const cmd = result.commands[0]
+    expect(cmd).toContain('"minecraft:custom_name":{"text":"Test","color":"#FF0000"}')
+    expect(cmd).not.toContain("custom_name':'{")
+    expect(cmd).not.toContain("custom_name':'[")
+  })
+
   it('double chest', () => {
     const slots: Record<string, SlotData> = {
       '0-0': slot(),
