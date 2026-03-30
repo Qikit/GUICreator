@@ -185,6 +185,7 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
 
   const onSlotRightClick = (menuId: string, slotKey: string, cx: number, cy: number) => {
     onSlotSelect(menuId, slotKey)
+    setHoverData(null)
     setSlotCtx({ x: cx, y: cy, menuId, slotKey })
   }
 
