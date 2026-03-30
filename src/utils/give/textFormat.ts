@@ -2,17 +2,25 @@ import type { TextSegment } from '@/types'
 
 interface FormatOptions {
   lore?: boolean
+  name?: boolean
 }
 
 export function segmentToJson(seg: TextSegment, opts: FormatOptions = {}): string {
   const obj: Record<string, unknown> = { text: seg.text }
-  if (seg.color !== '#FFFFFF') obj.color = seg.color
+
+  const needExplicitColor = opts.lore || opts.name
+  if (needExplicitColor || seg.color !== '#FFFFFF') {
+    obj.color = seg.color === '#FFFFFF' && opts.lore ? 'white' : seg.color
+  }
+
   if (seg.bold) obj.bold = true
   if (seg.italic) obj.italic = true
   if (seg.underlined) obj.underlined = true
   if (seg.strikethrough) obj.strikethrough = true
   if (seg.obfuscated) obj.obfuscated = true
-  if (opts.lore && !seg.italic) obj.italic = false
+
+  if ((opts.lore || opts.name) && !seg.italic) obj.italic = false
+
   return JSON.stringify(obj)
 }
 

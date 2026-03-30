@@ -24,7 +24,7 @@ function slot(overrides: Partial<SlotData> = {}): SlotData {
 describe('ComponentGenerator.formatItem', () => {
   it('minimal item', () => {
     const cmd = gen.formatItem(slot(), baseOpts)
-    expect(cmd).toBe("minecraft:give @p minecraft:diamond_sword[custom_name='{\"text\":\"Sword\"}'] 1")
+    expect(cmd).toBe("minecraft:give @p minecraft:diamond_sword[custom_name='{\"text\":\"Sword\",\"color\":\"#FFFFFF\",\"italic\":false}'] 1")
   })
 
   it('colored bold name', () => {
@@ -127,7 +127,7 @@ describe('ComponentGenerator.formatContainer', () => {
     const containerDef = { id: 'chest', label: 'Chest', maxSlots: 27, doubleAllowed: true }
     const result = gen.formatContainer(slots, 3, { ...baseOpts, container: containerDef })
     const cmd = result.commands[0]
-    expect(cmd).toContain('"minecraft:custom_name":{"text":"Test","color":"#FF0000"}')
+    expect(cmd).toContain('"minecraft:custom_name":{"text":"Test","color":"#FF0000","italic":false}')
     expect(cmd).not.toContain("custom_name':'{")
     expect(cmd).not.toContain("custom_name':'[")
   })

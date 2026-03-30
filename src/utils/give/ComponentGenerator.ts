@@ -68,7 +68,7 @@ export class ComponentGenerator implements CommandGenerator {
     const parts: string[] = []
 
     if (slot.displayName.length > 0) {
-      parts.push(`"minecraft:custom_name":${segmentsToJson(slot.displayName)}`)
+      parts.push(`"minecraft:custom_name":${segmentsToJson(slot.displayName, { name: true })}`)
     }
     if (slot.lore.length > 0) {
       const lines = slot.lore.map(line => segmentsToJson(line, { lore: true })).join(',')
@@ -105,7 +105,7 @@ export class ComponentGenerator implements CommandGenerator {
     }
 
     if (slot.displayName.length > 0) {
-      parts.push(`"minecraft:custom_name":${segmentsToJson(slot.displayName)}`)
+      parts.push(`"minecraft:custom_name":${segmentsToJson(slot.displayName, { name: true })}`)
     }
     if (slot.lore.length > 0) {
       const lines = slot.lore.map(line => segmentsToJson(line, { lore: true })).join(',')
@@ -141,7 +141,7 @@ export class ComponentGenerator implements CommandGenerator {
     const parts: string[] = []
 
     if (slot.displayName.length > 0) {
-      parts.push(`"minecraft:custom_name":${segmentsToJson(slot.displayName)}`)
+      parts.push(`"minecraft:custom_name":${segmentsToJson(slot.displayName, { name: true })}`)
     }
     if (slot.lore.length > 0) {
       const lines = slot.lore.map(line => segmentsToJson(line, { lore: true })).join(',')
@@ -203,7 +203,7 @@ export class ComponentGenerator implements CommandGenerator {
     const parts: string[] = []
 
     if (slot.displayName.length > 0) {
-      parts.push(`custom_name='${segmentsToJson(slot.displayName)}'`)
+      parts.push(`custom_name='${segmentsToJson(slot.displayName, { name: true })}'`)
     }
 
     if (slot.lore.length > 0) {
@@ -244,7 +244,7 @@ export class ComponentGenerator implements CommandGenerator {
     if (rawComponents) parts.push(rawComponents)
 
     if (slot.displayName.length > 0) {
-      parts.push(`custom_name='${segmentsToJson(slot.displayName)}'`)
+      parts.push(`custom_name='${segmentsToJson(slot.displayName, { name: true })}'`)
     }
     if (slot.lore.length > 0) {
       const lines = slot.lore.map(line => `'${segmentsToJson(line, { lore: true })}'`).join(',')
@@ -283,7 +283,7 @@ export class ComponentGenerator implements CommandGenerator {
     const parts: string[] = []
 
     if (slot.displayName.length > 0) {
-      parts.push(`custom_name='${segmentsToJson(slot.displayName)}'`)
+      parts.push(`custom_name='${segmentsToJson(slot.displayName, { name: true })}'`)
     }
     if (slot.lore.length > 0) {
       const lines = slot.lore.map(line => `'${segmentsToJson(line, { lore: true })}'`).join(',')

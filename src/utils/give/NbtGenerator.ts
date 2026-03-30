@@ -65,7 +65,7 @@ export class NbtGenerator implements CommandGenerator {
 
     const displayParts: string[] = []
     if (slot.displayName.length > 0) {
-      displayParts.push(`Name:'${segmentsToJson(slot.displayName)}'`)
+      displayParts.push(`Name:'${segmentsToJson(slot.displayName, { name: true })}'`)
     }
     if (slot.lore.length > 0) {
       const loreLines = slot.lore.map(line => `'${segmentsToJson(line, { lore: true })}'`).join(',')
@@ -114,7 +114,7 @@ export class NbtGenerator implements CommandGenerator {
 
     const displayParts: string[] = []
     if (slot.displayName.length > 0) {
-      displayParts.push(`Name:'${segmentsToJson(slot.displayName)}'`)
+      displayParts.push(`Name:'${segmentsToJson(slot.displayName, { name: true })}'`)
     }
     if (slot.lore.length > 0) {
       const loreLines = slot.lore.map(line => `'${segmentsToJson(line, { lore: true })}'`).join(',')

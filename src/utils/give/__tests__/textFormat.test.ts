@@ -51,6 +51,22 @@ describe('segmentsToJson', () => {
     const parsed = JSON.parse(result)
     expect(parsed.italic).toBe(false)
   })
+  it('lore context adds color:white for white text', () => {
+    const result = segmentsToJson([seg('White line')], { lore: true })
+    const parsed = JSON.parse(result)
+    expect(parsed.color).toBe('white')
+  })
+  it('lore context keeps non-white color as hex', () => {
+    const result = segmentsToJson([seg('Red', { color: '#FF0000' })], { lore: true })
+    const parsed = JSON.parse(result)
+    expect(parsed.color).toBe('#FF0000')
+  })
+  it('name context adds italic:false and includes color', () => {
+    const result = segmentsToJson([seg('Name')], { name: true })
+    const parsed = JSON.parse(result)
+    expect(parsed.italic).toBe(false)
+    expect(parsed.color).toBe('#FFFFFF')
+  })
 })
 
 describe('hexToDecimal', () => {
