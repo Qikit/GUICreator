@@ -1,6 +1,6 @@
 import type { SlotData } from '@/types'
 import type { CommandGenerator, GiveOptions, GiveResult } from './types'
-import { segmentsToJson, hexToDecimal } from './textFormat'
+import { segmentsToJson, hexToDecimal, isDefaultName } from './textFormat'
 
 export class ComponentGenerator implements CommandGenerator {
 
@@ -67,7 +67,7 @@ export class ComponentGenerator implements CommandGenerator {
   private buildVanillaSnbt(slot: SlotData): string {
     const parts: string[] = []
 
-    if (slot.displayName.length > 0) {
+    if (slot.displayName.length > 0 && !isDefaultName(slot.displayName, slot.itemId)) {
       parts.push(`"minecraft:custom_name":${segmentsToJson(slot.displayName, { name: true })}`)
     }
     if (slot.lore.length > 0) {
@@ -202,7 +202,7 @@ export class ComponentGenerator implements CommandGenerator {
   private buildVanillaComponents(slot: SlotData): string {
     const parts: string[] = []
 
-    if (slot.displayName.length > 0) {
+    if (slot.displayName.length > 0 && !isDefaultName(slot.displayName, slot.itemId)) {
       parts.push(`custom_name='${segmentsToJson(slot.displayName, { name: true })}'`)
     }
 

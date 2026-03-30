@@ -33,3 +33,12 @@ export function segmentsToJson(segs: TextSegment[], opts: FormatOptions = {}): s
 export function hexToDecimal(hex: string): number {
   return parseInt(hex.replace('#', ''), 16)
 }
+
+export function isDefaultName(segs: TextSegment[], itemId: string): boolean {
+  if (segs.length !== 1) return false
+  const s = segs[0]
+  if (s.bold || s.italic || s.underlined || s.strikethrough || s.obfuscated) return false
+  if (s.color !== '#FFFFFF') return false
+  const expected = itemId.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+  return s.text === expected
+}

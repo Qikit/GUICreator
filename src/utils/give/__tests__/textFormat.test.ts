@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { segmentsToJson, segmentToJson, hexToDecimal } from '../textFormat'
+import { segmentsToJson, segmentToJson, hexToDecimal, isDefaultName } from '../textFormat'
 import type { TextSegment } from '@/types'
 
 const seg = (text: string, overrides: Partial<TextSegment> = {}): TextSegment => ({
@@ -66,6 +66,24 @@ describe('segmentsToJson', () => {
     const parsed = JSON.parse(result)
     expect(parsed.italic).toBe(false)
     expect(parsed.color).toBe('#FFFFFF')
+  })
+})
+
+describe('isDefaultName', () => {
+  it('true for default name matching itemId', () => {
+    expect(isDefaultName([seg('Diamond Sword')], 'diamond_sword')).toBe(true)
+  })
+  it('false for custom name', () => {
+    expect(isDefaultName([seg('Fire Sword')], 'diamond_sword')).toBe(false)
+  })
+  it('false for colored name', () => {
+    expect(isDefaultName([seg('Diamond Sword', { color: '#FF0000' })], 'diamond_sword')).toBe(false)
+  })
+  it('false for bold name', () => {
+    expect(isDefaultName([seg('Diamond Sword', { bold: true })], 'diamond_sword')).toBe(false)
+  })
+  it('false for multi-segment name', () => {
+    expect(isDefaultName([seg('Diamond '), seg('Sword')], 'diamond_sword')).toBe(false)
   })
 })
 

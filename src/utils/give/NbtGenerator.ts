@@ -1,6 +1,6 @@
 import type { SlotData } from '@/types'
 import type { CommandGenerator, GiveOptions, GiveResult } from './types'
-import { segmentsToJson, hexToDecimal } from './textFormat'
+import { segmentsToJson, hexToDecimal, isDefaultName } from './textFormat'
 
 export class NbtGenerator implements CommandGenerator {
 
@@ -64,7 +64,7 @@ export class NbtGenerator implements CommandGenerator {
     const parts: string[] = []
 
     const displayParts: string[] = []
-    if (slot.displayName.length > 0) {
+    if (slot.displayName.length > 0 && !isDefaultName(slot.displayName, slot.itemId)) {
       displayParts.push(`Name:'${segmentsToJson(slot.displayName, { name: true })}'`)
     }
     if (slot.lore.length > 0) {
