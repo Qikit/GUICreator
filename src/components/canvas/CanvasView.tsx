@@ -118,7 +118,8 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
     window.addEventListener('mousemove', mv); window.addEventListener('mouseup', up)
   }
 
-  const onWheel = (e: React.WheelEvent) => {
+  const onWheelRef = useRef<(e: WheelEvent) => void>()
+  onWheelRef.current = (e: WheelEvent) => {
     e.preventDefault()
     const rect = surfRef.current!.getBoundingClientRect()
     const mx = e.clientX - rect.left, my = e.clientY - rect.top
@@ -127,6 +128,14 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
     setPan({ x: mx - (mx - pan.x) * nz / zoom, y: my - (my - pan.y) * nz / zoom })
     setZoom(nz)
   }
+
+  useEffect(() => {
+    const el = surfRef.current
+    if (!el) return
+    const handler = (e: WheelEvent) => onWheelRef.current?.(e)
+    el.addEventListener('wheel', handler, { passive: false })
+    return () => el.removeEventListener('wheel', handler)
+  }, [])
 
   const SNAP_DISTANCE = 10
 
@@ -351,8 +360,9 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
   }, [showAddPopover])
 
   return (
-    <div className={`${s.canvasWrap} ${grabbing || draggingSlot ? s.grabbing : ''}`} onMouseDown={onBgDown} onWheel={onWheel}
+    <div className={`${s.canvasWrap} ${grabbing || draggingSlot ? s.grabbing : ''}`} onMouseDown={onBgDown}
       onContextMenu={e => e.preventDefault()}
+      style={{ touchAction: 'none', overscrollBehavior: 'none' }}
       onMouseMove={e => setMousePos({ x: (e.clientX - pan.x) / zoom, y: (e.clientY - pan.y) / zoom })} ref={surfRef}
       onKeyDown={e => {
         if (e.key === 'Escape') { setConnecting(null); setConnectMode(false) }
@@ -510,9 +520,9 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
       )}
       {giveContainerMenuId && (() => {
         const p = projects[giveContainerMenuId]
-        return p ? <GiveContainerModal project={p} onClose={() => setGiveContainerMenuId(null)} /> : null
+        return p ? createPortal(<GiveContainerModal project={p} onClose={() => setGiveContainerMenuId(null)} />, document.body) : null
       })()}
-      {giveItemSlot && <GiveItemModal slot={giveItemSlot} onClose={() => setGiveItemSlot(null)} />}
+      {giveItemSlot && createPortal(<GiveItemModal slot={giveItemSlot} onClose={() => setGiveItemSlot(null)} />, document.body)}
     </div>
   )
 }
