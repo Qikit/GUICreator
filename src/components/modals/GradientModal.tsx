@@ -35,6 +35,8 @@ export function GradientModal({ onClose }: Props) {
   const [format, setFormat] = useState('minimessage')
   const [customFormat, setCustomFormat] = useState('$1$c')
   const [preInvert, setPreInvert] = useState<string[] | null>(null)
+  const [dragIdx, setDragIdx] = useState<number | null>(null)
+  const [dragOverIdx, setDragOverIdx] = useState<number | null>(null)
 
   const genSegs = (): TextSegment[] => {
     if (!text) return []
@@ -126,9 +128,31 @@ export function GradientModal({ onClose }: Props) {
         <div style={{ fontSize: 10, color: 'var(--tx3)', marginBottom: 4, fontWeight: 600, textTransform: 'uppercase' }}>Цвета</div>
         <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', alignItems: 'center' }}>
           {colors.map((c, i) => (
-            <div key={i} style={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-              <input type="color" value={c} onChange={e => setColors(colors.map((v, j) => j === i ? e.target.value.toUpperCase() : v))} style={{ width: 28, height: 28, padding: 0, border: '1px solid var(--glass-border)', borderRadius: 3, cursor: 'pointer' }} />
-              <input value={c} onChange={e => { if (/^#[0-9A-Fa-f]{6}$/.test(e.target.value)) setColors(colors.map((v, j) => j === i ? e.target.value.toUpperCase() : v)) }} style={{ width: 72, fontSize: 11, fontFamily: 'monospace' }} />
+            <div key={i}
+              draggable
+              onDragStart={e => { setDragIdx(i); e.dataTransfer.effectAllowed = 'move' }}
+              onDragOver={e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; setDragOverIdx(i) }}
+              onDragLeave={() => { if (dragOverIdx === i) setDragOverIdx(null) }}
+              onDrop={e => {
+                e.preventDefault()
+                if (dragIdx !== null && dragIdx !== i) {
+                  const next = [...colors]
+                  const [moved] = next.splice(dragIdx, 1)
+                  next.splice(i, 0, moved)
+                  setColors(next)
+                }
+                setDragIdx(null); setDragOverIdx(null)
+              }}
+              onDragEnd={() => { setDragIdx(null); setDragOverIdx(null) }}
+              style={{
+                display: 'flex', gap: 2, alignItems: 'center', cursor: 'grab',
+                opacity: dragIdx === i ? 0.4 : 1,
+                outline: dragOverIdx === i && dragIdx !== i ? '2px solid var(--accent)' : 'none',
+                borderRadius: 4,
+                transition: 'opacity 150ms',
+              }}>
+              <input type="color" value={c} onChange={e => setColors(colors.map((v, j) => j === i ? e.target.value.toUpperCase() : v))} style={{ width: 28, height: 28, padding: 0, border: '1px solid var(--glass-border)', borderRadius: 3, cursor: 'pointer', pointerEvents: 'auto' }} />
+              <input value={c} onChange={e => { if (/^#[0-9A-Fa-f]{6}$/.test(e.target.value)) setColors(colors.map((v, j) => j === i ? e.target.value.toUpperCase() : v)) }} style={{ width: 72, fontSize: 11, fontFamily: 'monospace' }} onDragStart={e => e.stopPropagation()} draggable={false} />
               {colors.length > 2 && <GlowButton style={{ padding: '0 4px', fontSize: 10 }} onClick={() => setColors(colors.filter((_, j) => j !== i))}>✕</GlowButton>}
             </div>
           ))}
