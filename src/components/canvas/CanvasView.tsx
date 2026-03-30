@@ -445,19 +445,19 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
           }} />
         )}
       </div>
-      {mmCtx && <CtxMenu x={mmCtx.x} y={mmCtx.y} onClose={() => setMmCtx(null)} items={[
+      {mmCtx && createPortal(<CtxMenu x={mmCtx.x} y={mmCtx.y} onClose={() => setMmCtx(null)} items={[
         { label: 'Убрать с canvas', danger: true, fn: () => removeFromCanvas(mmCtx.idx) },
-      ]} />}
+      ]} />, document.body)}
       {slotCtx && (() => {
         const p = projects[slotCtx.menuId]
         const hasItem = p?.slots[slotCtx.slotKey]
-        return <CtxMenu x={slotCtx.x} y={slotCtx.y} onClose={() => setSlotCtx(null)} items={[
+        return createPortal(<CtxMenu x={slotCtx.x} y={slotCtx.y} onClose={() => setSlotCtx(null)} items={[
           ...(hasItem ? [
             { label: 'Скопировать /give', fn: () => { setGiveItemSlot(hasItem); setSlotCtx(null) } },
             { sep: true },
             { label: 'Удалить предмет', danger: true, fn: () => { onRemoveItem(slotCtx.menuId, slotCtx.slotKey); setSlotCtx(null) } },
           ] : []),
-        ]} />
+        ]} />, document.body)
       })()}
       <input
         className={s.wsName}
@@ -503,7 +503,7 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
       {hoverData && !draggingSlot && <HoverTooltip data={hoverData.data} x={hoverData.x} y={hoverData.y} />}
       {draggingSlot && createPortal(
         <div style={{ position: 'fixed', left: dragMousePos.x - 20, top: dragMousePos.y - 20, width: 40, height: 40, pointerEvents: 'none', zIndex: 9999, opacity: 0.85, filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.5))' }}>
-          <ItemTexture itemId={draggingSlot.data.itemId} potionColor={draggingSlot.data.potionColor} skullTexture={draggingSlot.data.skullTexture} armorTrim={draggingSlot.data.armorTrim} showRP={showRP} />
+          <ItemTexture itemId={draggingSlot.data.itemId} potionColor={draggingSlot.data.potionColor} skullTexture={draggingSlot.data.skullTexture} rpTexture={draggingSlot.data.rpTexture} armorTrim={draggingSlot.data.armorTrim} showRP={showRP} />
         </div>,
         document.body,
       )}
