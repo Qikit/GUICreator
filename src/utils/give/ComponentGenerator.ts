@@ -44,7 +44,7 @@ export class ComponentGenerator implements CommandGenerator {
         if (!slot) continue
         const slotIndex = (r - startRow) * 9 + c
         if (slotIndex >= container.maxSlots) continue
-        const components = this.buildItemComponents(slot)
+        const components = this.buildSnbtComponents(slot)
         const compStr = components ? `,components:{${components}}` : ''
         items.push(`{slot:${slotIndex},item:{id:"minecraft:${slot.itemId}",count:${slot.amount}${compStr}}}`)
       }
@@ -52,6 +52,141 @@ export class ComponentGenerator implements CommandGenerator {
 
     const containerId = `minecraft:${container.id}`
     return `${prefix}give ${target} ${containerId}[container=[${items.join(',')}]] 1`
+  }
+
+  private buildSnbtComponents(slot: SlotData): string {
+    if (slot.funItemComponents && slot.funItemComponents.includes('[')) {
+      return this.buildFunItemSnbt(slot)
+    }
+    if (slot.funItemTags || slot.funItemEnchantments) {
+      return this.buildFunItemPropsSnbt(slot)
+    }
+    return this.buildVanillaSnbt(slot)
+  }
+
+  private buildVanillaSnbt(slot: SlotData): string {
+    const parts: string[] = []
+
+    if (slot.displayName.length > 0) {
+      parts.push(`"minecraft:custom_name":'${segmentsToJson(slot.displayName)}'`)
+    }
+    if (slot.lore.length > 0) {
+      const lines = slot.lore.map(line => `'${segmentsToJson(line, { lore: true })}'`).join(',')
+      parts.push(`"minecraft:lore":[${lines}]`)
+    }
+    if (slot.enchanted) {
+      parts.push('"minecraft:enchantment_glint_override":true')
+    }
+    if (slot.customModelData !== null) {
+      parts.push(`"minecraft:custom_model_data":${slot.customModelData}`)
+    }
+    if (slot.potionColor) {
+      parts.push(`"minecraft:potion_contents":{custom_color:${hexToDecimal(slot.potionColor)}}`)
+    }
+    if (slot.skullTexture) {
+      const value = this.encodeSkullTexture(slot.skullTexture)
+      parts.push(`"minecraft:profile":{id:[I;0,0,0,0],properties:[{name:"textures",value:"${value}"}]}`)
+    }
+    if (slot.armorTrim) {
+      parts.push(`"minecraft:trim":{material:"minecraft:${slot.armorTrim.material}",pattern:"minecraft:${slot.armorTrim.pattern}"}`)
+    }
+    return parts.join(',')
+  }
+
+  private buildFunItemSnbt(slot: SlotData): string {
+    const raw = slot.funItemComponents!
+    const bracketIdx = raw.indexOf('[')
+    const rawComponents = raw.slice(bracketIdx + 1, raw.lastIndexOf(']'))
+
+    const parts: string[] = []
+    if (rawComponents) {
+      const converted = this.bracketToSnbt(rawComponents)
+      parts.push(converted)
+    }
+
+    if (slot.displayName.length > 0) {
+      parts.push(`"minecraft:custom_name":'${segmentsToJson(slot.displayName)}'`)
+    }
+    if (slot.lore.length > 0) {
+      const lines = slot.lore.map(line => `'${segmentsToJson(line, { lore: true })}'`).join(',')
+      parts.push(`"minecraft:lore":[${lines}]`)
+    }
+    if (slot.funItemEnchantments && Object.keys(slot.funItemEnchantments).length > 0) {
+      if (!rawComponents.includes('enchantments')) {
+        const levels = Object.entries(slot.funItemEnchantments)
+          .map(([id, lvl]) => `"minecraft:${id}":${lvl}`)
+          .join(',')
+        parts.push(`"minecraft:enchantments":{levels:{${levels}}}`)
+      }
+    } else if (slot.enchanted && !rawComponents.includes('enchantment_glint_override')) {
+      parts.push('"minecraft:enchantment_glint_override":true')
+    }
+    if (slot.customModelData !== null && !rawComponents.includes('custom_model_data')) {
+      parts.push(`"minecraft:custom_model_data":${slot.customModelData}`)
+    }
+    if (slot.potionColor && !rawComponents.includes('potion_contents')) {
+      parts.push(`"minecraft:potion_contents":{custom_color:${hexToDecimal(slot.potionColor)}}`)
+    }
+    if (slot.skullTexture && !rawComponents.includes('profile')) {
+      const value = this.encodeSkullTexture(slot.skullTexture)
+      parts.push(`"minecraft:profile":{id:[I;0,0,0,0],properties:[{name:"textures",value:"${value}"}]}`)
+    }
+    if (slot.armorTrim && !rawComponents.includes('trim')) {
+      parts.push(`"minecraft:trim":{material:"minecraft:${slot.armorTrim.material}",pattern:"minecraft:${slot.armorTrim.pattern}"}`)
+    }
+    return parts.join(',')
+  }
+
+  private buildFunItemPropsSnbt(slot: SlotData): string {
+    const parts: string[] = []
+
+    if (slot.displayName.length > 0) {
+      parts.push(`"minecraft:custom_name":'${segmentsToJson(slot.displayName)}'`)
+    }
+    if (slot.lore.length > 0) {
+      const lines = slot.lore.map(line => `'${segmentsToJson(line, { lore: true })}'`).join(',')
+      parts.push(`"minecraft:lore":[${lines}]`)
+    }
+    if (slot.funItemTags && Object.keys(slot.funItemTags).length > 0) {
+      const tagParts = this.serializeTags(slot.funItemTags)
+      parts.push(`"minecraft:custom_data":{${tagParts}}`)
+    }
+    if (slot.funItemEnchantments && Object.keys(slot.funItemEnchantments).length > 0) {
+      const levels = Object.entries(slot.funItemEnchantments)
+        .map(([id, lvl]) => `"minecraft:${id}":${lvl}`)
+        .join(',')
+      parts.push(`"minecraft:enchantments":{levels:{${levels}}}`)
+    } else if (slot.enchanted) {
+      parts.push('"minecraft:enchantment_glint_override":true')
+    }
+    if (slot.customModelData !== null) {
+      parts.push(`"minecraft:custom_model_data":${slot.customModelData}`)
+    }
+    if (slot.potionColor) {
+      parts.push(`"minecraft:potion_contents":{custom_color:${hexToDecimal(slot.potionColor)}}`)
+    }
+    if (slot.skullTexture) {
+      const value = this.encodeSkullTexture(slot.skullTexture)
+      parts.push(`"minecraft:profile":{id:[I;0,0,0,0],properties:[{name:"textures",value:"${value}"}]}`)
+    }
+    if (slot.armorTrim) {
+      parts.push(`"minecraft:trim":{material:"minecraft:${slot.armorTrim.material}",pattern:"minecraft:${slot.armorTrim.pattern}"}`)
+    }
+    if (slot.funItemAttributes && slot.funItemAttributes.length > 0) {
+      const mods = slot.funItemAttributes.map(a => {
+        const op = a.operation === 'ADD' ? 'add_value' : a.operation === 'MULTIPLY' ? 'add_multiplied_total' : 'add_multiplied_base'
+        return `{type:"minecraft:${a.type}",amount:${a.amount},operation:"${op}",slot:"${a.slot.toLowerCase()}"${a.id ? `,id:"${a.id}"` : ''}}`
+      }).join(',')
+      parts.push(`"minecraft:attribute_modifiers":{modifiers:[${mods}]}`)
+    }
+    return parts.join(',')
+  }
+
+  private bracketToSnbt(bracketStr: string): string {
+    return bracketStr.replace(/(\w[\w.:]*)=/g, (_, key) => {
+      if (key.includes(':')) return `"${key}":`
+      return `"minecraft:${key}":`
+    })
   }
 
   private buildItemComponents(slot: SlotData): string {

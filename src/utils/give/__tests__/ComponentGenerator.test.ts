@@ -104,6 +104,19 @@ describe('ComponentGenerator.formatContainer', () => {
     expect(result.commands[0]).toContain('slot:0')
   })
 
+  it('uses SNBT syntax with ":" and namespaced keys inside container items', () => {
+    const slots: Record<string, SlotData> = {
+      '0-0': slot({ enchanted: true }),
+    }
+    const containerDef = { id: 'chest', label: 'Chest', maxSlots: 27, doubleAllowed: true }
+    const result = gen.formatContainer(slots, 3, { ...baseOpts, container: containerDef })
+    const cmd = result.commands[0]
+    expect(cmd).toContain('"minecraft:custom_name":')
+    expect(cmd).toContain('"minecraft:enchantment_glint_override":true')
+    expect(cmd).not.toContain('custom_name=')
+    expect(cmd).not.toContain('enchantment_glint_override=')
+  })
+
   it('double chest', () => {
     const slots: Record<string, SlotData> = {
       '0-0': slot(),
