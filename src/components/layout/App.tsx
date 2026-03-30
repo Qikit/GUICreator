@@ -12,7 +12,7 @@ import { Palette } from '@/components/palette'
 import { ItemEditor } from '@/components/editor'
 import { HoverTooltip, CtxMenu } from '@/components/shared'
 import type { CtxMenuItem } from '@/components/shared'
-import { ExportModal, GradientModal, ColorPickerModal, TemplateModal, ProjectModal } from '@/components/modals'
+import { ExportModal, GradientModal, ColorPickerModal, TemplateModal, ProjectModal, ImportJsonModal } from '@/components/modals'
 import { CanvasView } from '@/components/canvas'
 import { DockLayout } from './DockLayout'
 import { StatusBar } from './StatusBar'
@@ -34,6 +34,7 @@ export function App() {
   const [showColorPicker, setShowColorPicker] = useState(false)
   const [showTpls, setShowTpls] = useState(false)
   const [showProjs, setShowProjs] = useState(false)
+  const [showImportJson, setShowImportJson] = useState(false)
   const [ctxMenu, setCtxMenu] = useState<{ x: number; y: number; items: CtxMenuItem[] } | null>(null)
   const [htt, setHTT] = useState<{ data: SlotData; x: number; y: number } | null>(null)
   const [saveStatus, setSaveStatus] = useState('Saved')
@@ -229,6 +230,7 @@ export function App() {
                 <button onClick={() => { setShowMenu(false); if (!activeWS) return; const projIds = activeWS.menus.map(m => m.projectId); const projs = projIds.map(id => loadProject(id)).filter(Boolean); const d = { workspace: activeWS, projects: projs, templates: uTpls }; const blob = new Blob([JSON.stringify(d, null, 2)], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `${activeWS.name.replace(/[^a-zA-Z0-9\u0400-\u04FF]/g, '_')}-backup.json`; a.click(); URL.revokeObjectURL(url) }}>Бэкап</button>
                 <button onClick={() => { setShowMenu(false); const inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.json'; inp.onchange = (ev: Event) => { const f = (ev.target as HTMLInputElement).files?.[0]; if (!f) return; const reader = new FileReader(); reader.onload = (re) => { try { const d = JSON.parse(re.target?.result as string); if (d.projects) { for (const p of d.projects) saveProject(p) } if (d.workspace && activeWS) { const imported = d.workspace as Workspace; const newMenus = [...activeWS.menus]; const maxX = newMenus.reduce((mx, m) => Math.max(mx, m.x), 0); for (const m of imported.menus) { if (!newMenus.find(e => e.projectId === m.projectId)) newMenus.push({ ...m, x: m.x + maxX + 300 }) } const newConns = [...activeWS.connections, ...imported.connections.filter(c => !activeWS.connections.find(e => e.id === c.id))]; const updated = { ...activeWS, menus: newMenus, connections: newConns }; updateWS(updated) } else if (d.projects?.length && activeWS) { const newMenus = [...activeWS.menus]; let ox = newMenus.reduce((mx, m) => Math.max(mx, m.x), 0) + 300; for (const p of d.projects) { if (!newMenus.find(e => e.projectId === p.id)) { newMenus.push({ projectId: p.id, x: ox, y: 100 }); ox += 250 } }; updateWS({ ...activeWS, menus: newMenus, connections: activeWS.connections }) } const last = d.projects?.[d.projects.length - 1]; if (last) { loadProj(last); setSelSlot(null); setMultiSel(new Set()) } } catch (err) { alert('Ошибка: ' + (err as Error).message) } }; reader.readAsText(f) }; inp.click() }}>Импорт</button>
                 <button onClick={() => { setShowMenu(false); const text = prompt('Вставьте конфиг AbstractMenus (YAML):'); if (!text) return; const am = parseAbstractMenus(text); if (!am) { alert('Не удалось распарсить конфиг AbstractMenus.'); return }; const np = newProject(am.name, am.rows); np.slots = am.slots; saveProject(np); addToWorkspace(np.id); loadProj(np); setSelSlot(null); setMultiSel(new Set()) }}>Импорт AbstractMenus</button>
+                <button onClick={() => { setShowMenu(false); setShowImportJson(true) }}>Импорт JSON (из игры)</button>
                 <div style={{ height: 1, background: 'var(--glass-border)', margin: '2px 0' }} />
                 <button onClick={() => { setShowMenu(false); const ws = newWorkspace(); saveWorkspace(ws); setActiveWS(ws); refreshCache(ws) }}>Новый workspace</button>
                 {loadWorkspaceList().length > 1 && <button onClick={() => { setShowMenu(false); setShowWorkspaces(true) }}>Workspaces</button>}
@@ -336,6 +338,9 @@ export function App() {
       {showGrad && <GradientModal onClose={() => setShowGrad(false)} />}
       {showColorPicker && <ColorPickerModal onClose={() => setShowColorPicker(false)} />}
       {showTpls && <TemplateModal builtIn={BUILT_TPLS as never} userTemplates={[]} onApply={(t: any) => { const np = newProject(t.name || proj.name, t.rows); np.slots = JSON.parse(JSON.stringify(t.slots || {})); saveProject(np); addToWorkspace(np.id); loadProj(np); setSelSlot(null); setMultiSel(new Set()); setShowTpls(false) }} onDeleteUser={() => {}} onClose={() => setShowTpls(false)} />}
+      {showImportJson && <ImportJsonModal onImport={({ name, rows, slots }) => {
+        const np = newProject(name, rows); np.slots = slots; saveProject(np); addToWorkspace(np.id); loadProj(np); setSelSlot(null); setMultiSel(new Set()); setShowImportJson(false)
+      }} onClose={() => setShowImportJson(false)} />}
       {showProjs && <ProjectModal list={loadProjectList()} onOpen={p => { loadProj(p); setSelSlot(null); setMultiSel(new Set()); setShowProjs(false) }} onDelete={id => { deleteProject(id); forceRender(x => x + 1) }} onClose={() => setShowProjs(false)} />}
       {ctxMenu && <CtxMenu x={ctxMenu.x} y={ctxMenu.y} items={ctxMenu.items} onClose={() => setCtxMenu(null)} />}
       {showWorkspaces && (

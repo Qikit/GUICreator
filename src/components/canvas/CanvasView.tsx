@@ -7,6 +7,7 @@ import { saveProject, loadProject, loadProjectList } from '@/storage'
 import { ItemTexture, CtxMenu, HoverTooltip } from '@/components/shared'
 import { getGuiType } from '@/data/guiTypes'
 import { MiniMenu } from './MiniMenu'
+import { GiveContainerModal, GiveItemModal } from '@/components/modals'
 import s from '@/styles/canvas.module.css'
 import ss from '@/styles/shared.module.css'
 
@@ -48,6 +49,8 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
   const [mmCtx, setMmCtx] = useState<{ x: number; y: number; idx: number } | null>(null)
   const [slotCtx, setSlotCtx] = useState<{ x: number; y: number; menuId: string; slotKey: string } | null>(null)
   const [hoverData, setHoverData] = useState<{ data: SlotData; x: number; y: number } | null>(null)
+  const [giveContainerMenuId, setGiveContainerMenuId] = useState<string | null>(null)
+  const [giveItemSlot, setGiveItemSlot] = useState<SlotData | null>(null)
   const [showAddPopover, setShowAddPopover] = useState(false)
   const [selBox, setSelBox] = useState<{ x1: number; y1: number; x2: number; y2: number } | null>(null)
   const [selectedMenus, setSelectedMenus] = useState<Set<string>>(new Set())
@@ -418,6 +421,7 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
             onSetGuiType={onSetGuiType}
             onSetEraser={onSetEraser}
             onClearAll={onClearAll}
+            onGiveCommand={(menuId) => setGiveContainerMenuId(menuId)}
             onRename={onRenameMenu}
             isMultiSelected={selectedMenus.has(m.projectId)}
             onSlotEnter={(menuId, slot) => {
@@ -448,7 +452,11 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
         const p = projects[slotCtx.menuId]
         const hasItem = p?.slots[slotCtx.slotKey]
         return <CtxMenu x={slotCtx.x} y={slotCtx.y} onClose={() => setSlotCtx(null)} items={[
-          ...(hasItem ? [{ label: 'Удалить предмет', danger: true, fn: () => { onRemoveItem(slotCtx.menuId, slotCtx.slotKey); setSlotCtx(null) } }] : []),
+          ...(hasItem ? [
+            { label: 'Скопировать /give', fn: () => { setGiveItemSlot(hasItem); setSlotCtx(null) } },
+            { sep: true },
+            { label: 'Удалить предмет', danger: true, fn: () => { onRemoveItem(slotCtx.menuId, slotCtx.slotKey); setSlotCtx(null) } },
+          ] : []),
         ]} />
       })()}
       <input
@@ -499,6 +507,11 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
         </div>,
         document.body,
       )}
+      {giveContainerMenuId && (() => {
+        const p = projects[giveContainerMenuId]
+        return p ? <GiveContainerModal project={p} onClose={() => setGiveContainerMenuId(null)} /> : null
+      })()}
+      {giveItemSlot && <GiveItemModal slot={giveItemSlot} onClose={() => setGiveItemSlot(null)} />}
     </div>
   )
 }

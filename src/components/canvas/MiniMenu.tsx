@@ -34,6 +34,7 @@ interface Props {
   onSetGuiType?: (menuId: string, guiType: string) => void
   onSetEraser?: () => void
   onClearAll?: (menuId: string) => void
+  onGiveCommand?: (menuId: string) => void
   onRename?: (menuId: string, name: string) => void
   isMultiSelected?: boolean
   onSlotEnter?: (menuId: string, slot: string) => void
@@ -42,7 +43,7 @@ interface Props {
 
 const SCALE = 2
 
-export function MiniMenu({ project, x, y, zoom, onDrag, onSlotClick, onSlotRightClick, onSlotMouseDown, connectingFrom, onCtxMenu, isActive, selectedSlot, showNums, showRP, onSlotHover, onActivate, palItem, onDeleteMenu, onResizeMenu, onSetGuiType, onSetEraser, onClearAll, onRename, onSlotEnter, dragSourceKey }: Props) {
+export function MiniMenu({ project, x, y, zoom, onDrag, onSlotClick, onSlotRightClick, onSlotMouseDown, connectingFrom, onCtxMenu, isActive, selectedSlot, showNums, showRP, onSlotHover, onActivate, palItem, onDeleteMenu, onResizeMenu, onSetGuiType, onSetEraser, onClearAll, onGiveCommand, onRename, onSlotEnter, dragSourceKey }: Props) {
   const [editingName, setEditingName] = useState(false)
   const [nameText, setNameText] = useState(project.name)
   const [showSizeMenu, setShowSizeMenu] = useState(false)
@@ -251,6 +252,11 @@ export function MiniMenu({ project, x, y, zoom, onDrag, onSlotClick, onSlotRight
       <button className={`${s.mmToolBtn} ${palItem === '__eraser__' ? s.mmToolBtnActive : ''}`} data-tip="Ластик"
         onClick={e => { e.stopPropagation(); onSetEraser?.() }}>
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M8.5 2.5l3 3-6 6H3L1.5 10l7-7.5z" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/><path d="M3 13h8" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/></svg>
+      </button>
+      <button className={s.mmToolBtn} data-tip="Команда /give"
+        disabled={Object.keys(project.slots).length === 0}
+        onClick={e => { e.stopPropagation(); onGiveCommand?.(project.id) }}>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 11h12M3 8l4 3 4-3M5 1h4v4H5z" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></svg>
       </button>
       <button className={s.mmToolBtn} data-tip="Очистить все слоты"
         onClick={e => { e.stopPropagation(); onClearAll?.(project.id) }}>

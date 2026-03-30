@@ -10,6 +10,16 @@ interface PrefsStore {
   collapsed: { left: boolean; right: boolean }
   panelWidths: { left: number; right: number }
   paletteView: 'grid' | 'largeGrid' | 'list'
+  giveVersion: '1.16.5' | '1.20.5+'
+  giveTarget: string
+  givePrefix: string
+  giveContainer: string
+  giveShulkerColor: string
+  setGiveVersion: (v: '1.16.5' | '1.20.5+') => void
+  setGiveTarget: (t: string) => void
+  setGivePrefix: (p: string) => void
+  setGiveContainer: (c: string) => void
+  setGiveShulkerColor: (c: string) => void
   toggleNums: () => void
   toggleRP: () => void
   toggleAnimations: () => void
@@ -41,6 +51,11 @@ function persistPrefs(state: PrefsStore) {
     collapsed: state.collapsed,
     panelWidths: state.panelWidths,
     paletteView: state.paletteView,
+    giveVersion: state.giveVersion,
+    giveTarget: state.giveTarget,
+    givePrefix: state.givePrefix,
+    giveContainer: state.giveContainer,
+    giveShulkerColor: state.giveShulkerColor,
   }))
 }
 
@@ -55,6 +70,16 @@ export const usePrefsStore = create<PrefsStore>((set, get) => ({
   collapsed: (persisted as { collapsed?: { left: boolean; right: boolean } }).collapsed ?? { left: false, right: false },
   panelWidths: (persisted as { panelWidths?: { left: number; right: number } }).panelWidths ?? DEFAULT_PANEL_WIDTHS,
   paletteView: (persisted as { paletteView?: 'grid' | 'largeGrid' | 'list' }).paletteView ?? 'grid',
+  giveVersion: (persisted as any).giveVersion ?? '1.20.5+',
+  giveTarget: (persisted as any).giveTarget ?? '@p',
+  givePrefix: (persisted as any).givePrefix ?? 'minecraft:',
+  giveContainer: (persisted as any).giveContainer ?? 'chest',
+  giveShulkerColor: (persisted as any).giveShulkerColor ?? '',
+  setGiveVersion: (v) => { set({ giveVersion: v }); persistPrefs(get()) },
+  setGiveTarget: (t) => { set({ giveTarget: t }); persistPrefs(get()) },
+  setGivePrefix: (p) => { set({ givePrefix: p }); persistPrefs(get()) },
+  setGiveContainer: (c) => { set({ giveContainer: c }); persistPrefs(get()) },
+  setGiveShulkerColor: (c) => { set({ giveShulkerColor: c }); persistPrefs(get()) },
   toggleNums: () => { set(s => ({ showNums: !s.showNums })); persistPrefs(get()) },
   toggleRP: () => { set(s => ({ showRP: !s.showRP })); persistPrefs(get()) },
   toggleAnimations: () => { set(s => ({ animations: !s.animations })); persistPrefs(get()) },

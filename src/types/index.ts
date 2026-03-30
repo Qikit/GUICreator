@@ -24,6 +24,14 @@ export interface SlotData {
   potionColor: string | null
   skullTexture: string | null
   armorTrim: ArmorTrim | null
+  funItemId?: string
+  funItemNbt?: string
+  funItemComponents?: string
+  funItemTags?: Record<string, Record<string, unknown>>
+  funItemEnchantments?: Record<string, number>
+  funItemEffects?: Array<{ potion: string; level: number; time: number }>
+  funItemAttributes?: Array<{ type: string; amount: number; operation: string; slot: string; id?: string }>
+  funItemFlags?: string[]
 }
 
 export interface Project {
@@ -72,6 +80,7 @@ export interface SlotPreset {
   potionColor?: string | null
   skullTexture?: string | null
   armorTrim?: ArmorTrim | null
+  funItemId?: string
 }
 
 export interface ItemCategory {

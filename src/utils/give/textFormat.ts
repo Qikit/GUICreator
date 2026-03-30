@@ -1,0 +1,27 @@
+import type { TextSegment } from '@/types'
+
+interface FormatOptions {
+  lore?: boolean
+}
+
+export function segmentToJson(seg: TextSegment, opts: FormatOptions = {}): string {
+  const obj: Record<string, unknown> = { text: seg.text }
+  if (seg.color !== '#FFFFFF') obj.color = seg.color
+  if (seg.bold) obj.bold = true
+  if (seg.italic) obj.italic = true
+  if (seg.underlined) obj.underlined = true
+  if (seg.strikethrough) obj.strikethrough = true
+  if (seg.obfuscated) obj.obfuscated = true
+  if (opts.lore && !seg.italic) obj.italic = false
+  return JSON.stringify(obj)
+}
+
+export function segmentsToJson(segs: TextSegment[], opts: FormatOptions = {}): string {
+  if (segs.length === 0) return '{"text":""}'
+  if (segs.length === 1) return segmentToJson(segs[0], opts)
+  return '[' + segs.map(s => segmentToJson(s, opts)).join(',') + ']'
+}
+
+export function hexToDecimal(hex: string): number {
+  return parseInt(hex.replace('#', ''), 16)
+}

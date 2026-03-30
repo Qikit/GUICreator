@@ -50,6 +50,7 @@ export function makeSlot(id: string, preset?: SlotPreset | null): SlotData {
       potionColor: preset.potionColor || null,
       skullTexture: preset.skullTexture || null,
       armorTrim: preset.armorTrim ? { ...preset.armorTrim } : null,
+      funItemId: preset.funItemId,
     }
   }
   return defSlot(id)

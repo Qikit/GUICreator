@@ -1,0 +1,111 @@
+.field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.field label {
+  min-width: 90px;
+  font-size: 12px;
+  color: var(--tx2);
+  flex-shrink: 0;
+}
+
+.field select,
+.field input {
+  flex: 1;
+  background: var(--glass-surface);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  color: var(--tx1);
+  padding: 4px 8px;
+  font-size: 12px;
+  outline: none;
+}
+
+.field select:focus,
+.field input:focus {
+  border-color: var(--accent);
+}
+
+.commandArea {
+  background: var(--glass-surface);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  color: var(--tx1);
+  font-family: monospace;
+  font-size: 11px;
+  padding: 8px;
+  width: 100%;
+  min-height: 80px;
+  max-height: 200px;
+  resize: vertical;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.statusBadge {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 10px;
+  margin-left: 6px;
+}
+
+.statusFits {
+  background: #1a472a;
+  color: #55ff55;
+}
+
+.statusDouble {
+  background: #3a3a1a;
+  color: #ffff55;
+}
+
+.statusTruncated {
+  background: #472a1a;
+  color: #ff5555;
+}
+
+.doubleNote {
+  font-size: 11px;
+  color: var(--tx2);
+  margin: 8px 0;
+  padding: 6px 8px;
+  background: var(--glass-surface);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.copyBtn {
+  padding: 6px 16px;
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius-sm);
+  color: #fff;
+  font-size: 12px;
+  cursor: pointer;
+  transition: opacity 150ms;
+}
+
+.copyBtn:hover {
+  opacity: 0.85;
+}
+
+.copyBtn:active {
+  opacity: 0.7;
+}
+
+.copied {
+  font-size: 11px;
+  color: #55ff55;
+  margin-left: 8px;
+}
