@@ -1,4 +1,4 @@
-import { useState, useCallback, Fragment } from 'react'
+import { useState, useCallback, useEffect, Fragment } from 'react'
 import { usePrefsStore } from '@/store/prefsStore'
 import { DockPanel } from './DockPanel'
 import s from '@/styles/dock.module.css'
@@ -15,11 +15,25 @@ interface Props {
   panels: PanelConfig[]
 }
 
+const MOBILE_BREAKPOINT = 768
+
+function useIsMobile() {
+  const [mobile, setMobile] = useState(window.innerWidth < MOBILE_BREAKPOINT)
+  useEffect(() => {
+    const h = () => setMobile(window.innerWidth < MOBILE_BREAKPOINT)
+    window.addEventListener('resize', h)
+    return () => window.removeEventListener('resize', h)
+  }, [])
+  return mobile
+}
+
 export function DockLayout({ panels }: Props) {
   const { dockOrder, setDockOrder, collapsed, toggleCollapse, panelWidths, setPanelWidth, resetPanelWidth } = usePrefsStore()
   const [dragId, setDragId] = useState<string | null>(null)
   const [dropTarget, setDropTarget] = useState<string | null>(null)
   const [resizing, setResizing] = useState<{ side: 'left' | 'right'; width: number } | null>(null)
+  const [mobileTab, setMobileTab] = useState(1)
+  const isMobile = useIsMobile()
 
   const panelMap = Object.fromEntries(panels.map(p => [p.id, p]))
 
@@ -66,6 +80,32 @@ export function DockLayout({ panels }: Props) {
     }
     window.addEventListener('mousemove', onMove)
     window.addEventListener('mouseup', onUp)
+  }
+
+  if (isMobile) {
+    const ordered = dockOrder.map(id => panelMap[id]).filter(Boolean)
+    const active = ordered[mobileTab]
+    if (!active) return null
+
+    return (
+      <div className={s.mobileLayout}>
+        <div className={s.mobileContent}>
+          {active.content}
+        </div>
+        <div className={s.mobileTabBar}>
+          {ordered.map((p, i) => (
+            <button
+              key={p.id}
+              className={`${s.mobileTab} ${i === mobileTab ? s.mobileTabActive : ''}`}
+              onClick={() => setMobileTab(i)}
+            >
+              <span className={s.mobileTabIcon}>{i === 0 ? '\u2630' : i === 1 ? '\u2587' : '\u270E'}</span>
+              <span className={s.mobileTabLabel}>{p.title}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    )
   }
 
   const positions: ('left' | 'center' | 'right')[] = ['left', 'center', 'right']

@@ -80,3 +80,28 @@
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
 }
+
+@media (max-width: 768px) {
+  .toolbar {
+    padding: var(--sp-xs) var(--sp-sm);
+    min-height: 40px;
+    gap: var(--sp-xs);
+  }
+  .projName {
+    min-width: 80px;
+    font-size: 12px;
+  }
+  .sep { display: none; }
+  .label { display: none; }
+  .statusBar { display: none; }
+  .burgerDd {
+    position: fixed;
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    min-width: unset;
+    padding-bottom: calc(var(--sp-sm) + env(safe-area-inset-bottom, 0));
+  }
+}

@@ -46,3 +46,14 @@
   box-shadow: var(--accent-glow), 0 4px 14px rgba(0,0,0,.4);
   backdrop-filter: blur(8px);
 }
+
+@media (max-width: 768px) {
+  .gridArea { padding: var(--sp-sm); }
+  .gridWrap { padding: var(--sp-sm); }
+  .invFrame { padding: 4px; border-width: 2px; }
+  .invTitle { font-size: 11px; padding: 1px 0 3px 4px; }
+  .invGrid { grid-template-columns: repeat(9, 1fr); gap: 1px; }
+  .slot { width: auto; height: auto; aspect-ratio: 1; }
+  .slotAmount { font-size: 10px; }
+  .slotNum { font-size: 7px; }
+}

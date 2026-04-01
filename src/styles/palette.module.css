@@ -36,3 +36,11 @@
 .listItem:hover { background: var(--glass-hover); color: var(--tx1); }
 .listItemSel { background: var(--accent-subtle); border-color: var(--accent); color: var(--tx1); }
 .listItem .itemTex { width: 20px; height: 20px; image-rendering: pixelated; flex-shrink: 0; }
+
+@media (max-width: 768px) {
+  .palette { height: 100%; }
+  .header { padding: var(--sp-sm) var(--sp-md); }
+  .search { padding: var(--sp-xs) var(--sp-sm); }
+  .itemGrid { grid-template-columns: repeat(auto-fill, minmax(42px, 1fr)); }
+  .palItem .itemTex { width: 32px; height: 32px; }
+}
