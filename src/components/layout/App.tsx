@@ -43,7 +43,7 @@ export function App() {
   const [htt, setHTT] = useState<{ data: SlotData; x: number; y: number } | null>(null)
   const [saveStatus, setSaveStatus] = useState('Saved')
   const [recent, setRecent] = useState<string[]>([])
-  const [clipboard, setClipboard] = useState<{ multi: boolean; data: Record<string, SlotData> | SlotData; keys?: string[] } | null>(null)
+  const [clipboard, setClipboard] = useState<{ multi: boolean; data: Record<string, SlotData> | SlotData; keys?: string[]; rows?: number } | null>(null)
   const [showMenu, setShowMenu] = useState(false)
   const [showWorkspaces, setShowWorkspaces] = useState(false)
   const [uTpls, setUTpls] = useState<unknown[]>([])

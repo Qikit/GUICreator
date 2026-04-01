@@ -7,8 +7,8 @@ interface Params {
   multiSel: Set<string>
   setMultiSel: (s: Set<string> | ((prev: Set<string>) => Set<string>)) => void
   proj: Project
-  clipboard: { multi: boolean; data: Record<string, SlotData> | SlotData; keys?: string[] } | null
-  setClipboard: (c: { multi: boolean; data: Record<string, SlotData> | SlotData; keys?: string[] } | null) => void
+  clipboard: { multi: boolean; data: Record<string, SlotData> | SlotData; keys?: string[]; rows?: number } | null
+  setClipboard: (c: { multi: boolean; data: Record<string, SlotData> | SlotData; keys?: string[]; rows?: number } | null) => void
   dispatch: (action: { type: string; [k: string]: unknown }) => void
   undo: () => void
   redo: () => void
@@ -62,22 +62,30 @@ export function useKeyboardShortcuts(params: Params) {
           setClipboard({ multi: true, data: d, keys: [...multiSel] })
         } else if (selSlot && proj.slots[selSlot]) {
           e.preventDefault(); setClipboard({ multi: false, data: JSON.parse(JSON.stringify(proj.slots[selSlot])) })
+        } else if (!selSlot && Object.keys(proj.slots).length > 0) {
+          e.preventDefault()
+          setClipboard({ multi: true, data: JSON.parse(JSON.stringify(proj.slots)), keys: Object.keys(proj.slots), rows: proj.rows })
         }
       }
       // Paste
-      if (e.ctrlKey && e.key === 'v' && clipboard && selSlot) {
+      if (e.ctrlKey && e.key === 'v' && clipboard) {
         e.preventDefault()
         if (clipboard.multi && clipboard.keys) {
-          const keys = clipboard.keys; if (!keys.length) return
-          const [br, bc] = keys[0].split('-').map(Number); const [sr, sc] = selSlot.split('-').map(Number)
-          const dr = sr - br, dc = sc - bc; const slots: Record<string, SlotData> = {}
-          for (const k of keys) {
-            const d = (clipboard.data as Record<string, SlotData>)[k]; if (!d) continue
-            const [r, c] = k.split('-').map(Number); const nk = `${r + dr}-${c + dc}`
-            if (r + dr >= 0 && r + dr < proj.rows && c + dc >= 0 && c + dc < 9) slots[nk] = JSON.parse(JSON.stringify(d))
+          if (clipboard.rows && !selSlot) {
+            dispatch({ type: 'SR', rows: clipboard.rows })
+            dispatch({ type: 'SM', slots: JSON.parse(JSON.stringify(clipboard.data)) })
+          } else if (selSlot) {
+            const keys = clipboard.keys; if (!keys.length) return
+            const [br, bc] = keys[0].split('-').map(Number); const [sr, sc] = selSlot.split('-').map(Number)
+            const dr = sr - br, dc = sc - bc; const slots: Record<string, SlotData> = {}
+            for (const k of keys) {
+              const d = (clipboard.data as Record<string, SlotData>)[k]; if (!d) continue
+              const [r, c] = k.split('-').map(Number); const nk = `${r + dr}-${c + dc}`
+              if (r + dr >= 0 && r + dr < proj.rows && c + dc >= 0 && c + dc < 9) slots[nk] = JSON.parse(JSON.stringify(d))
+            }
+            dispatch({ type: 'SM', slots })
           }
-          dispatch({ type: 'SM', slots })
-        } else { dispatch({ type: 'SS', key: selSlot, data: JSON.parse(JSON.stringify(clipboard.data)) }) }
+        } else if (selSlot) { dispatch({ type: 'SS', key: selSlot, data: JSON.parse(JSON.stringify(clipboard.data)) }) }
       }
       // Arrow keys
       if (selSlot && ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
