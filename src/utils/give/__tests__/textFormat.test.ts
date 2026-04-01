@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { segmentsToJson, segmentToJson, hexToDecimal, isDefaultName } from '../textFormat'
+import { segmentsToJson, segmentToJson, segmentToSnbt, segmentsToSnbt, hexToDecimal, isDefaultName } from '../textFormat'
 import type { TextSegment } from '@/types'
 
 const seg = (text: string, overrides: Partial<TextSegment> = {}): TextSegment => ({
@@ -84,6 +84,40 @@ describe('isDefaultName', () => {
   })
   it('false for multi-segment name', () => {
     expect(isDefaultName([seg('Diamond '), seg('Sword')], 'diamond_sword')).toBe(false)
+  })
+})
+
+describe('segmentToSnbt', () => {
+  it('plain white text produces SNBT compound', () => {
+    expect(segmentToSnbt(seg('Hello'))).toBe('{text:"Hello"}')
+  })
+  it('colored bold text', () => {
+    expect(segmentToSnbt(seg('Fire', { color: '#FF5555', bold: true }))).toBe('{text:"Fire",color:"#FF5555",bold:true}')
+  })
+  it('name context adds italic:false and color', () => {
+    expect(segmentToSnbt(seg('Name'), { name: true })).toBe('{text:"Name",color:"#FFFFFF",italic:false}')
+  })
+  it('lore context uses "white" for white color', () => {
+    expect(segmentToSnbt(seg('Line'), { lore: true })).toBe('{text:"Line",color:"white",italic:false}')
+  })
+  it('escapes double quotes in text', () => {
+    expect(segmentToSnbt(seg('Say "hi"'))).toBe('{text:"Say \\"hi\\""}')
+  })
+  it('escapes backslashes in text', () => {
+    expect(segmentToSnbt(seg('A\\B'))).toBe('{text:"A\\\\B"}')
+  })
+})
+
+describe('segmentsToSnbt', () => {
+  it('single segment', () => {
+    expect(segmentsToSnbt([seg('Solo')])).toBe('{text:"Solo"}')
+  })
+  it('multiple segments as array', () => {
+    const result = segmentsToSnbt([seg('A', { color: '#FF0000' }), seg('B', { color: '#00FF00' })])
+    expect(result).toBe('[{text:"A",color:"#FF0000"},{text:"B",color:"#00FF00"}]')
+  })
+  it('empty segments', () => {
+    expect(segmentsToSnbt([])).toBe('{text:""}')
   })
 })
 

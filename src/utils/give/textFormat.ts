@@ -30,6 +30,36 @@ export function segmentsToJson(segs: TextSegment[], opts: FormatOptions = {}): s
   return '[' + segs.map(s => segmentToJson(s, opts)).join(',') + ']'
 }
 
+function escapeSnbt(s: string): string {
+  return s.replace(/\\/g, '\\\\').replace(/"/g, '\\"')
+}
+
+export function segmentToSnbt(seg: TextSegment, opts: FormatOptions = {}): string {
+  const parts: string[] = [`text:"${escapeSnbt(seg.text)}"`]
+
+  const needExplicitColor = opts.lore || opts.name
+  if (needExplicitColor || seg.color !== '#FFFFFF') {
+    const color = seg.color === '#FFFFFF' && opts.lore ? 'white' : seg.color
+    parts.push(`color:"${color}"`)
+  }
+
+  if (seg.bold) parts.push('bold:true')
+  if (seg.italic) parts.push('italic:true')
+  if (seg.underlined) parts.push('underlined:true')
+  if (seg.strikethrough) parts.push('strikethrough:true')
+  if (seg.obfuscated) parts.push('obfuscated:true')
+
+  if ((opts.lore || opts.name) && !seg.italic) parts.push('italic:false')
+
+  return `{${parts.join(',')}}`
+}
+
+export function segmentsToSnbt(segs: TextSegment[], opts: FormatOptions = {}): string {
+  if (segs.length === 0) return '{text:""}'
+  if (segs.length === 1) return segmentToSnbt(segs[0], opts)
+  return '[' + segs.map(s => segmentToSnbt(s, opts)).join(',') + ']'
+}
+
 export function hexToDecimal(hex: string): number {
   return parseInt(hex.replace('#', ''), 16)
 }

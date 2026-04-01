@@ -1,6 +1,6 @@
 import type { SlotData } from '@/types'
 import type { CommandGenerator, GiveOptions, GiveResult } from './types'
-import { segmentsToJson, hexToDecimal, isDefaultName } from './textFormat'
+import { segmentsToSnbt, hexToDecimal, isDefaultName } from './textFormat'
 
 export class ComponentGenerator implements CommandGenerator {
 
@@ -68,10 +68,10 @@ export class ComponentGenerator implements CommandGenerator {
     const parts: string[] = []
 
     if (slot.displayName.length > 0 && !isDefaultName(slot.displayName, slot.itemId)) {
-      parts.push(`"minecraft:custom_name":'${segmentsToJson(slot.displayName, { name: true })}'`)
+      parts.push(`"minecraft:custom_name":${segmentsToSnbt(slot.displayName, { name: true })}`)
     }
     if (slot.lore.length > 0) {
-      const lines = slot.lore.map(line => `'${segmentsToJson(line, { lore: true })}'`).join(',')
+      const lines = slot.lore.map(line => segmentsToSnbt(line, { lore: true })).join(',')
       parts.push(`"minecraft:lore":[${lines}]`)
     }
     if (slot.enchanted) {
@@ -105,10 +105,10 @@ export class ComponentGenerator implements CommandGenerator {
     }
 
     if (slot.displayName.length > 0) {
-      parts.push(`"minecraft:custom_name":'${segmentsToJson(slot.displayName, { name: true })}'`)
+      parts.push(`"minecraft:custom_name":${segmentsToSnbt(slot.displayName, { name: true })}`)
     }
     if (slot.lore.length > 0) {
-      const lines = slot.lore.map(line => `'${segmentsToJson(line, { lore: true })}'`).join(',')
+      const lines = slot.lore.map(line => segmentsToSnbt(line, { lore: true })).join(',')
       parts.push(`"minecraft:lore":[${lines}]`)
     }
     if (slot.funItemEnchantments && Object.keys(slot.funItemEnchantments).length > 0) {
@@ -141,10 +141,10 @@ export class ComponentGenerator implements CommandGenerator {
     const parts: string[] = []
 
     if (slot.displayName.length > 0) {
-      parts.push(`"minecraft:custom_name":'${segmentsToJson(slot.displayName, { name: true })}'`)
+      parts.push(`"minecraft:custom_name":${segmentsToSnbt(slot.displayName, { name: true })}`)
     }
     if (slot.lore.length > 0) {
-      const lines = slot.lore.map(line => `'${segmentsToJson(line, { lore: true })}'`).join(',')
+      const lines = slot.lore.map(line => segmentsToSnbt(line, { lore: true })).join(',')
       parts.push(`"minecraft:lore":[${lines}]`)
     }
     if (slot.funItemTags && Object.keys(slot.funItemTags).length > 0) {
@@ -203,11 +203,11 @@ export class ComponentGenerator implements CommandGenerator {
     const parts: string[] = []
 
     if (slot.displayName.length > 0 && !isDefaultName(slot.displayName, slot.itemId)) {
-      parts.push(`custom_name='${segmentsToJson(slot.displayName, { name: true })}'`)
+      parts.push(`custom_name=${segmentsToSnbt(slot.displayName, { name: true })}`)
     }
 
     if (slot.lore.length > 0) {
-      const lines = slot.lore.map(line => `'${segmentsToJson(line, { lore: true })}'`).join(',')
+      const lines = slot.lore.map(line => segmentsToSnbt(line, { lore: true })).join(',')
       parts.push(`lore=[${lines}]`)
     }
 
@@ -244,10 +244,10 @@ export class ComponentGenerator implements CommandGenerator {
     if (rawComponents) parts.push(rawComponents)
 
     if (slot.displayName.length > 0) {
-      parts.push(`custom_name='${segmentsToJson(slot.displayName, { name: true })}'`)
+      parts.push(`custom_name=${segmentsToSnbt(slot.displayName, { name: true })}`)
     }
     if (slot.lore.length > 0) {
-      const lines = slot.lore.map(line => `'${segmentsToJson(line, { lore: true })}'`).join(',')
+      const lines = slot.lore.map(line => segmentsToSnbt(line, { lore: true })).join(',')
       parts.push(`lore=[${lines}]`)
     }
 
@@ -283,10 +283,10 @@ export class ComponentGenerator implements CommandGenerator {
     const parts: string[] = []
 
     if (slot.displayName.length > 0) {
-      parts.push(`custom_name='${segmentsToJson(slot.displayName, { name: true })}'`)
+      parts.push(`custom_name=${segmentsToSnbt(slot.displayName, { name: true })}`)
     }
     if (slot.lore.length > 0) {
-      const lines = slot.lore.map(line => `'${segmentsToJson(line, { lore: true })}'`).join(',')
+      const lines = slot.lore.map(line => segmentsToSnbt(line, { lore: true })).join(',')
       parts.push(`lore=[${lines}]`)
     }
 
