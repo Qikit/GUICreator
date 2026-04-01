@@ -20,7 +20,7 @@ import { GlowButton, GlassModal, glassModalStyles } from '@/components/ui'
 import { parseFunMenu, parseAbstractMenus } from '@/utils/importMenu'
 import { AmbientBackground } from './AmbientBackground'
 import { Grid } from '@/components/grid'
-import { generateShareUrl, detectShareInUrl } from '@/utils/shareUrl'
+import { generateShareUrl, detectShareInUrl, decodeShareUrl } from '@/utils/shareUrl'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import type { ShareResult } from '@/utils/shareUrl'
 import tb from '@/styles/toolbar.module.css'
@@ -142,6 +142,16 @@ export function App() {
     dispatch: dispatch as never, undo, redo, saveProject, setSaveStatus,
     setShowExport, setShowTpls, setShowProjs, palItem, setPalItem, setPalPreset: setPalPreset as (v: unknown) => void, setCtxMenu: () => setCtxMenu(null),
   })
+
+  const importFromShareUrl = (url: string) => {
+    const data = decodeShareUrl(url)
+    if (!data) { alert('Не удалось декодировать ссылку'); return }
+    for (const p of data.projects) saveProject(p)
+    saveWorkspace(data.workspace)
+    setActiveWS(data.workspace)
+    refreshCache(data.workspace)
+    if (data.projects.length) { loadProj(data.projects[0]); setSelSlot(null); setMultiSel(new Set()) }
+  }
 
   const handlePalSelect = (id: string, preset?: SlotPreset) => {
     if (id === palItem && !preset) { setPalItem(null); setPalPreset(null) }
@@ -271,6 +281,7 @@ export function App() {
                 <div style={{ height: 1, background: 'var(--glass-border)', margin: '2px 0' }} />
                 <button onClick={() => { setShowMenu(false); if (!activeWS) return; const projIds = activeWS.menus.map(m => m.projectId); const projs = projIds.map(id => loadProject(id)).filter(Boolean); const d = { workspace: activeWS, projects: projs, templates: uTpls }; const blob = new Blob([JSON.stringify(d, null, 2)], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `${activeWS.name.replace(/[^a-zA-Z0-9\u0400-\u04FF]/g, '_')}-backup.json`; a.click(); URL.revokeObjectURL(url) }}>Бэкап</button>
                 <button onClick={() => { setShowMenu(false); if (!activeWS) return; const projs = activeWS.menus.map(m => loadProject(m.projectId)).filter(Boolean) as Project[]; const result = generateShareUrl({ workspace: activeWS, projects: projs }, window.location.href); setShareResult(result) }}>Поделиться ссылкой</button>
+                <button onClick={() => { setShowMenu(false); const url = prompt('Вставьте ссылку с #share='); if (url) importFromShareUrl(url) }}>Загрузить из ссылки</button>
                 <button onClick={() => { setShowMenu(false); const inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.json'; inp.style.display = 'none'; document.body.appendChild(inp); inp.onchange = (ev: Event) => { const f = (ev.target as HTMLInputElement).files?.[0]; if (!f) return; const reader = new FileReader(); reader.onload = (re) => { try { const d = JSON.parse(re.target?.result as string); if (d.projects) { for (const p of d.projects) saveProject(p) } if (d.workspace && activeWS) { const imported = d.workspace as Workspace; const newMenus = [...activeWS.menus]; const maxX = newMenus.reduce((mx, m) => Math.max(mx, m.x), 0); for (const m of imported.menus) { if (!newMenus.find(e => e.projectId === m.projectId)) newMenus.push({ ...m, x: m.x + maxX + 300 }) } const newConns = [...activeWS.connections, ...imported.connections.filter(c => !activeWS.connections.find(e => e.id === c.id))]; const updated = { ...activeWS, menus: newMenus, connections: newConns }; updateWS(updated) } else if (d.projects?.length && activeWS) { const newMenus = [...activeWS.menus]; let ox = newMenus.reduce((mx, m) => Math.max(mx, m.x), 0) + 300; for (const p of d.projects) { if (!newMenus.find(e => e.projectId === p.id)) { newMenus.push({ projectId: p.id, x: ox, y: 100 }); ox += 250 } }; updateWS({ ...activeWS, menus: newMenus, connections: activeWS.connections }) } const last = d.projects?.[d.projects.length - 1]; if (last) { loadProj(last); setSelSlot(null); setMultiSel(new Set()) } } catch (err) { alert('Ошибка: ' + (err as Error).message) } finally { document.body.removeChild(inp) } }; reader.readAsText(f) }; inp.click() }}>Импорт</button>
                 <button onClick={() => { setShowMenu(false); const text = prompt('Вставьте код FunMenu (Kotlin) или конфиг AbstractMenus (YAML):'); if (!text) return; const fm = parseFunMenu(text); const am = fm || parseAbstractMenus(text); if (!am) { alert('Не удалось распарсить. Поддерживается FunMenu (Kotlin) и AbstractMenus (YAML).'); return }; const np = newProject(am.name, am.rows); np.slots = am.slots; saveProject(np); addToWorkspace(np.id); loadProj(np); setSelSlot(null); setMultiSel(new Set()) }}>Импорт FunMenu / AM</button>
                 <button onClick={() => { setShowMenu(false); setShowImportJson(true) }}>Импорт JSON (из игры)</button>

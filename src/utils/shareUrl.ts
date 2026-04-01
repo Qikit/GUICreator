@@ -14,11 +14,23 @@ export interface ShareResult {
   stripped: number
 }
 
+function uint8ToBase64(bytes: Uint8Array): string {
+  let binary = ''
+  for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i])
+  return btoa(binary)
+}
+
+function base64ToUint8(b64: string): Uint8Array {
+  const binary = atob(b64)
+  const bytes = new Uint8Array(binary.length)
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i)
+  return bytes
+}
+
 function encode(data: ShareData): string {
   const json = JSON.stringify(data)
   const compressed = pako.deflate(json)
-  const binary = String.fromCharCode(...compressed)
-  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+  return uint8ToBase64(compressed).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
 }
 
 function slotWeight(slot: SlotData): number {
@@ -67,13 +79,19 @@ export function generateShareUrl(data: ShareData, baseUrl: string): ShareResult 
   return { url, stripped }
 }
 
-export function decodeShareUrl(hash: string): ShareData | null {
+function extractSharePayload(input: string): string | null {
+  const hashIdx = input.indexOf('#share=')
+  if (hashIdx === -1) return null
+  return input.slice(hashIdx)
+}
+
+export function decodeShareUrl(input: string): ShareData | null {
+  const hash = input.startsWith('#') ? input : (extractSharePayload(input) ?? '')
   if (!hash.startsWith(HASH_PREFIX)) return null
   try {
-    const b64 = hash.slice(HASH_PREFIX.length).replace(/-/g, '+').replace(/_/g, '/')
-    const binary = atob(b64)
-    const bytes = new Uint8Array(binary.length)
-    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i)
+    const raw = hash.slice(HASH_PREFIX.length)
+    const b64 = raw.replace(/-/g, '+').replace(/_/g, '/')
+    const bytes = base64ToUint8(b64)
     const json = pako.inflate(bytes, { to: 'string' })
     return JSON.parse(json)
   } catch {

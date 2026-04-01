@@ -115,8 +115,9 @@
     right: 0;
     border-radius: var(--radius-lg) var(--radius-lg) 0 0;
     min-width: unset;
-    max-height: 70dvh;
+    max-height: 85dvh;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     padding: var(--sp-md) var(--sp-md) calc(var(--sp-md) + env(safe-area-inset-bottom, 0));
     animation: slideUp 200ms ease;
   }
