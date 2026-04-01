@@ -19,6 +19,8 @@ import { StatusBar } from './StatusBar'
 import { GlowButton, GlassModal, glassModalStyles } from '@/components/ui'
 import { parseFunMenu, parseAbstractMenus } from '@/utils/importMenu'
 import { AmbientBackground } from './AmbientBackground'
+import { generateShareUrl, detectShareInUrl } from '@/utils/shareUrl'
+import type { ShareResult } from '@/utils/shareUrl'
 import tb from '@/styles/toolbar.module.css'
 
 export function App() {
@@ -56,6 +58,7 @@ export function App() {
 
   const updateWS = useCallback((ws: Workspace) => { setActiveWS(ws); saveWorkspace(ws); refreshCache(ws) }, [refreshCache])
 
+  const [shareResult, setShareResult] = useState<ShareResult | null>(null)
   const [, forceRender] = useState(0)
 
   const saveTimer = useRef<ReturnType<typeof setTimeout>>()
@@ -67,6 +70,18 @@ export function App() {
     loadResourcepackIndex().then(() => {
       loadFunItems(ITEM_DB).then(() => forceRender(x => x + 1))
     })
+
+    const shared = detectShareInUrl()
+    if (shared) {
+      for (const p of shared.projects) saveProject(p)
+      const ws = shared.workspace
+      saveWorkspace(ws)
+      setActiveWS(ws)
+      refreshCache(ws)
+      if (shared.projects.length) { loadProj(shared.projects[0]); setSelSlot(null); setMultiSel(new Set()) }
+      history.replaceState(null, '', window.location.pathname + window.location.search)
+      return
+    }
 
     const wl = loadWorkspaceList()
     let ws: Workspace | null = null
@@ -241,6 +256,7 @@ export function App() {
                 <button onClick={() => { setShowMenu(false); setShowProjs(true) }}>Открыть проект</button>
                 <div style={{ height: 1, background: 'var(--glass-border)', margin: '2px 0' }} />
                 <button onClick={() => { setShowMenu(false); if (!activeWS) return; const projIds = activeWS.menus.map(m => m.projectId); const projs = projIds.map(id => loadProject(id)).filter(Boolean); const d = { workspace: activeWS, projects: projs, templates: uTpls }; const blob = new Blob([JSON.stringify(d, null, 2)], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `${activeWS.name.replace(/[^a-zA-Z0-9\u0400-\u04FF]/g, '_')}-backup.json`; a.click(); URL.revokeObjectURL(url) }}>Бэкап</button>
+                <button onClick={() => { setShowMenu(false); if (!activeWS) return; const projs = activeWS.menus.map(m => loadProject(m.projectId)).filter(Boolean) as Project[]; const result = generateShareUrl({ workspace: activeWS, projects: projs }, window.location.href); setShareResult(result) }}>Поделиться ссылкой</button>
                 <button onClick={() => { setShowMenu(false); const inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.json'; inp.style.display = 'none'; document.body.appendChild(inp); inp.onchange = (ev: Event) => { const f = (ev.target as HTMLInputElement).files?.[0]; if (!f) return; const reader = new FileReader(); reader.onload = (re) => { try { const d = JSON.parse(re.target?.result as string); if (d.projects) { for (const p of d.projects) saveProject(p) } if (d.workspace && activeWS) { const imported = d.workspace as Workspace; const newMenus = [...activeWS.menus]; const maxX = newMenus.reduce((mx, m) => Math.max(mx, m.x), 0); for (const m of imported.menus) { if (!newMenus.find(e => e.projectId === m.projectId)) newMenus.push({ ...m, x: m.x + maxX + 300 }) } const newConns = [...activeWS.connections, ...imported.connections.filter(c => !activeWS.connections.find(e => e.id === c.id))]; const updated = { ...activeWS, menus: newMenus, connections: newConns }; updateWS(updated) } else if (d.projects?.length && activeWS) { const newMenus = [...activeWS.menus]; let ox = newMenus.reduce((mx, m) => Math.max(mx, m.x), 0) + 300; for (const p of d.projects) { if (!newMenus.find(e => e.projectId === p.id)) { newMenus.push({ projectId: p.id, x: ox, y: 100 }); ox += 250 } }; updateWS({ ...activeWS, menus: newMenus, connections: activeWS.connections }) } const last = d.projects?.[d.projects.length - 1]; if (last) { loadProj(last); setSelSlot(null); setMultiSel(new Set()) } } catch (err) { alert('Ошибка: ' + (err as Error).message) } finally { document.body.removeChild(inp) } }; reader.readAsText(f) }; inp.click() }}>Импорт</button>
                 <button onClick={() => { setShowMenu(false); const text = prompt('Вставьте код FunMenu (Kotlin) или конфиг AbstractMenus (YAML):'); if (!text) return; const fm = parseFunMenu(text); const am = fm || parseAbstractMenus(text); if (!am) { alert('Не удалось распарсить. Поддерживается FunMenu (Kotlin) и AbstractMenus (YAML).'); return }; const np = newProject(am.name, am.rows); np.slots = am.slots; saveProject(np); addToWorkspace(np.id); loadProj(np); setSelSlot(null); setMultiSel(new Set()) }}>Импорт FunMenu / AM</button>
                 <button onClick={() => { setShowMenu(false); setShowImportJson(true) }}>Импорт JSON (из игры)</button>
@@ -356,6 +372,20 @@ export function App() {
       }} onClose={() => setShowImportJson(false)} />}
       {showProjs && <ProjectModal list={loadProjectList()} onOpen={p => { loadProj(p); setSelSlot(null); setMultiSel(new Set()); setShowProjs(false) }} onDelete={id => { deleteProject(id); forceRender(x => x + 1) }} onClose={() => setShowProjs(false)} />}
       {ctxMenu && <CtxMenu x={ctxMenu.x} y={ctxMenu.y} items={ctxMenu.items} onClose={() => setCtxMenu(null)} />}
+      {shareResult && (
+        <GlassModal onClose={() => setShareResult(null)} title="Поделиться ссылкой">
+          {shareResult.stripped > 0 && (
+            <div style={{ fontSize: 12, color: '#ff5555', marginBottom: 8, padding: '6px 10px', background: 'rgba(255,85,85,0.1)', borderRadius: 6 }}>
+              Workspace слишком большой для ссылки. Удалено {shareResult.stripped} самых тяжёлых предметов из копии. Используйте бэкап для полной передачи.
+            </div>
+          )}
+          <textarea readOnly value={shareResult.url} style={{ width: '100%', minHeight: 60, fontSize: 11, background: 'var(--glass-surface)', border: '1px solid var(--glass-border)', borderRadius: 6, color: 'var(--tx1)', padding: 8, resize: 'vertical', fontFamily: 'monospace' }} onClick={e => (e.target as HTMLTextAreaElement).select()} />
+          <div className={glassModalStyles.actions} style={{ marginTop: 12 }}>
+            <GlowButton variant="primary" onClick={() => { navigator.clipboard.writeText(shareResult.url); setShareResult(null) }}>Скопировать</GlowButton>
+            <GlowButton onClick={() => setShareResult(null)}>Закрыть</GlowButton>
+          </div>
+        </GlassModal>
+      )}
       {showWorkspaces && (
         <GlassModal onClose={() => setShowWorkspaces(false)} title="Workspaces">
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 12 }}>
