@@ -81,15 +81,17 @@ export class ComponentGenerator implements CommandGenerator {
       parts.push(`"minecraft:custom_model_data":${slot.customModelData}`)
     }
     if (slot.potionColor) {
-      parts.push(`"minecraft:potion_contents":{custom_color:${hexToDecimal(slot.potionColor)}}`)
+      parts.push(`"minecraft:potion_contents":{custom_color:${hexToDecimal(slot.potionColor)},show_in_tooltip:false}`)
     }
     if (slot.skullTexture) {
       const value = this.encodeSkullTexture(slot.skullTexture)
       parts.push(`"minecraft:profile":{id:[I;0,0,0,0],properties:[{name:"textures",value:"${value}"}]}`)
     }
     if (slot.armorTrim) {
-      parts.push(`"minecraft:trim":{material:"minecraft:${slot.armorTrim.material}",pattern:"minecraft:${slot.armorTrim.pattern}"}`)
+      parts.push(`"minecraft:trim":{material:"minecraft:${slot.armorTrim.material}",pattern:"minecraft:${slot.armorTrim.pattern}",show_in_tooltip:false}`)
     }
+    parts.push('"minecraft:attribute_modifiers":{show_in_tooltip:false}')
+    parts.push('"minecraft:hide_additional_tooltip":{}')
     return parts.join(',')
   }
 
@@ -125,15 +127,17 @@ export class ComponentGenerator implements CommandGenerator {
       parts.push(`"minecraft:custom_model_data":${slot.customModelData}`)
     }
     if (slot.potionColor && !rawComponents.includes('potion_contents')) {
-      parts.push(`"minecraft:potion_contents":{custom_color:${hexToDecimal(slot.potionColor)}}`)
+      parts.push(`"minecraft:potion_contents":{custom_color:${hexToDecimal(slot.potionColor)},show_in_tooltip:false}`)
     }
     if (slot.skullTexture && !rawComponents.includes('profile')) {
       const value = this.encodeSkullTexture(slot.skullTexture)
       parts.push(`"minecraft:profile":{id:[I;0,0,0,0],properties:[{name:"textures",value:"${value}"}]}`)
     }
     if (slot.armorTrim && !rawComponents.includes('trim')) {
-      parts.push(`"minecraft:trim":{material:"minecraft:${slot.armorTrim.material}",pattern:"minecraft:${slot.armorTrim.pattern}"}`)
+      parts.push(`"minecraft:trim":{material:"minecraft:${slot.armorTrim.material}",pattern:"minecraft:${slot.armorTrim.pattern}",show_in_tooltip:false}`)
     }
+    if (!rawComponents.includes('attribute_modifiers')) parts.push('"minecraft:attribute_modifiers":{show_in_tooltip:false}')
+    if (!rawComponents.includes('hide_additional_tooltip')) parts.push('"minecraft:hide_additional_tooltip":{}')
     return parts.join(',')
   }
 
@@ -163,22 +167,25 @@ export class ComponentGenerator implements CommandGenerator {
       parts.push(`"minecraft:custom_model_data":${slot.customModelData}`)
     }
     if (slot.potionColor) {
-      parts.push(`"minecraft:potion_contents":{custom_color:${hexToDecimal(slot.potionColor)}}`)
+      parts.push(`"minecraft:potion_contents":{custom_color:${hexToDecimal(slot.potionColor)},show_in_tooltip:false}`)
     }
     if (slot.skullTexture) {
       const value = this.encodeSkullTexture(slot.skullTexture)
       parts.push(`"minecraft:profile":{id:[I;0,0,0,0],properties:[{name:"textures",value:"${value}"}]}`)
     }
     if (slot.armorTrim) {
-      parts.push(`"minecraft:trim":{material:"minecraft:${slot.armorTrim.material}",pattern:"minecraft:${slot.armorTrim.pattern}"}`)
+      parts.push(`"minecraft:trim":{material:"minecraft:${slot.armorTrim.material}",pattern:"minecraft:${slot.armorTrim.pattern}",show_in_tooltip:false}`)
     }
     if (slot.funItemAttributes && slot.funItemAttributes.length > 0) {
       const mods = slot.funItemAttributes.map(a => {
         const op = a.operation === 'ADD' ? 'add_value' : a.operation === 'MULTIPLY' ? 'add_multiplied_total' : 'add_multiplied_base'
         return `{type:"minecraft:${a.type}",amount:${a.amount},operation:"${op}",slot:"${a.slot.toLowerCase()}"${a.id ? `,id:"${a.id}"` : ''}}`
       }).join(',')
-      parts.push(`"minecraft:attribute_modifiers":{modifiers:[${mods}]}`)
+      parts.push(`"minecraft:attribute_modifiers":{modifiers:[${mods}],show_in_tooltip:false}`)
+    } else {
+      parts.push('"minecraft:attribute_modifiers":{show_in_tooltip:false}')
     }
+    parts.push('"minecraft:hide_additional_tooltip":{}')
     return parts.join(',')
   }
 
@@ -220,7 +227,7 @@ export class ComponentGenerator implements CommandGenerator {
     }
 
     if (slot.potionColor) {
-      parts.push(`potion_contents={custom_color:${hexToDecimal(slot.potionColor)}}`)
+      parts.push(`potion_contents={custom_color:${hexToDecimal(slot.potionColor)},show_in_tooltip:false}`)
     }
 
     if (slot.skullTexture) {
@@ -229,8 +236,11 @@ export class ComponentGenerator implements CommandGenerator {
     }
 
     if (slot.armorTrim) {
-      parts.push(`trim={material:"minecraft:${slot.armorTrim.material}",pattern:"minecraft:${slot.armorTrim.pattern}"}`)
+      parts.push(`trim={material:"minecraft:${slot.armorTrim.material}",pattern:"minecraft:${slot.armorTrim.pattern}",show_in_tooltip:false}`)
     }
+
+    parts.push('attribute_modifiers={show_in_tooltip:false}')
+    parts.push('hide_additional_tooltip={}')
 
     return parts.join(',')
   }
@@ -266,15 +276,18 @@ export class ComponentGenerator implements CommandGenerator {
       parts.push(`custom_model_data=${slot.customModelData}`)
     }
     if (slot.potionColor && !rawComponents.includes('potion_contents=')) {
-      parts.push(`potion_contents={custom_color:${hexToDecimal(slot.potionColor)}}`)
+      parts.push(`potion_contents={custom_color:${hexToDecimal(slot.potionColor)},show_in_tooltip:false}`)
     }
     if (slot.skullTexture && !rawComponents.includes('profile=')) {
       const value = this.encodeSkullTexture(slot.skullTexture)
       parts.push(`profile={id:[I;0,0,0,0],properties:[{name:"textures",value:"${value}"}]}`)
     }
     if (slot.armorTrim && !rawComponents.includes('trim=')) {
-      parts.push(`trim={material:"minecraft:${slot.armorTrim.material}",pattern:"minecraft:${slot.armorTrim.pattern}"}`)
+      parts.push(`trim={material:"minecraft:${slot.armorTrim.material}",pattern:"minecraft:${slot.armorTrim.pattern}",show_in_tooltip:false}`)
     }
+
+    if (!rawComponents.includes('attribute_modifiers=')) parts.push('attribute_modifiers={show_in_tooltip:false}')
+    if (!rawComponents.includes('hide_additional_tooltip=')) parts.push('hide_additional_tooltip={}')
 
     return parts.join(',')
   }
@@ -308,14 +321,14 @@ export class ComponentGenerator implements CommandGenerator {
       parts.push(`custom_model_data=${slot.customModelData}`)
     }
     if (slot.potionColor) {
-      parts.push(`potion_contents={custom_color:${hexToDecimal(slot.potionColor)}}`)
+      parts.push(`potion_contents={custom_color:${hexToDecimal(slot.potionColor)},show_in_tooltip:false}`)
     }
     if (slot.skullTexture) {
       const value = this.encodeSkullTexture(slot.skullTexture)
       parts.push(`profile={id:[I;0,0,0,0],properties:[{name:"textures",value:"${value}"}]}`)
     }
     if (slot.armorTrim) {
-      parts.push(`trim={material:"minecraft:${slot.armorTrim.material}",pattern:"minecraft:${slot.armorTrim.pattern}"}`)
+      parts.push(`trim={material:"minecraft:${slot.armorTrim.material}",pattern:"minecraft:${slot.armorTrim.pattern}",show_in_tooltip:false}`)
     }
 
     if (slot.funItemAttributes && slot.funItemAttributes.length > 0) {
@@ -323,8 +336,11 @@ export class ComponentGenerator implements CommandGenerator {
         const op = a.operation === 'ADD' ? 'add_value' : a.operation === 'MULTIPLY' ? 'add_multiplied_total' : 'add_multiplied_base'
         return `{type:"minecraft:${a.type}",amount:${a.amount},operation:"${op}",slot:"${a.slot.toLowerCase()}"${a.id ? `,id:"${a.id}"` : ''}}`
       }).join(',')
-      parts.push(`attribute_modifiers={modifiers:[${mods}]}`)
+      parts.push(`attribute_modifiers={modifiers:[${mods}],show_in_tooltip:false}`)
+    } else {
+      parts.push('attribute_modifiers={show_in_tooltip:false}')
     }
+    parts.push('hide_additional_tooltip={}')
 
     return parts.join(',')
   }

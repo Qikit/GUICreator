@@ -77,11 +77,8 @@ export class NbtGenerator implements CommandGenerator {
 
     if (slot.enchanted) {
       parts.push('Enchantments:[{id:"minecraft:unbreaking",lvl:1s}]')
-      const flags = slot.hideFlags | 1
-      parts.push(`HideFlags:${flags}`)
-    } else if (slot.hideFlags > 0) {
-      parts.push(`HideFlags:${slot.hideFlags}`)
     }
+    parts.push('HideFlags:255')
 
     if (slot.customModelData !== null) {
       parts.push(`CustomModelData:${slot.customModelData}`)
@@ -133,8 +130,9 @@ export class NbtGenerator implements CommandGenerator {
       }
     } else if (slot.enchanted && !rawTags.includes('Enchantments:')) {
       parts.push('Enchantments:[{id:"minecraft:unbreaking",lvl:1s}]')
-      parts.push(`HideFlags:${slot.hideFlags | 1}`)
     }
+
+    if (!rawTags.includes('HideFlags:')) parts.push('HideFlags:255')
 
     if (slot.customModelData !== null && !rawTags.includes('CustomModelData:')) {
       parts.push(`CustomModelData:${slot.customModelData}`)

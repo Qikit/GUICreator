@@ -16,15 +16,16 @@ function slot(overrides: Partial<SlotData> = {}): SlotData {
     hideFlags: 0,
     potionColor: null,
     skullTexture: null,
+    rpTexture: null,
     armorTrim: null,
     ...overrides,
   }
 }
 
 describe('NbtGenerator.formatItem', () => {
-  it('minimal item — no tags needed', () => {
+  it('minimal item — always has HideFlags', () => {
     const cmd = gen.formatItem(slot(), baseOpts)
-    expect(cmd).toBe('minecraft:give @p minecraft:diamond_sword{display:{Name:\'{"text":"Sword","color":"#FFFFFF","italic":false}\'}} 1')
+    expect(cmd).toBe('minecraft:give @p minecraft:diamond_sword{display:{Name:\'{"text":"Sword","color":"#FFFFFF","italic":false}\'},HideFlags:255} 1')
   })
 
   it('colored bold name', () => {

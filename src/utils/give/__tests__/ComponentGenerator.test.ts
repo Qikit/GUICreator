@@ -23,9 +23,9 @@ function slot(overrides: Partial<SlotData> = {}): SlotData {
 }
 
 describe('ComponentGenerator.formatItem', () => {
-  it('minimal item — native SNBT text component', () => {
+  it('minimal item — native SNBT text component with hide flags', () => {
     const cmd = gen.formatItem(slot(), baseOpts)
-    expect(cmd).toBe('minecraft:give @p minecraft:diamond_sword[custom_name={text:"Sword",color:"#FFFFFF",italic:false}] 1')
+    expect(cmd).toBe('minecraft:give @p minecraft:diamond_sword[custom_name={text:"Sword",color:"#FFFFFF",italic:false},attribute_modifiers={show_in_tooltip:false},hide_additional_tooltip={}] 1')
   })
 
   it('colored bold name', () => {
@@ -53,9 +53,9 @@ describe('ComponentGenerator.formatItem', () => {
     expect(cmd).toContain('custom_model_data=1001')
   })
 
-  it('potion color', () => {
+  it('potion color with hidden tooltip', () => {
     const cmd = gen.formatItem(slot({ itemId: 'potion', potionColor: '#FF0000' }), baseOpts)
-    expect(cmd).toContain('potion_contents={custom_color:16711680}')
+    expect(cmd).toContain('potion_contents={custom_color:16711680,show_in_tooltip:false}')
   })
 
   it('skull texture', () => {
@@ -64,9 +64,9 @@ describe('ComponentGenerator.formatItem', () => {
     expect(cmd).toContain('textures')
   })
 
-  it('armor trim', () => {
+  it('armor trim with hidden tooltip', () => {
     const cmd = gen.formatItem(slot({ itemId: 'diamond_chestplate', armorTrim: { material: 'gold', pattern: 'sentry' } }), baseOpts)
-    expect(cmd).toContain('trim={material:"minecraft:gold",pattern:"minecraft:sentry"}')
+    expect(cmd).toContain('trim={material:"minecraft:gold",pattern:"minecraft:sentry",show_in_tooltip:false}')
   })
 
   it('funItemComponents with components — uses as base', () => {
