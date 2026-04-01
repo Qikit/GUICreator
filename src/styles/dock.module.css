@@ -133,6 +133,7 @@
   50% { box-shadow: 0 0 30px rgba(139,92,246,0.4); }
 }
 
+/* Mobile tab layout */
 .mobileLayout {
   display: flex;
   flex-direction: column;
@@ -147,6 +148,8 @@
 .mobileTabBar {
   display: flex;
   background: var(--glass-panel);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   border-top: 1px solid var(--glass-border);
   padding: 0 0 env(safe-area-inset-bottom, 0);
   flex-shrink: 0;
@@ -157,7 +160,7 @@
   flex-direction: column;
   align-items: center;
   gap: 2px;
-  padding: 8px 4px 6px;
+  padding: 10px 4px 8px;
   border: none;
   background: none;
   color: var(--tx3);
@@ -165,6 +168,8 @@
   cursor: pointer;
   transition: color 150ms;
   -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  min-height: 50px;
 }
 .mobileTab:active {
   background: var(--glass-hover);
@@ -173,7 +178,7 @@
   color: var(--accent);
 }
 .mobileTabIcon {
-  font-size: 18px;
+  font-size: 20px;
   line-height: 1;
 }
 .mobileTabLabel {

@@ -1,6 +1,6 @@
 .editor { display: flex; flex-direction: column; overflow: hidden; height: 100%; }
 .empty { display: flex; align-items: center; justify-content: center; height: 100%; color: var(--tx3); font-size: 13px; text-align: center; padding: var(--sp-xl); }
-.body { flex: 1; overflow-y: auto; padding: var(--sp-lg); }
+.body { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: var(--sp-lg); }
 .header { display: flex; align-items: center; gap: var(--sp-md); padding-bottom: var(--sp-md); margin-bottom: var(--sp-md); border-bottom: 1px solid var(--glass-border); }
 .header .itemTex { width: 32px; height: 32px; image-rendering: pixelated; }
 .itemId { font-family: monospace; color: var(--tx2); font-size: 11px; }
@@ -10,14 +10,14 @@
 .props label { font-size: 10px; color: var(--tx2); text-transform: uppercase; letter-spacing: 0.5px; }
 .amount { display: flex; align-items: center; gap: var(--sp-sm); }
 .amount input { width: 50px; text-align: center; font-size: 14px; font-weight: 600; padding: 4px; }
-.actions { display: flex; gap: var(--sp-sm); padding-top: var(--sp-md); border-top: 1px solid var(--glass-border); margin-top: var(--sp-sm); }
+.actions { display: flex; gap: var(--sp-sm); padding-top: var(--sp-md); border-top: 1px solid var(--glass-border); margin-top: var(--sp-sm); flex-wrap: wrap; }
 
 .segRow { display: flex; gap: 3px; align-items: center; margin-bottom: 3px; }
-.segColor { width: 24px; height: 24px; border-radius: var(--radius-sm); cursor: pointer; border: 2px solid var(--glass-border); flex-shrink: 0; transition: border-color 150ms; }
+.segColor { width: 24px; height: 24px; border-radius: var(--radius-sm); cursor: pointer; border: 2px solid var(--glass-border); flex-shrink: 0; transition: border-color 150ms; -webkit-tap-highlight-color: transparent; }
 .segColor:hover { border-color: var(--accent); }
 .segText { flex: 1; min-width: 0; padding: 3px 8px; font-size: 12px; }
 .segFormats { display: flex; gap: 1px; flex-shrink: 0; }
-.fmtBtn { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-sm); font-size: 9px; font-weight: 700; border: 1px solid var(--glass-border); color: var(--tx2); cursor: pointer; background: none; transition: all 150ms; }
+.fmtBtn { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-sm); font-size: 9px; font-weight: 700; border: 1px solid var(--glass-border); color: var(--tx2); cursor: pointer; background: none; transition: all 150ms; -webkit-tap-highlight-color: transparent; }
 .fmtBtn:hover { background: var(--glass-hover); color: var(--tx1); }
 .fmtBtnOn { background: var(--accent); color: #fff; border-color: var(--accent); box-shadow: 0 0 6px rgba(139,92,246,0.3); }
 .segRemove { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-sm); color: var(--er); font-size: 12px; flex-shrink: 0; cursor: pointer; border: none; background: none; transition: all 150ms; }
@@ -37,6 +37,11 @@
   .body { padding: var(--sp-md); }
   .props { grid-template-columns: 1fr; gap: 4px; }
   .props label { font-size: 11px; }
-  .segRow { flex-wrap: wrap; }
-  .segFormats { flex-wrap: wrap; }
+  .segRow { flex-wrap: wrap; gap: 4px; }
+  .segText { min-width: 100%; order: -1; font-size: 14px; padding: 6px 8px; }
+  .segColor { width: 32px; height: 32px; }
+  .fmtBtn { width: 32px; height: 32px; font-size: 12px; }
+  .segRemove { width: 32px; height: 32px; font-size: 16px; }
+  .amount input { width: 60px; font-size: 16px; padding: 6px; }
+  .addBtn { padding: 8px 12px; font-size: 12px; }
 }

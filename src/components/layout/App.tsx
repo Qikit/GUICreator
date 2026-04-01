@@ -237,21 +237,32 @@ export function App() {
           <GlowButton onClick={undo} disabled={!past.length} data-tip="Отменить (Ctrl+Z)">↩</GlowButton>
           <GlowButton onClick={redo} disabled={!future.length} data-tip="Повторить (Ctrl+Y)">↪</GlowButton>
         </div>
-        <div className={tb.sep} />
-        <div className={tb.group}>
-          <GlowButton onClick={toggleNums} variant={showNums ? 'primary' : 'ghost'} data-tip="Номера слотов">#</GlowButton>
-          <GlowButton onClick={toggleRP} variant={showRP ? 'primary' : 'ghost'} data-tip="Ресурспак">RP</GlowButton>
-          <GlowButton onClick={toggleAnimations} variant={animations ? 'primary' : 'ghost'} data-tip="Анимации">✦</GlowButton>
-        </div>
+        {!isMobile && <>
+          <div className={tb.sep} />
+          <div className={tb.group}>
+            <GlowButton onClick={toggleNums} variant={showNums ? 'primary' : 'ghost'} data-tip="Номера слотов">#</GlowButton>
+            <GlowButton onClick={toggleRP} variant={showRP ? 'primary' : 'ghost'} data-tip="Ресурспак">RP</GlowButton>
+            <GlowButton onClick={toggleAnimations} variant={animations ? 'primary' : 'ghost'} data-tip="Анимации">✦</GlowButton>
+          </div>
+        </>}
         <div className={tb.spacer} />
         <div className={tb.group}>
-          <GlowButton onClick={() => setShowGrad(true)}>Градиент</GlowButton>
-          <GlowButton onClick={() => setShowColorPicker(true)}>Цвета</GlowButton>
-          <GlowButton variant="primary" onClick={() => setShowExport(true)}>Экспорт</GlowButton>
+          {!isMobile && <>
+            <GlowButton onClick={() => setShowGrad(true)}>Градиент</GlowButton>
+            <GlowButton onClick={() => setShowColorPicker(true)}>Цвета</GlowButton>
+            <GlowButton variant="primary" onClick={() => setShowExport(true)}>Экспорт</GlowButton>
+          </>}
           <div className={tb.burger} ref={menuRef}>
             <GlowButton onClick={() => setShowMenu(!showMenu)}>☰</GlowButton>
-            {showMenu && (
+            {showMenu && (<>
+              {isMobile && <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 199 }} onClick={() => setShowMenu(false)} />}
               <div className={tb.burgerDd}>
+                {isMobile && <>
+                  <button onClick={() => { setShowMenu(false); setShowExport(true) }}>Экспорт</button>
+                  <button onClick={() => { setShowMenu(false); setShowGrad(true) }}>Градиент</button>
+                  <button onClick={() => { setShowMenu(false); setShowColorPicker(true) }}>Цвета</button>
+                  <div style={{ height: 1, background: 'var(--glass-border)', margin: '2px 0' }} />
+                </>}
                 <button onClick={() => { setShowMenu(false); setShowTpls(true) }}>Шаблоны</button>
                 <button onClick={() => { setShowMenu(false); const name = prompt('Название шаблона:', proj.name); if (!name) return; const desc = prompt('Описание:', ''); saveTpl({ name, desc: desc || '', rows: proj.rows, slots: JSON.parse(JSON.stringify(proj.slots)) }) }}>Сохранить шаблон</button>
                 <div style={{ height: 1, background: 'var(--glass-border)', margin: '2px 0' }} />
@@ -267,7 +278,7 @@ export function App() {
                 <button onClick={() => { setShowMenu(false); const ws = newWorkspace(); saveWorkspace(ws); setActiveWS(ws); refreshCache(ws) }}>Новый workspace</button>
                 {loadWorkspaceList().length > 1 && <button onClick={() => { setShowMenu(false); setShowWorkspaces(true) }}>Workspaces</button>}
               </div>
-            )}
+            </>)}
           </div>
         </div>
       </div>

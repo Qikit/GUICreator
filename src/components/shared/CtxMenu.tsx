@@ -15,19 +15,24 @@ interface Props {
   onClose: () => void
 }
 
+const isMobile = () => window.innerWidth < 768
+
 export function CtxMenu({ x, y, items, onClose }: Props) {
   const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const h = (e: MouseEvent) => {
+    const h = (e: MouseEvent | TouchEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) onClose()
     }
     document.addEventListener('mousedown', h)
-    return () => document.removeEventListener('mousedown', h)
+    document.addEventListener('touchstart', h)
+    return () => { document.removeEventListener('mousedown', h); document.removeEventListener('touchstart', h) }
   }, [onClose])
 
+  const posStyle = isMobile() ? undefined : { left: x, top: y }
+
   return (
-    <div className={s.ctxMenu} ref={ref} style={{ left: x, top: y }}>
+    <div className={s.ctxMenu} ref={ref} style={posStyle}>
       {items.map((it, i) => {
         if (it.sep) return <div key={i} className={s.ctxSep} />
         return (

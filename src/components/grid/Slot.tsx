@@ -1,3 +1,4 @@
+import { useRef, useCallback } from 'react'
 import type { SlotData } from '@/types'
 import { ItemTexture } from '@/components/shared'
 import s from '@/styles/grid.module.css'
@@ -9,6 +10,7 @@ interface Props {
   selected: boolean
   multiSel: boolean
   showNums: boolean
+  showRP: boolean
   onMouseDown: (e: React.MouseEvent) => void
   onContextMenu: (e: React.MouseEvent) => void
   onDrop?: (e: React.DragEvent) => void
@@ -17,13 +19,38 @@ interface Props {
   onDragEnd?: (key: string) => void
 }
 
+const isTouchDevice = () => 'ontouchstart' in window
+
 export function Slot({
-  row, col, data, selected, multiSel, showNums,
+  row, col, data, selected, multiSel, showNums, showRP,
   onMouseDown, onContextMenu, onDrop, onMouseEnter, onMouseLeave, onDragEnd,
 }: Props) {
   const cls = [s.slot]
   if (selected) cls.push(s.slotSelected)
   if (multiSel) cls.push(s.slotMulti)
+
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const touchMoved = useRef(false)
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    touchMoved.current = false
+    longPressTimer.current = setTimeout(() => {
+      if (!touchMoved.current) {
+        const touch = e.touches[0]
+        const synth = new MouseEvent('contextmenu', { clientX: touch.clientX, clientY: touch.clientY, bubbles: true })
+        onContextMenu(synth as unknown as React.MouseEvent)
+      }
+    }, 500)
+  }, [onContextMenu])
+
+  const handleTouchMove = useCallback(() => {
+    touchMoved.current = true
+    if (longPressTimer.current) { clearTimeout(longPressTimer.current); longPressTimer.current = null }
+  }, [])
+
+  const handleTouchEnd = useCallback(() => {
+    if (longPressTimer.current) { clearTimeout(longPressTimer.current); longPressTimer.current = null }
+  }, [])
 
   return (
     <div
@@ -31,7 +58,10 @@ export function Slot({
       onMouseDown={e => { if (e.button === 1) e.preventDefault(); onMouseDown(e) }}
       onAuxClick={e => { if (e.button === 1) e.preventDefault() }}
       onContextMenu={onContextMenu}
-      draggable={!!data}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      draggable={!!data && !isTouchDevice()}
       onDragStart={e => {
         if (data) {
           e.dataTransfer.setData('text/plain', `${row}-${col}`)
@@ -55,7 +85,9 @@ export function Slot({
             itemId={data.itemId}
             potionColor={data.potionColor}
             skullTexture={data.skullTexture}
+            rpTexture={data.rpTexture}
             armorTrim={data.armorTrim}
+            showRP={showRP}
           />
         </div>
       )}

@@ -1,4 +1,4 @@
-.gridArea { flex: 1; display: flex; align-items: center; justify-content: center; overflow: auto; padding: var(--sp-xl); position: relative; }
+.gridArea { flex: 1; display: flex; align-items: center; justify-content: center; overflow: auto; padding: var(--sp-xl); position: relative; -webkit-overflow-scrolling: touch; }
 .gridWrap {
   background: var(--glass-panel);
   backdrop-filter: var(--glass-blur);
@@ -13,7 +13,7 @@
 .invTitle { text-align: left; padding: 2px 0 5px 7px; font-family: 'Minecraft', 'Courier New', monospace; font-size: 13px; color: #3F3F3F; font-weight: bold; }
 .invGrid { display: grid; grid-template-columns: repeat(9, 48px); gap: 2px; }
 
-.slot { width: 48px; height: 48px; position: relative; background: #8B8B8B; border: 2px solid; border-color: #373737 #FFF #FFF #373737; cursor: pointer; display: flex; align-items: center; justify-content: center; user-select: none; }
+.slot { width: 48px; height: 48px; position: relative; background: #8B8B8B; border: 2px solid; border-color: #373737 #FFF #FFF #373737; cursor: pointer; display: flex; align-items: center; justify-content: center; user-select: none; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 .slot:hover .slotHover { opacity: 1; }
 
 .slotSelected { outline: 2px solid var(--accent); outline-offset: -1px; z-index: 2; box-shadow: 0 0 0 2px var(--accent), var(--accent-glow); }
@@ -48,12 +48,12 @@
 }
 
 @media (max-width: 768px) {
-  .gridArea { padding: var(--sp-sm); }
-  .gridWrap { padding: var(--sp-sm); }
-  .invFrame { padding: 4px; border-width: 2px; }
+  .gridArea { padding: var(--sp-xs); align-items: flex-start; }
+  .gridWrap { padding: var(--sp-xs); width: 100%; }
+  .invFrame { padding: 3px; border-width: 2px; }
   .invTitle { font-size: 11px; padding: 1px 0 3px 4px; }
   .invGrid { grid-template-columns: repeat(9, 1fr); gap: 1px; }
-  .slot { width: auto; height: auto; aspect-ratio: 1; }
-  .slotAmount { font-size: 10px; }
-  .slotNum { font-size: 7px; }
+  .slot { width: auto; height: auto; aspect-ratio: 1; border-width: 1px; }
+  .slotAmount { font-size: 9px; right: 1px; }
+  .slotNum { font-size: 6px; }
 }
