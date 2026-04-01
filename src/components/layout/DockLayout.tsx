@@ -1,5 +1,6 @@
-import { useState, useCallback, useEffect, Fragment } from 'react'
+import { useState, useCallback, Fragment } from 'react'
 import { usePrefsStore } from '@/store/prefsStore'
+import { useIsMobile } from '@/hooks/useIsMobile'
 import { DockPanel } from './DockPanel'
 import s from '@/styles/dock.module.css'
 
@@ -13,18 +14,6 @@ interface PanelConfig {
 
 interface Props {
   panels: PanelConfig[]
-}
-
-const MOBILE_BREAKPOINT = 768
-
-function useIsMobile() {
-  const [mobile, setMobile] = useState(window.innerWidth < MOBILE_BREAKPOINT)
-  useEffect(() => {
-    const h = () => setMobile(window.innerWidth < MOBILE_BREAKPOINT)
-    window.addEventListener('resize', h)
-    return () => window.removeEventListener('resize', h)
-  }, [])
-  return mobile
 }
 
 export function DockLayout({ panels }: Props) {

@@ -19,7 +19,9 @@ import { StatusBar } from './StatusBar'
 import { GlowButton, GlassModal, glassModalStyles } from '@/components/ui'
 import { parseFunMenu, parseAbstractMenus } from '@/utils/importMenu'
 import { AmbientBackground } from './AmbientBackground'
+import { Grid } from '@/components/grid'
 import { generateShareUrl, detectShareInUrl } from '@/utils/shareUrl'
+import { useIsMobile } from '@/hooks/useIsMobile'
 import type { ShareResult } from '@/utils/shareUrl'
 import tb from '@/styles/toolbar.module.css'
 
@@ -59,6 +61,7 @@ export function App() {
   const updateWS = useCallback((ws: Workspace) => { setActiveWS(ws); saveWorkspace(ws); refreshCache(ws) }, [refreshCache])
 
   const [shareResult, setShareResult] = useState<ShareResult | null>(null)
+  const isMobile = useIsMobile()
   const [, forceRender] = useState(0)
 
   const saveTimer = useRef<ReturnType<typeof setTimeout>>()
@@ -273,7 +276,7 @@ export function App() {
         { id: 'palette', title: 'Предметы', content: (
           <Palette itemDB={ITEM_DB} selItem={palItem} onSelect={handlePalSelect} recent={recent} />
         )},
-        { id: 'grid', title: 'Workspace', headerExtra: (() => {
+        { id: 'grid', title: isMobile ? proj.name : 'Workspace', headerExtra: (() => {
           const wsList = loadWorkspaceList()
           const MAX_TABS = 5
           const visible = wsList.slice(0, MAX_TABS)
@@ -304,7 +307,24 @@ export function App() {
                 style={{ padding: '1px 3px', fontSize: 9, border: '1px solid var(--glass-border)', borderRadius: 3, background: 'none', color: 'var(--tx3)', cursor: 'pointer' }} title="Новый workspace">+</button>
             </div>
           )
-        })(), content: activeWS ? (
+        })(), content: isMobile ? (
+          <Grid
+            project={proj}
+            selSlot={selSlot}
+            multiSel={multiSel}
+            showNums={showNums}
+            showRP={showRP}
+            onSlotMD={(_e, key) => {
+              if (palItem) { handlePlaceItem(proj.id, key) }
+              else { setSelSlot(key); setMultiSel(new Set()) }
+            }}
+            onSlotCtx={(e, key) => { e.preventDefault(); if (proj.slots[key]) { dispatch({ type: 'RS', key }); if (selSlot === key) setSelSlot(null) } }}
+            onPaint={() => {}}
+            setHTT={() => {}}
+            dispatch={dispatch as never}
+            onBgClick={() => { setSelSlot(null); setMultiSel(new Set()) }}
+          />
+        ) : activeWS ? (
           <CanvasView
             workspace={activeWS}
             onUpdateWS={updateWS}
