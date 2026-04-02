@@ -5,7 +5,7 @@ import { usePrefsStore } from '@/store/prefsStore'
 import { ITEM_DB } from '@/data/items'
 import { BUILT_TPLS } from '@/data/templates'
 import { saveProject, loadProject, loadProjectList, deleteProject, loadPrefs, savePrefs, saveWorkspace, loadWorkspace, loadWorkspaceList, newWorkspace, saveUserTemplates, deleteWorkspace } from '@/storage'
-import { loadLocale, loadFunItems, loadResourcepackIndex } from '@/loaders'
+import { loadLocale } from '@/loaders'
 import { makeSlot, newProject, ERASER_ID } from '@/utils/slot'
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { Palette } from '@/components/palette'
@@ -17,7 +17,7 @@ import { CanvasView } from '@/components/canvas'
 import { DockLayout } from './DockLayout'
 import { StatusBar } from './StatusBar'
 import { GlowButton, GlassModal, glassModalStyles } from '@/components/ui'
-import { parseFunMenu, parseAbstractMenus } from '@/utils/importMenu'
+import { parseAbstractMenus } from '@/utils/importMenu'
 import { AmbientBackground } from './AmbientBackground'
 import { Grid } from '@/components/grid'
 import { generateShareUrl, detectShareInUrl, decodeShareUrl } from '@/utils/shareUrl'
@@ -70,9 +70,6 @@ export function App() {
   // Init loaders + auto-init workspace
   useEffect(() => {
     loadLocale().then(n => { if (n) forceRender(x => x + 1) })
-    loadResourcepackIndex().then(() => {
-      loadFunItems(ITEM_DB).then(() => forceRender(x => x + 1))
-    })
 
     const shared = detectShareInUrl()
     if (shared) {
@@ -141,6 +138,18 @@ export function App() {
     selSlot, setSelSlot, multiSel, setMultiSel, proj, clipboard, setClipboard,
     dispatch: dispatch as never, undo, redo, saveProject, setSaveStatus,
     setShowExport, setShowTpls, setShowProjs, palItem, setPalItem, setPalPreset: setPalPreset as (v: unknown) => void, setCtxMenu: () => setCtxMenu(null),
+    onDuplicateProject: activeWS ? (project: Project) => {
+      const np = newProject(project.name, project.rows)
+      np.slots = project.slots
+      saveProject(np)
+      const origMenu = activeWS.menus.find(m => m.projectId === proj.id)
+      const ox = origMenu ? origMenu.x + 30 : 100
+      const oy = origMenu ? origMenu.y + 30 : 100
+      updateWS({ ...activeWS, menus: [...activeWS.menus, { projectId: np.id, x: ox, y: oy }] })
+      loadProj(np)
+      setSelSlot(null)
+      setMultiSel(new Set())
+    } : undefined,
   })
 
   const importFromShareUrl = (url: string) => {
@@ -163,6 +172,12 @@ export function App() {
     saveProject(proj)
     const p = loadProject(pid)
     if (p) { loadProj(p); setSelSlot(null); setMultiSel(new Set()) }
+  }
+
+  const handleMultiToggle = (pid: string, key: string) => {
+    if (pid !== proj.id) { switchToProject(pid) }
+    setMultiSel(prev => { const n = new Set(prev); if (n.has(key)) n.delete(key); else n.add(key); return n })
+    setSelSlot(key)
   }
 
   const handleSlotSelect = (pid: string, key: string) => {
@@ -202,16 +217,7 @@ export function App() {
       customModelData: d.customModelData,
       potionColor: d.potionColor,
       skullTexture: d.skullTexture,
-      rpTexture: d.rpTexture,
       armorTrim: d.armorTrim ? { ...d.armorTrim } : null,
-      funItemId: d.funItemId,
-      funItemNbt: d.funItemNbt,
-      funItemComponents: d.funItemComponents,
-      funItemTags: d.funItemTags ? JSON.parse(JSON.stringify(d.funItemTags)) : undefined,
-      funItemEnchantments: d.funItemEnchantments ? { ...d.funItemEnchantments } : undefined,
-      funItemEffects: d.funItemEffects ? JSON.parse(JSON.stringify(d.funItemEffects)) : undefined,
-      funItemAttributes: d.funItemAttributes ? JSON.parse(JSON.stringify(d.funItemAttributes)) : undefined,
-      funItemFlags: d.funItemFlags ? [...d.funItemFlags] : undefined,
     })
   }
 
@@ -283,7 +289,7 @@ export function App() {
                 <button onClick={() => { setShowMenu(false); if (!activeWS) return; const projs = activeWS.menus.map(m => loadProject(m.projectId)).filter(Boolean) as Project[]; const result = generateShareUrl({ workspace: activeWS, projects: projs }, window.location.href); setShareResult(result) }}>Поделиться ссылкой</button>
                 <button onClick={() => { setShowMenu(false); const url = prompt('Вставьте ссылку с #share='); if (url) importFromShareUrl(url) }}>Загрузить из ссылки</button>
                 <button onClick={() => { setShowMenu(false); const inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.json'; inp.style.display = 'none'; document.body.appendChild(inp); inp.onchange = (ev: Event) => { const f = (ev.target as HTMLInputElement).files?.[0]; if (!f) return; const reader = new FileReader(); reader.onload = (re) => { try { const d = JSON.parse(re.target?.result as string); if (d.projects) { for (const p of d.projects) saveProject(p) } if (d.workspace && activeWS) { const imported = d.workspace as Workspace; const newMenus = [...activeWS.menus]; const maxX = newMenus.reduce((mx, m) => Math.max(mx, m.x), 0); for (const m of imported.menus) { if (!newMenus.find(e => e.projectId === m.projectId)) newMenus.push({ ...m, x: m.x + maxX + 300 }) } const newConns = [...activeWS.connections, ...imported.connections.filter(c => !activeWS.connections.find(e => e.id === c.id))]; const updated = { ...activeWS, menus: newMenus, connections: newConns }; updateWS(updated) } else if (d.projects?.length && activeWS) { const newMenus = [...activeWS.menus]; let ox = newMenus.reduce((mx, m) => Math.max(mx, m.x), 0) + 300; for (const p of d.projects) { if (!newMenus.find(e => e.projectId === p.id)) { newMenus.push({ projectId: p.id, x: ox, y: 100 }); ox += 250 } }; updateWS({ ...activeWS, menus: newMenus, connections: activeWS.connections }) } const last = d.projects?.[d.projects.length - 1]; if (last) { loadProj(last); setSelSlot(null); setMultiSel(new Set()) } } catch (err) { alert('Ошибка: ' + (err as Error).message) } finally { document.body.removeChild(inp) } }; reader.readAsText(f) }; inp.click() }}>Импорт</button>
-                <button onClick={() => { setShowMenu(false); const text = prompt('Вставьте код FunMenu (Kotlin) или конфиг AbstractMenus (YAML):'); if (!text) return; const fm = parseFunMenu(text); const am = fm || parseAbstractMenus(text); if (!am) { alert('Не удалось распарсить. Поддерживается FunMenu (Kotlin) и AbstractMenus (YAML).'); return }; const np = newProject(am.name, am.rows); np.slots = am.slots; saveProject(np); addToWorkspace(np.id); loadProj(np); setSelSlot(null); setMultiSel(new Set()) }}>Импорт FunMenu / AM</button>
+                <button onClick={() => { setShowMenu(false); const text = prompt('Вставьте конфиг AbstractMenus (YAML):'); if (!text) return; const am = parseAbstractMenus(text); if (!am) { alert('Не удалось распарсить. Поддерживается AbstractMenus (YAML).'); return }; const np = newProject(am.name, am.rows); np.slots = am.slots; saveProject(np); addToWorkspace(np.id); loadProj(np); setSelSlot(null); setMultiSel(new Set()) }}>Импорт AbstractMenus</button>
                 <button onClick={() => { setShowMenu(false); setShowImportJson(true) }}>Импорт JSON (из игры)</button>
                 <div style={{ height: 1, background: 'var(--glass-border)', margin: '2px 0' }} />
                 <button onClick={() => { setShowMenu(false); const ws = newWorkspace(); saveWorkspace(ws); setActiveWS(ws); refreshCache(ws) }}>Новый workspace</button>
@@ -345,6 +351,10 @@ export function App() {
             setHTT={() => {}}
             dispatch={dispatch as never}
             onBgClick={() => { setSelSlot(null); setMultiSel(new Set()) }}
+            onMultiToggle={(key: string) => {
+              setMultiSel(prev => { const n = new Set(prev); if (n.has(key)) n.delete(key); else n.add(key); return n })
+              setSelSlot(key)
+            }}
           />
         ) : activeWS ? (
           <CanvasView
@@ -354,6 +364,8 @@ export function App() {
             activeProjectId={proj.id}
             selSlot={selSlot}
             onSlotSelect={handleSlotSelect}
+            multiSel={multiSel}
+            onMultiToggle={handleMultiToggle}
             palItem={palItem}
             onPlaceItem={handlePlaceItem}
             onRemoveItem={handleRemoveItem}

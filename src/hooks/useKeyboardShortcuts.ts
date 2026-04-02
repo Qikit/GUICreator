@@ -21,6 +21,7 @@ interface Params {
   setPalItem: (v: string | null) => void
   setPalPreset: (v: unknown) => void
   setCtxMenu: (v: null) => void
+  onDuplicateProject?: (project: Project) => void
 }
 
 export function useKeyboardShortcuts(params: Params) {
@@ -28,23 +29,24 @@ export function useKeyboardShortcuts(params: Params) {
     selSlot, setSelSlot, multiSel, setMultiSel, proj, clipboard, setClipboard,
     dispatch, undo, redo, saveProject, setSaveStatus,
     setShowExport, setShowTpls, setShowProjs, palItem, setPalItem, setPalPreset, setCtxMenu,
+    onDuplicateProject,
   } = params
 
   useEffect(() => {
     const h = (e: KeyboardEvent) => {
       if ((e.target as HTMLElement).tagName === 'INPUT' || (e.target as HTMLElement).tagName === 'TEXTAREA') return
-      if (e.ctrlKey && e.key === 'z') { e.preventDefault(); undo() }
-      if (e.ctrlKey && (e.key === 'y' || (e.shiftKey && e.key === 'Z'))) { e.preventDefault(); redo() }
-      if (e.ctrlKey && e.key === 'e') { e.preventDefault(); setShowExport(true) }
-      if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveProject(proj); setSaveStatus('Saved') }
+      if (e.ctrlKey && !e.shiftKey && e.code === 'KeyZ') { e.preventDefault(); undo() }
+      if (e.ctrlKey && (e.code === 'KeyY' || (e.shiftKey && e.code === 'KeyZ'))) { e.preventDefault(); redo() }
+      if (e.ctrlKey && e.code === 'KeyE') { e.preventDefault(); setShowExport(true) }
+      if (e.ctrlKey && e.code === 'KeyS') { e.preventDefault(); saveProject(proj); setSaveStatus('Saved') }
       if (e.key === 'Escape') { setSelSlot(null); setMultiSel(new Set()); setCtxMenu(null); setShowExport(false); setShowTpls(false); setShowProjs(false); setPalItem(null); setPalPreset(null) }
       if (e.code === 'KeyE' && !e.ctrlKey && !e.metaKey) { e.preventDefault(); if (palItem === '__eraser__') { setPalItem(null); setPalPreset(null) } else { setPalItem('__eraser__'); setPalPreset(null) } }
       if (e.key === 'Delete' || e.key === 'Backspace') {
         if (multiSel.size > 0) { e.preventDefault(); dispatch({ type: 'RM', keys: [...multiSel] }); setMultiSel(new Set()); setSelSlot(null) }
         else if (selSlot && proj.slots[selSlot]) { e.preventDefault(); dispatch({ type: 'RS', key: selSlot }) }
       }
-      if (e.ctrlKey && e.key === 'a') { e.preventDefault(); const all = new Set<string>(); for (let r = 0; r < proj.rows; r++) for (let c = 0; c < 9; c++) all.add(`${r}-${c}`); setMultiSel(all) }
-      if (e.ctrlKey && e.key === 'd') {
+      if (e.ctrlKey && e.code === 'KeyA') { e.preventDefault(); const all = new Set<string>(); for (let r = 0; r < proj.rows; r++) for (let c = 0; c < 9; c++) all.add(`${r}-${c}`); setMultiSel(all) }
+      if (e.ctrlKey && e.code === 'KeyD') {
         e.preventDefault()
         if (selSlot && proj.slots[selSlot]) {
           const [r, c] = selSlot.split('-').map(Number)
@@ -55,7 +57,7 @@ export function useKeyboardShortcuts(params: Params) {
         }
       }
       // Copy
-      if (e.ctrlKey && e.key === 'c') {
+      if (e.ctrlKey && e.code === 'KeyC') {
         if (multiSel.size > 0) {
           e.preventDefault(); const d: Record<string, SlotData> = {}
           for (const k of multiSel) if (proj.slots[k]) d[k] = JSON.parse(JSON.stringify(proj.slots[k]))
@@ -68,12 +70,16 @@ export function useKeyboardShortcuts(params: Params) {
         }
       }
       // Paste
-      if (e.ctrlKey && e.key === 'v' && clipboard) {
+      if (e.ctrlKey && e.code === 'KeyV' && clipboard) {
         e.preventDefault()
         if (clipboard.multi && clipboard.keys) {
           if (clipboard.rows && !selSlot) {
-            dispatch({ type: 'SR', rows: clipboard.rows })
-            dispatch({ type: 'SM', slots: JSON.parse(JSON.stringify(clipboard.data)) })
+            if (onDuplicateProject) {
+              onDuplicateProject({ id: '', name: proj.name + ' (копия)', rows: clipboard.rows, cols: 9, slots: JSON.parse(JSON.stringify(clipboard.data)), createdAt: Date.now(), updatedAt: Date.now() } as Project)
+            } else {
+              dispatch({ type: 'SR', rows: clipboard.rows })
+              dispatch({ type: 'SM', slots: JSON.parse(JSON.stringify(clipboard.data)) })
+            }
           } else if (selSlot) {
             const keys = clipboard.keys; if (!keys.length) return
             const [br, bc] = keys[0].split('-').map(Number); const [sr, sc] = selSlot.split('-').map(Number)
@@ -103,5 +109,5 @@ export function useKeyboardShortcuts(params: Params) {
     }
     window.addEventListener('keydown', h)
     return () => window.removeEventListener('keydown', h)
-  }, [selSlot, proj, clipboard, multiSel, palItem, undo, redo, dispatch])
+  }, [selSlot, proj, clipboard, multiSel, palItem, undo, redo, dispatch, onDuplicateProject])
 }

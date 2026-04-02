@@ -32,6 +32,8 @@ interface Props {
   onResizeMenu: (projectId: string, rows: number) => void
   onSetGuiType: (projectId: string, guiType: string) => void
   onSetEraser: () => void
+  multiSel: Set<string>
+  onMultiToggle: (projectId: string, slotKey: string) => void
   onDeselect: () => void
   onDeselectPalette: () => void
   onClearAll: (projectId: string) => void
@@ -39,7 +41,7 @@ interface Props {
   onMenuRemoved?: (projectId: string) => void
 }
 
-export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, selSlot, onSlotSelect, palItem, onPlaceItem, onRemoveItem, onMoveSlot, showNums, showRP, onActivateMenu, onBrushPick, onSlotPickup, onResizeMenu, onSetGuiType, onSetEraser, onDeselect, onDeselectPalette, onClearAll, onRenameMenu, onMenuRemoved }: Props) {
+export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, selSlot, onSlotSelect, palItem, onPlaceItem, onRemoveItem, onMoveSlot, showNums, showRP, onActivateMenu, onBrushPick, onSlotPickup, onResizeMenu, onSetGuiType, onSetEraser, multiSel, onMultiToggle, onDeselect, onDeselectPalette, onClearAll, onRenameMenu, onMenuRemoved }: Props) {
   const [pan, setPan] = useState({ x: 0, y: 0 })
   const [zoom, setZoom] = useState(1)
   const [connectMode, setConnectMode] = useState(false)
@@ -60,6 +62,8 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
   const wasDraggingRef = useRef(false)
   const popoverRef = useRef<HTMLDivElement>(null)
   const surfRef = useRef<HTMLDivElement>(null)
+  const wsRef = useRef(workspace)
+  wsRef.current = workspace
 
   const SLOT_SIZE = 48
   const SLOT_GAP = 2
@@ -71,12 +75,13 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
 
     if (e.button === 2) {
       e.preventDefault()
-      const startX = (e.clientX - pan.x) / zoom
-      const startY = (e.clientY - pan.y) / zoom
+      const rect = surfRef.current!.getBoundingClientRect()
+      const startX = (e.clientX - rect.left - pan.x) / zoom
+      const startY = (e.clientY - rect.top - pan.y) / zoom
       setSelBox({ x1: startX, y1: startY, x2: startX, y2: startY })
       const mv = (ev: MouseEvent) => {
-        const cx = (ev.clientX - pan.x) / zoom
-        const cy = (ev.clientY - pan.y) / zoom
+        const cx = (ev.clientX - rect.left - pan.x) / zoom
+        const cy = (ev.clientY - rect.top - pan.y) / zoom
         setSelBox(prev => prev ? { ...prev, x2: cx, y2: cy } : null)
       }
       const up = () => {
@@ -148,13 +153,14 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
   }
 
   const snapMenu = (idx: number, rawX: number, rawY: number) => {
+    const ws = wsRef.current
     let sx = rawX, sy = rawY
-    const myP = projects[workspace.menus[idx]?.projectId]
+    const myP = projects[ws.menus[idx]?.projectId]
     const myDims = myP ? getMenuDims(myP) : { w: 460, h: 200 }
 
-    for (let j = 0; j < workspace.menus.length; j++) {
+    for (let j = 0; j < ws.menus.length; j++) {
       if (j === idx) continue
-      const other = workspace.menus[j]
+      const other = ws.menus[j]
       const op = projects[other.projectId]; if (!op) continue
       const od = getMenuDims(op)
       const otherCenterX = other.x + od.w / 2
@@ -172,11 +178,12 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
   }
 
   const moveMenu = (idx: number, cx: number, cy: number) => {
+    const ws = wsRef.current
     const { x, y } = snapMenu(idx, cx, cy)
-    onUpdateWS({ ...workspace, menus: workspace.menus.map((m, i) => i === idx ? { ...m, x, y } : m) })
+    onUpdateWS({ ...ws, menus: ws.menus.map((m, i) => i === idx ? { ...m, x, y } : m) })
   }
 
-  const onSlotClick = (menuId: string, slot: string) => {
+  const onSlotClick = (menuId: string, slot: string, e?: React.MouseEvent) => {
     if (wasDraggingRef.current) return
     if (connectMode) {
       if (!connecting) { setConnecting({ menuId, slot }) }
@@ -187,15 +194,23 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
       }
     } else if (palItem) {
       onPlaceItem(menuId, slot)
+    } else if (e?.shiftKey) {
+      onMultiToggle(menuId, slot)
     } else {
       onSlotSelect(menuId, slot)
     }
   }
 
-  const onSlotRightClick = (menuId: string, slotKey: string, cx: number, cy: number) => {
-    onSlotSelect(menuId, slotKey)
-    setHoverData(null)
-    setSlotCtx({ x: cx, y: cy, menuId, slotKey })
+  const onSlotRightClick = (menuId: string, slotKey: string, cx: number, cy: number, asCtx?: boolean) => {
+    if (asCtx) {
+      onSlotSelect(menuId, slotKey)
+      setHoverData(null)
+      setSlotCtx({ x: cx, y: cy, menuId, slotKey })
+      return
+    }
+    if (!palItem) {
+      onMultiToggle(menuId, slotKey)
+    }
   }
 
   const handleSlotMouseDown = (menuId: string, slot: string, e: React.MouseEvent) => {
@@ -263,6 +278,14 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
         window.addEventListener('mouseup', up)
       }
     }
+  }
+
+  const duplicateMenu = (menuId: string, nx: number, ny: number) => {
+    const src = projects[menuId]
+    if (!src) return
+    const dup = { ...JSON.parse(JSON.stringify(src)), id: gid(), name: src.name + ' (копия)', createdAt: Date.now(), updatedAt: Date.now() }
+    saveProject(dup)
+    onUpdateWS({ ...workspace, menus: [...workspace.menus, { projectId: dup.id, x: nx, y: ny }] })
   }
 
   const delConn = (id: string) => onUpdateWS({ ...workspace, connections: workspace.connections.filter(c => c.id !== id) })
@@ -363,7 +386,10 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
     <div className={`${s.canvasWrap} ${grabbing || draggingSlot ? s.grabbing : ''}`} onMouseDown={onBgDown}
       onContextMenu={e => e.preventDefault()}
       style={{ touchAction: 'none', overscrollBehavior: 'none' }}
-      onMouseMove={e => setMousePos({ x: (e.clientX - pan.x) / zoom, y: (e.clientY - pan.y) / zoom })} ref={surfRef}
+      onMouseMove={e => {
+        const r = surfRef.current!.getBoundingClientRect()
+        setMousePos({ x: (e.clientX - r.left - pan.x) / zoom, y: (e.clientY - r.top - pan.y) / zoom })
+      }} ref={surfRef}
       onKeyDown={e => {
         if (e.key === 'Escape') { setConnecting(null); setConnectMode(false) }
         if (e.key === 'Delete') {
@@ -420,6 +446,7 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
             onActivate={onActivateMenu}
             isActive={m.projectId === activeProjectId}
             selectedSlot={m.projectId === activeProjectId ? selSlot : null}
+            multiSel={m.projectId === activeProjectId ? multiSel : undefined}
             showNums={showNums}
             showRP={showRP}
             onSlotHover={(data, x, y) => data ? setHoverData({ data, x, y }) : setHoverData(null)}
@@ -432,6 +459,7 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
             onSetGuiType={onSetGuiType}
             onSetEraser={onSetEraser}
             onClearAll={onClearAll}
+            onDuplicateDrag={duplicateMenu}
             onGiveCommand={(menuId) => setGiveContainerMenuId(menuId)}
             onRename={onRenameMenu}
             isMultiSelected={selectedMenus.has(m.projectId)}
@@ -514,7 +542,7 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
       {hoverData && !draggingSlot && <HoverTooltip data={hoverData.data} x={hoverData.x} y={hoverData.y} />}
       {draggingSlot && createPortal(
         <div style={{ position: 'fixed', left: dragMousePos.x - 20, top: dragMousePos.y - 20, width: 40, height: 40, pointerEvents: 'none', zIndex: 9999, opacity: 0.85, filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.5))' }}>
-          <ItemTexture itemId={draggingSlot.data.itemId} potionColor={draggingSlot.data.potionColor} skullTexture={draggingSlot.data.skullTexture} rpTexture={draggingSlot.data.rpTexture} armorTrim={draggingSlot.data.armorTrim} showRP={showRP} />
+          <ItemTexture itemId={draggingSlot.data.itemId} potionColor={draggingSlot.data.potionColor} skullTexture={draggingSlot.data.skullTexture} armorTrim={draggingSlot.data.armorTrim} />
         </div>,
         document.body,
       )}

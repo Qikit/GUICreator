@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { Project, SlotData } from '@/types'
 import { parseMM } from '@/utils/minimessage'
 import { McText } from '@/components/shared'
@@ -9,28 +10,57 @@ interface Props {
   selSlot: string | null
   multiSel: Set<string>
   showNums: boolean
+  showRP: boolean
   onSlotMD: (e: React.MouseEvent, key: string) => void
   onSlotCtx: (e: React.MouseEvent, key: string) => void
   onPaint: (key: string) => void
   setHTT: (data: { data: SlotData; x: number; y: number } | null) => void
   dispatch: (action: { type: string; [k: string]: unknown }) => void
   onBgClick: () => void
+  onMultiToggle?: (key: string) => void
 }
 
 export function Grid({
-  project, selSlot, multiSel, showNums,
-  onSlotMD, onSlotCtx, onPaint, setHTT, dispatch, onBgClick,
+  project, selSlot, multiSel, showNums, showRP,
+  onSlotMD, onSlotCtx, onPaint, setHTT, dispatch, onBgClick, onMultiToggle,
 }: Props) {
+  const [selectPainting, setSelectPainting] = useState(false)
+
   const handleDrop = (r: number, c: number, e: React.DragEvent) => {
     const from = e.dataTransfer.getData('text/plain')
     const to = `${r}-${c}`
     if (from && from !== to) dispatch({ type: 'MV', from, to })
   }
 
+  const handleSlotMD = (e: React.MouseEvent, key: string) => {
+    if (e.button === 2 && onMultiToggle) {
+      e.preventDefault()
+      setSelectPainting(true)
+      onMultiToggle(key)
+      return
+    }
+    if (e.button === 0 && e.shiftKey && onMultiToggle) {
+      e.preventDefault()
+      setSelectPainting(true)
+      onMultiToggle(key)
+      return
+    }
+    onSlotMD(e, key)
+  }
+
+  const handleSlotEnter = (e: React.MouseEvent, key: string) => {
+    onPaint(key)
+    if (project.slots[key]) setHTT({ data: project.slots[key], x: e.clientX, y: e.clientY })
+    if (selectPainting && onMultiToggle) onMultiToggle(key)
+  }
+
   return (
     <div
       className={s.gridArea}
       onMouseDown={e => { if ((e.target as HTMLElement).classList.contains(s.gridArea)) onBgClick() }}
+      onMouseUp={() => setSelectPainting(false)}
+      onMouseLeave={() => setSelectPainting(false)}
+      onContextMenu={e => e.preventDefault()}
     >
       <div className={s.gridWrap}>
         <div className={s.invFrame}>
@@ -50,13 +80,11 @@ export function Grid({
                     selected={selSlot === k}
                     multiSel={multiSel.has(k)}
                     showNums={showNums}
-                    onMouseDown={e => onSlotMD(e, k)}
-                    onContextMenu={e => onSlotCtx(e, k)}
+                    showRP={showRP}
+                    onMouseDown={e => handleSlotMD(e, k)}
+                    onContextMenu={e => e.preventDefault()}
                     onDrop={e => handleDrop(r, c, e)}
-                    onMouseEnter={e => {
-                      onPaint(k)
-                      if (project.slots[k]) setHTT({ data: project.slots[k], x: e.clientX, y: e.clientY })
-                    }}
+                    onMouseEnter={e => handleSlotEnter(e, k)}
                     onMouseLeave={() => setHTT(null)}
                     onDragEnd={key => {
                       if (project.slots[key]) dispatch({ type: 'RS', key })

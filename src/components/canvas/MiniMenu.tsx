@@ -17,8 +17,9 @@ interface Props {
   x: number; y: number
   zoom: number
   onDrag: (nx: number, ny: number) => void
-  onSlotClick: (menuId: string, slot: string) => void
-  onSlotRightClick?: (menuId: string, slot: string, x: number, y: number) => void
+  onSlotClick: (menuId: string, slot: string, e?: React.MouseEvent) => void
+  onSlotRightClick?: (menuId: string, slot: string, x: number, y: number, asCtx?: boolean) => void
+  multiSel?: Set<string>
   onSlotMouseDown?: (menuId: string, slot: string, e: React.MouseEvent) => void
   connectingFrom: ConnectingFrom | null
   onCtxMenu?: (cx: number, cy: number) => void
@@ -34,6 +35,7 @@ interface Props {
   onSetGuiType?: (menuId: string, guiType: string) => void
   onSetEraser?: () => void
   onClearAll?: (menuId: string) => void
+  onDuplicateDrag?: (menuId: string, nx: number, ny: number) => void
   onGiveCommand?: (menuId: string) => void
   onRename?: (menuId: string, name: string) => void
   isMultiSelected?: boolean
@@ -43,7 +45,7 @@ interface Props {
 
 const SCALE = 2
 
-export function MiniMenu({ project, x, y, zoom, onDrag, onSlotClick, onSlotRightClick, onSlotMouseDown, connectingFrom, onCtxMenu, isActive, selectedSlot, showNums, showRP, onSlotHover, onActivate, palItem, onDeleteMenu, onResizeMenu, onSetGuiType, onSetEraser, onClearAll, onGiveCommand, onRename, onSlotEnter, dragSourceKey }: Props) {
+export function MiniMenu({ project, x, y, zoom, onDrag, onSlotClick, onSlotRightClick, onSlotMouseDown, connectingFrom, onCtxMenu, isActive, selectedSlot, showNums, showRP, onSlotHover, onActivate, palItem, onDeleteMenu, onResizeMenu, onSetGuiType, onSetEraser, onClearAll, onDuplicateDrag, onGiveCommand, onRename, multiSel, onSlotEnter, dragSourceKey, isMultiSelected }: Props) {
   const [editingName, setEditingName] = useState(false)
   const [nameText, setNameText] = useState(project.name)
   const [showSizeMenu, setShowSizeMenu] = useState(false)
@@ -60,6 +62,10 @@ export function MiniMenu({ project, x, y, zoom, onDrag, onSlotClick, onSlotRight
 
   const startDrag = (e: React.MouseEvent) => {
     if (e.button !== 0) return; e.stopPropagation()
+    const isAlt = e.altKey
+    if (isAlt && onDuplicateDrag) {
+      onDuplicateDrag(project.id, x, y)
+    }
     onActivate?.(project.id)
     const startMouseX = e.clientX, startMouseY = e.clientY
     const startX = x, startY = y
@@ -75,11 +81,12 @@ export function MiniMenu({ project, x, y, zoom, onDrag, onSlotClick, onSlotRight
   const renderSlot = (key: string, d: SlotData | undefined, displayNum?: number | string, extraClass?: string) => {
     const isSrc = connectingFrom && connectingFrom.menuId === project.id && connectingFrom.slot === key
     const isSel = selectedSlot === key
+    const isMulti = multiSel?.has(key)
     const isDragSrc = dragSourceKey === key
     return (
-      <div key={key} className={`${extraClass || s.mmSlot} ${isSrc ? s.mmSlotConn : ''} ${isSel ? s.mmSlotSel : ''} ${isDragSrc ? s.mmSlotDragSrc : ''}`}
+      <div key={key} className={`${extraClass || s.mmSlot} ${isSrc ? s.mmSlotConn : ''} ${isSel ? s.mmSlotSel : ''} ${isMulti ? s.mmSlotMulti : ''} ${isDragSrc ? s.mmSlotDragSrc : ''}`}
         data-slot-key={key} data-menu-id={project.id}
-        onClick={e => { e.stopPropagation(); onSlotClick(project.id, key) }}
+        onClick={e => { e.stopPropagation(); onSlotClick(project.id, key, e) }}
         onMouseDown={e => { onSlotMouseDown?.(project.id, key, e) }}
         onContextMenu={e => {
           e.preventDefault(); e.stopPropagation()
@@ -94,7 +101,7 @@ export function MiniMenu({ project, x, y, zoom, onDrag, onSlotClick, onSlotRight
         {showNums && <span className={s.mmSlotNum}>{displayNum !== undefined ? displayNum : key}</span>}
         {d && (
           <div className={s.mmSlotContent}>
-            <ItemTexture itemId={d.itemId} potionColor={d.potionColor} skullTexture={d.skullTexture} armorTrim={d.armorTrim} showRP={showRP} />
+            <ItemTexture itemId={d.itemId} potionColor={d.potionColor} skullTexture={d.skullTexture} armorTrim={d.armorTrim} />
           </div>
         )}
         {d?.enchanted && <div className={s.mmSlotEnchant} />}
@@ -301,7 +308,7 @@ export function MiniMenu({ project, x, y, zoom, onDrag, onSlotClick, onSlotRight
 
     return (
       <>
-        <div className={`${s.miniMenu} ${isActive ? s.mmActive : ''}`} style={{ left: x, top: y }}
+        <div className={`${s.miniMenu} ${isActive ? s.mmActive : ''} ${isMultiSelected ? s.mmMultiSel : ''}`} style={{ left: x, top: y }}
           onMouseDown={e => { e.stopPropagation(); onActivate?.(project.id) }}>
           <div className={s.mmMain}>
             {header}
@@ -326,7 +333,7 @@ export function MiniMenu({ project, x, y, zoom, onDrag, onSlotClick, onSlotRight
                     onMouseEnter={e => { if (d) onSlotHover?.(d, e.clientX, e.clientY); onSlotEnter?.(project.id, sl.key) }}
                     onMouseLeave={() => onSlotHover?.(null, 0, 0)}>
                     {showNums && <span className={s.mmSlotNum}>{sl.key}</span>}
-                    {d && <div className={s.mmSlotContent}><ItemTexture itemId={d.itemId} potionColor={d.potionColor} skullTexture={d.skullTexture} armorTrim={d.armorTrim} showRP={showRP} /></div>}
+                    {d && <div className={s.mmSlotContent}><ItemTexture itemId={d.itemId} potionColor={d.potionColor} skullTexture={d.skullTexture} armorTrim={d.armorTrim} /></div>}
                     {d?.enchanted && <div className={s.mmSlotEnchant} />}
                     {d && d.amount > 1 && <span className={s.mmSlotAmount}>{d.amount}</span>}
                   </div>

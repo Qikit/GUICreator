@@ -16,7 +16,6 @@ function slot(overrides: Partial<SlotData> = {}): SlotData {
     hideFlags: 0,
     potionColor: null,
     skullTexture: null,
-    rpTexture: null,
     armorTrim: null,
     ...overrides,
   }

@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect, useMemo } from 'react'
 import type { SlotData } from '@/types'
+import { ITEM_DB } from '@/data/items'
 import { ItemTexture, Preview } from '@/components/shared'
 import { SkullFace } from '@/components/shared/SkullFace'
 import { TINTABLE, TRIMMABLE, TRIM_MATERIALS, TRIM_PATTERNS } from '@/utils/slot'
@@ -19,6 +20,34 @@ interface Props {
 
 export function ItemEditor({ data, slotKey, dispatch }: Props) {
   const [showColorPicker, setShowColorPicker] = useState(false)
+  const [showMatPopup, setShowMatPopup] = useState(false)
+  const [matSearch, setMatSearch] = useState('')
+  const matRef = useRef<HTMLDivElement>(null)
+  const matInputRef = useRef<HTMLInputElement>(null)
+
+  const allItems = useMemo(() => {
+    const items: { id: string; name: string }[] = []
+    for (const cat of Object.values(ITEM_DB)) {
+      if ((cat as { preset?: boolean }).preset) continue
+      for (const item of cat.items) items.push({ id: item.id, name: item.name })
+    }
+    const seen = new Set<string>()
+    return items.filter(i => { if (seen.has(i.id)) return false; seen.add(i.id); return true })
+  }, [])
+
+  const filteredMats = useMemo(() => {
+    if (!matSearch) return allItems.slice(0, 50)
+    const q = matSearch.toLowerCase()
+    return allItems.filter(i => i.id.includes(q) || i.name.toLowerCase().includes(q)).slice(0, 50)
+  }, [matSearch, allItems])
+
+  useEffect(() => {
+    if (!showMatPopup) return
+    matInputRef.current?.focus()
+    const h = (e: MouseEvent) => { if (matRef.current && !matRef.current.contains(e.target as Node)) setShowMatPopup(false) }
+    const t = setTimeout(() => document.addEventListener('mousedown', h), 0)
+    return () => { clearTimeout(t); document.removeEventListener('mousedown', h) }
+  }, [showMatPopup])
 
   if (!data || !slotKey) {
     return <div className={s.editor}><div className={s.empty}>Выберите слот для редактирования</div></div>
@@ -26,12 +55,43 @@ export function ItemEditor({ data, slotKey, dispatch }: Props) {
 
   const upd = (ch: Partial<SlotData>) => dispatch({ type: 'SS', key: slotKey, data: { ...data, ...ch } })
 
+  const changeMaterial = (newId: string) => {
+    upd({ itemId: newId })
+    setShowMatPopup(false)
+    setMatSearch('')
+  }
+
   return (
     <div className={s.editor}>
       <div className={s.body}>
         <div className={s.header}>
           <ItemTexture itemId={data.itemId} size={32} potionColor={data.potionColor} skullTexture={data.skullTexture} armorTrim={data.armorTrim} />
-          <div style={{ flex: 1 }}><div className={s.itemId}>{data.itemId}</div></div>
+          <div style={{ flex: 1, position: 'relative' }} ref={matRef}>
+            <div className={s.itemId} style={{ cursor: 'pointer' }} onClick={() => setShowMatPopup(v => !v)}>
+              {data.itemId} <span style={{ fontSize: 9, color: 'var(--tx3)' }}>&#9662;</span>
+            </div>
+            {showMatPopup && (
+              <div className={s.matPopup}>
+                <input
+                  ref={matInputRef}
+                  className={s.matSearch}
+                  value={matSearch}
+                  onChange={e => setMatSearch(e.target.value)}
+                  placeholder="Search item..."
+                  onKeyDown={e => {
+                    if (e.key === 'Escape') setShowMatPopup(false)
+                    if (e.key === 'Enter' && filteredMats.length > 0) changeMaterial(filteredMats[0].id)
+                  }}
+                />
+                {filteredMats.map(item => (
+                  <button key={item.id} className={s.matItem} onClick={() => changeMaterial(item.id)}>
+                    <ItemTexture itemId={item.id} size={16} />
+                    {item.id}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
           <button onClick={() => setShowColorPicker(true)} data-tip="Цвета"
             style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-sm)', background: 'none', color: 'var(--tx2)', cursor: 'pointer' }}>
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1.2"/><circle cx="5" cy="5" r="1" fill="#f87171"/><circle cx="9" cy="5" r="1" fill="#4ade80"/><circle cx="5" cy="9" r="1" fill="#60a5fa"/><circle cx="9" cy="9" r="1" fill="#facc15"/></svg>
