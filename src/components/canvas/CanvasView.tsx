@@ -252,14 +252,9 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, o
         return
       }
       sel.startDragSel(menuId, slot)
-      const onUp = (ev: MouseEvent) => {
+      const onUp = () => {
         window.removeEventListener('mouseup', onUp)
-        const st = useSelectionStore.getState()
-        st.endDragSel()
-        if (st.multiSel.size > 0) {
-          setHoverData(null)
-          setSlotCtx({ x: ev.clientX, y: ev.clientY, menuId, slotKey: slot })
-        }
+        useSelectionStore.getState().endDragSel()
       }
       window.addEventListener('mouseup', onUp)
       return
