@@ -21,6 +21,12 @@ function applyAction(p: Project, action: ProjectStoreAction): Project {
     case 'SR': return { ...r, rows: action.rows, guiType: undefined }
     case 'SGT': return { ...r, guiType: action.guiType === 'generic' ? undefined : action.guiType }
     case 'CA': return { ...r, slots: {} }
+    case 'REPL': {
+      const sl = { ...r.slots }
+      for (const k of action.remove) delete sl[k]
+      for (const [k, v] of Object.entries(action.set)) sl[k] = v
+      return { ...r, slots: sl }
+    }
     case 'FE': {
       const sl = { ...r.slots }
       const gt = getGuiType(r.guiType)
@@ -48,6 +54,7 @@ type ProjectStoreAction =
   | { type: 'SR'; rows: number }
   | { type: 'SGT'; guiType: string }
   | { type: 'CA' }
+  | { type: 'REPL'; remove: string[]; set: Record<string, SlotData> }
   | { type: 'FE'; data: SlotData }
 
 interface ProjectStore {

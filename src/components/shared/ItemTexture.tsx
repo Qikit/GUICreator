@@ -25,7 +25,6 @@ interface Props {
   potionColor?: string | null
   skullTexture?: string | null
   armorTrim?: ArmorTrim | null
-  showRP?: boolean
 }
 
 export function ItemTexture({ itemId, size, className, potionColor, skullTexture, armorTrim }: Props) {

@@ -2,28 +2,25 @@ import { useState } from 'react'
 import type { Project, SlotData } from '@/types'
 import { parseMM } from '@/utils/minimessage'
 import { McText } from '@/components/shared'
+import { useSelectionStore } from '@/store/selectionStore'
 import { Slot } from './Slot'
 import s from '@/styles/grid.module.css'
 
 interface Props {
   project: Project
-  selSlot: string | null
-  multiSel: Set<string>
   showNums: boolean
-  showRP: boolean
   onSlotMD: (e: React.MouseEvent, key: string) => void
   onSlotCtx: (e: React.MouseEvent, key: string) => void
   onPaint: (key: string) => void
   setHTT: (data: { data: SlotData; x: number; y: number } | null) => void
   dispatch: (action: { type: string; [k: string]: unknown }) => void
-  onBgClick: () => void
-  onMultiToggle?: (key: string) => void
 }
 
 export function Grid({
-  project, selSlot, multiSel, showNums, showRP,
-  onSlotMD, onSlotCtx, onPaint, setHTT, dispatch, onBgClick, onMultiToggle,
+  project, showNums,
+  onSlotMD, onSlotCtx, onPaint, setHTT, dispatch,
 }: Props) {
+  const { selSlot, multiSel, toggleMulti, clearSlotSelection } = useSelectionStore()
   const [selectPainting, setSelectPainting] = useState(false)
 
   const handleDrop = (r: number, c: number, e: React.DragEvent) => {
@@ -33,16 +30,16 @@ export function Grid({
   }
 
   const handleSlotMD = (e: React.MouseEvent, key: string) => {
-    if (e.button === 2 && onMultiToggle) {
+    if (e.button === 2) {
       e.preventDefault()
       setSelectPainting(true)
-      onMultiToggle(key)
+      toggleMulti(key)
       return
     }
-    if (e.button === 0 && e.shiftKey && onMultiToggle) {
+    if (e.button === 0 && e.shiftKey) {
       e.preventDefault()
       setSelectPainting(true)
-      onMultiToggle(key)
+      toggleMulti(key)
       return
     }
     onSlotMD(e, key)
@@ -51,13 +48,13 @@ export function Grid({
   const handleSlotEnter = (e: React.MouseEvent, key: string) => {
     onPaint(key)
     if (project.slots[key]) setHTT({ data: project.slots[key], x: e.clientX, y: e.clientY })
-    if (selectPainting && onMultiToggle) onMultiToggle(key)
+    if (selectPainting) toggleMulti(key)
   }
 
   return (
     <div
       className={s.gridArea}
-      onMouseDown={e => { if ((e.target as HTMLElement).classList.contains(s.gridArea)) onBgClick() }}
+      onMouseDown={e => { if ((e.target as HTMLElement).classList.contains(s.gridArea)) clearSlotSelection() }}
       onMouseUp={() => setSelectPainting(false)}
       onMouseLeave={() => setSelectPainting(false)}
       onContextMenu={e => e.preventDefault()}
@@ -80,7 +77,6 @@ export function Grid({
                     selected={selSlot === k}
                     multiSel={multiSel.has(k)}
                     showNums={showNums}
-                    showRP={showRP}
                     onMouseDown={e => handleSlotMD(e, k)}
                     onContextMenu={e => e.preventDefault()}
                     onDrop={e => handleDrop(r, c, e)}

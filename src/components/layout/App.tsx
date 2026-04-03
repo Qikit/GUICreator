@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import type { SlotData, SlotPreset, Workspace, Project } from '@/types'
 import { useProjectStore } from '@/store/projectStore'
 import { usePrefsStore } from '@/store/prefsStore'
+import { useSelectionStore } from '@/store/selectionStore'
 import { ITEM_DB } from '@/data/items'
 import { BUILT_TPLS } from '@/data/templates'
 import { saveProject, loadProject, loadProjectList, deleteProject, loadPrefs, savePrefs, saveWorkspace, loadWorkspace, loadWorkspaceList, newWorkspace, saveUserTemplates, deleteWorkspace } from '@/storage'
@@ -27,10 +28,9 @@ import tb from '@/styles/toolbar.module.css'
 
 export function App() {
   const { present: proj, past, future, dispatch, undo, redo, setName, loadProject: loadProj } = useProjectStore()
-  const { showNums, showRP, toggleNums, toggleRP, animations, toggleAnimations } = usePrefsStore()
+  const { showNums, toggleNums, animations, toggleAnimations } = usePrefsStore()
 
-  const [selSlot, setSelSlot] = useState<string | null>(null)
-  const [multiSel, setMultiSel] = useState<Set<string>>(new Set())
+  const { selSlot, selectSlot, toggleMulti, clearSlotSelection } = useSelectionStore()
   const [palItem, setPalItem] = useState<string | null>(null)
   const [palPreset, setPalPreset] = useState<SlotPreset | null>(null)
   const [showExport, setShowExport] = useState(false)
@@ -78,7 +78,7 @@ export function App() {
       saveWorkspace(ws)
       setActiveWS(ws)
       refreshCache(ws)
-      if (shared.projects.length) { loadProj(shared.projects[0]); setSelSlot(null); setMultiSel(new Set()) }
+      if (shared.projects.length) { loadProj(shared.projects[0]); clearSlotSelection() }
       history.replaceState(null, '', window.location.pathname + window.location.search)
       return
     }
@@ -135,7 +135,7 @@ export function App() {
   }, [showMenu])
 
   useKeyboardShortcuts({
-    selSlot, setSelSlot, multiSel, setMultiSel, proj, clipboard, setClipboard,
+    proj, clipboard, setClipboard,
     dispatch: dispatch as never, undo, redo, saveProject, setSaveStatus,
     setShowExport, setShowTpls, setShowProjs, palItem, setPalItem, setPalPreset: setPalPreset as (v: unknown) => void, setCtxMenu: () => setCtxMenu(null),
     onDuplicateProject: activeWS ? (project: Project) => {
@@ -147,8 +147,7 @@ export function App() {
       const oy = origMenu ? origMenu.y + 30 : 100
       updateWS({ ...activeWS, menus: [...activeWS.menus, { projectId: np.id, x: ox, y: oy }] })
       loadProj(np)
-      setSelSlot(null)
-      setMultiSel(new Set())
+      clearSlotSelection()
     } : undefined,
   })
 
@@ -159,7 +158,7 @@ export function App() {
     saveWorkspace(data.workspace)
     setActiveWS(data.workspace)
     refreshCache(data.workspace)
-    if (data.projects.length) { loadProj(data.projects[0]); setSelSlot(null); setMultiSel(new Set()) }
+    if (data.projects.length) { loadProj(data.projects[0]); clearSlotSelection() }
   }
 
   const handlePalSelect = (id: string, preset?: SlotPreset) => {
@@ -171,13 +170,12 @@ export function App() {
     if (pid === proj.id) return
     saveProject(proj)
     const p = loadProject(pid)
-    if (p) { loadProj(p); setSelSlot(null); setMultiSel(new Set()) }
+    if (p) { loadProj(p); clearSlotSelection() }
   }
 
   const handleMultiToggle = (pid: string, key: string) => {
     if (pid !== proj.id) { switchToProject(pid) }
-    setMultiSel(prev => { const n = new Set(prev); if (n.has(key)) n.delete(key); else n.add(key); return n })
-    setSelSlot(key)
+    toggleMulti(key)
   }
 
   const handleSlotSelect = (pid: string, key: string) => {
@@ -186,7 +184,7 @@ export function App() {
       const p = loadProject(pid)
       if (p) { loadProj(p) }
     }
-    setSelSlot(key); setMultiSel(new Set())
+    selectSlot(key)
   }
 
   const handlePlaceItem = (pid: string, key: string) => {
@@ -201,7 +199,7 @@ export function App() {
       dispatch({ type: 'SS', key, data: makeSlot(palItem, palPreset) })
       setRecent(prev => [palItem!, ...prev.filter(x => x !== palItem)].slice(0, 8))
     }
-    setSelSlot(key); setMultiSel(new Set())
+    selectSlot(key)
   }
 
   const handleSlotPickup = (pid: string, key: string) => {
@@ -228,7 +226,7 @@ export function App() {
       if (p) { loadProj(p) }
     }
     dispatch({ type: 'MV', from, to })
-    setSelSlot(to); setMultiSel(new Set())
+    selectSlot(to)
   }
 
   const handleRemoveItem = (pid: string, key: string) => {
@@ -238,7 +236,7 @@ export function App() {
       if (p) { loadProj(p) }
     }
     dispatch({ type: 'RS', key })
-    if (selSlot === key) setSelSlot(null)
+    if (selSlot === key) selectSlot(null)
   }
 
   return (
@@ -257,7 +255,6 @@ export function App() {
           <div className={tb.sep} />
           <div className={tb.group}>
             <GlowButton onClick={toggleNums} variant={showNums ? 'primary' : 'ghost'} data-tip="Номера слотов">#</GlowButton>
-            <GlowButton onClick={toggleRP} variant={showRP ? 'primary' : 'ghost'} data-tip="Ресурспак">RP</GlowButton>
             <GlowButton onClick={toggleAnimations} variant={animations ? 'primary' : 'ghost'} data-tip="Анимации">✦</GlowButton>
           </div>
         </>}
@@ -282,14 +279,14 @@ export function App() {
                 <button onClick={() => { setShowMenu(false); setShowTpls(true) }}>Шаблоны</button>
                 <button onClick={() => { setShowMenu(false); const name = prompt('Название шаблона:', proj.name); if (!name) return; const desc = prompt('Описание:', ''); saveTpl({ name, desc: desc || '', rows: proj.rows, slots: JSON.parse(JSON.stringify(proj.slots)) }) }}>Сохранить шаблон</button>
                 <div style={{ height: 1, background: 'var(--glass-border)', margin: '2px 0' }} />
-                <button onClick={() => { setShowMenu(false); const np = newProject(); saveProject(np); addToWorkspace(np.id); loadProj(np); setSelSlot(null); setMultiSel(new Set()) }}>Новый проект</button>
+                <button onClick={() => { setShowMenu(false); const np = newProject(); saveProject(np); addToWorkspace(np.id); loadProj(np); clearSlotSelection() }}>Новый проект</button>
                 <button onClick={() => { setShowMenu(false); setShowProjs(true) }}>Открыть проект</button>
                 <div style={{ height: 1, background: 'var(--glass-border)', margin: '2px 0' }} />
                 <button onClick={() => { setShowMenu(false); if (!activeWS) return; const projIds = activeWS.menus.map(m => m.projectId); const projs = projIds.map(id => loadProject(id)).filter(Boolean); const d = { workspace: activeWS, projects: projs, templates: uTpls }; const blob = new Blob([JSON.stringify(d, null, 2)], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `${activeWS.name.replace(/[^a-zA-Z0-9\u0400-\u04FF]/g, '_')}-backup.json`; a.click(); URL.revokeObjectURL(url) }}>Бэкап</button>
                 <button onClick={() => { setShowMenu(false); if (!activeWS) return; const projs = activeWS.menus.map(m => loadProject(m.projectId)).filter(Boolean) as Project[]; const result = generateShareUrl({ workspace: activeWS, projects: projs }, window.location.href); setShareResult(result) }}>Поделиться ссылкой</button>
                 <button onClick={() => { setShowMenu(false); const url = prompt('Вставьте ссылку с #share='); if (url) importFromShareUrl(url) }}>Загрузить из ссылки</button>
-                <button onClick={() => { setShowMenu(false); const inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.json'; inp.style.display = 'none'; document.body.appendChild(inp); inp.onchange = (ev: Event) => { const f = (ev.target as HTMLInputElement).files?.[0]; if (!f) return; const reader = new FileReader(); reader.onload = (re) => { try { const d = JSON.parse(re.target?.result as string); if (d.projects) { for (const p of d.projects) saveProject(p) } if (d.workspace && activeWS) { const imported = d.workspace as Workspace; const newMenus = [...activeWS.menus]; const maxX = newMenus.reduce((mx, m) => Math.max(mx, m.x), 0); for (const m of imported.menus) { if (!newMenus.find(e => e.projectId === m.projectId)) newMenus.push({ ...m, x: m.x + maxX + 300 }) } const newConns = [...activeWS.connections, ...imported.connections.filter(c => !activeWS.connections.find(e => e.id === c.id))]; const updated = { ...activeWS, menus: newMenus, connections: newConns }; updateWS(updated) } else if (d.projects?.length && activeWS) { const newMenus = [...activeWS.menus]; let ox = newMenus.reduce((mx, m) => Math.max(mx, m.x), 0) + 300; for (const p of d.projects) { if (!newMenus.find(e => e.projectId === p.id)) { newMenus.push({ projectId: p.id, x: ox, y: 100 }); ox += 250 } }; updateWS({ ...activeWS, menus: newMenus, connections: activeWS.connections }) } const last = d.projects?.[d.projects.length - 1]; if (last) { loadProj(last); setSelSlot(null); setMultiSel(new Set()) } } catch (err) { alert('Ошибка: ' + (err as Error).message) } finally { document.body.removeChild(inp) } }; reader.readAsText(f) }; inp.click() }}>Импорт</button>
-                <button onClick={() => { setShowMenu(false); const text = prompt('Вставьте конфиг AbstractMenus (YAML):'); if (!text) return; const am = parseAbstractMenus(text); if (!am) { alert('Не удалось распарсить. Поддерживается AbstractMenus (YAML).'); return }; const np = newProject(am.name, am.rows); np.slots = am.slots; saveProject(np); addToWorkspace(np.id); loadProj(np); setSelSlot(null); setMultiSel(new Set()) }}>Импорт AbstractMenus</button>
+                <button onClick={() => { setShowMenu(false); const inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.json'; inp.style.display = 'none'; document.body.appendChild(inp); inp.onchange = (ev: Event) => { const f = (ev.target as HTMLInputElement).files?.[0]; if (!f) return; const reader = new FileReader(); reader.onload = (re) => { try { const d = JSON.parse(re.target?.result as string); if (d.projects) { for (const p of d.projects) saveProject(p) } if (d.workspace && activeWS) { const imported = d.workspace as Workspace; const newMenus = [...activeWS.menus]; const maxX = newMenus.reduce((mx, m) => Math.max(mx, m.x), 0); for (const m of imported.menus) { if (!newMenus.find(e => e.projectId === m.projectId)) newMenus.push({ ...m, x: m.x + maxX + 300 }) } const newConns = [...activeWS.connections, ...imported.connections.filter(c => !activeWS.connections.find(e => e.id === c.id))]; const updated = { ...activeWS, menus: newMenus, connections: newConns }; updateWS(updated) } else if (d.projects?.length && activeWS) { const newMenus = [...activeWS.menus]; let ox = newMenus.reduce((mx, m) => Math.max(mx, m.x), 0) + 300; for (const p of d.projects) { if (!newMenus.find(e => e.projectId === p.id)) { newMenus.push({ projectId: p.id, x: ox, y: 100 }); ox += 250 } }; updateWS({ ...activeWS, menus: newMenus, connections: activeWS.connections }) } const last = d.projects?.[d.projects.length - 1]; if (last) { loadProj(last); clearSlotSelection() } } catch (err) { alert('Ошибка: ' + (err as Error).message) } finally { document.body.removeChild(inp) } }; reader.readAsText(f) }; inp.click() }}>Импорт</button>
+                <button onClick={() => { setShowMenu(false); const text = prompt('Вставьте конфиг AbstractMenus (YAML):'); if (!text) return; const am = parseAbstractMenus(text); if (!am) { alert('Не удалось распарсить. Поддерживается AbstractMenus (YAML).'); return }; const np = newProject(am.name, am.rows); np.slots = am.slots; saveProject(np); addToWorkspace(np.id); loadProj(np); clearSlotSelection() }}>Импорт AbstractMenus</button>
                 <button onClick={() => { setShowMenu(false); setShowImportJson(true) }}>Импорт JSON (из игры)</button>
                 <div style={{ height: 1, background: 'var(--glass-border)', margin: '2px 0' }} />
                 <button onClick={() => { setShowMenu(false); const ws = newWorkspace(); saveWorkspace(ws); setActiveWS(ws); refreshCache(ws) }}>Новый workspace</button>
@@ -338,23 +335,15 @@ export function App() {
         })(), content: isMobile ? (
           <Grid
             project={proj}
-            selSlot={selSlot}
-            multiSel={multiSel}
             showNums={showNums}
-            showRP={showRP}
             onSlotMD={(_e, key) => {
               if (palItem) { handlePlaceItem(proj.id, key) }
-              else { setSelSlot(key); setMultiSel(new Set()) }
+              else { selectSlot(key) }
             }}
-            onSlotCtx={(e, key) => { e.preventDefault(); if (proj.slots[key]) { dispatch({ type: 'RS', key }); if (selSlot === key) setSelSlot(null) } }}
+            onSlotCtx={(e, key) => { e.preventDefault(); if (proj.slots[key]) { dispatch({ type: 'RS', key }); if (selSlot === key) selectSlot(null) } }}
             onPaint={() => {}}
             setHTT={() => {}}
             dispatch={dispatch as never}
-            onBgClick={() => { setSelSlot(null); setMultiSel(new Set()) }}
-            onMultiToggle={(key: string) => {
-              setMultiSel(prev => { const n = new Set(prev); if (n.has(key)) n.delete(key); else n.add(key); return n })
-              setSelSlot(key)
-            }}
           />
         ) : activeWS ? (
           <CanvasView
@@ -362,19 +351,18 @@ export function App() {
             onUpdateWS={updateWS}
             projects={projectCache}
             activeProjectId={proj.id}
-            selSlot={selSlot}
             onSlotSelect={handleSlotSelect}
-            multiSel={multiSel}
             onMultiToggle={handleMultiToggle}
             palItem={palItem}
             onPlaceItem={handlePlaceItem}
             onRemoveItem={handleRemoveItem}
             onMoveSlot={handleMoveSlot}
             showNums={showNums}
-            showRP={showRP}
             onActivateMenu={switchToProject}
             onBrushPick={id => { setPalItem(id); setPalPreset(null) }}
             onSlotPickup={handleSlotPickup}
+            clipboard={clipboard}
+            setClipboard={setClipboard}
             onResizeMenu={(pid, rows) => {
               if (pid !== proj.id) switchToProject(pid)
               dispatch({ type: 'SR', rows })
@@ -387,7 +375,6 @@ export function App() {
               if (palItem === ERASER_ID) { setPalItem(null); setPalPreset(null) }
               else { setPalItem(ERASER_ID); setPalPreset(null) }
             }}
-            onDeselect={() => { setSelSlot(null); setMultiSel(new Set()) }}
             onDeselectPalette={() => { setPalItem(null); setPalPreset(null) }}
             onMenuRemoved={(pid) => {
               removedFromCanvas.current.add(pid)
@@ -395,13 +382,13 @@ export function App() {
                 const remaining = activeWS?.menus.filter(m => m.projectId !== pid) || []
                 if (remaining.length > 0) {
                   const p = loadProject(remaining[0].projectId)
-                  if (p) { loadProj(p); setSelSlot(null); setMultiSel(new Set()) }
+                  if (p) { loadProj(p); clearSlotSelection() }
                 }
               }
             }}
             onClearAll={(pid) => {
               if (pid !== proj.id) switchToProject(pid)
-              dispatch({ type: 'CA' }); setSelSlot(null); setMultiSel(new Set())
+              dispatch({ type: 'CA' }); clearSlotSelection()
             }}
             onRenameMenu={(pid, name) => {
               if (pid !== proj.id) switchToProject(pid)
@@ -414,17 +401,17 @@ export function App() {
         )},
       ]} />
 
-      <StatusBar selSlot={selSlot} multiSel={multiSel} palItem={palItem} rows={proj.rows} slotCount={Object.keys(proj.slots).length} saveStatus={saveStatus} />
+      <StatusBar palItem={palItem} rows={proj.rows} slotCount={Object.keys(proj.slots).length} saveStatus={saveStatus} />
 
       {htt && <HoverTooltip data={htt.data} x={htt.x} y={htt.y} />}
       {showExport && <ExportModal project={proj} onClose={() => setShowExport(false)} />}
       {showGrad && <GradientModal onClose={() => setShowGrad(false)} />}
       {showColorPicker && <ColorPickerModal onClose={() => setShowColorPicker(false)} />}
-      {showTpls && <TemplateModal builtIn={BUILT_TPLS as never} userTemplates={[]} onApply={(t: any) => { const np = newProject(t.name || proj.name, t.rows); np.slots = JSON.parse(JSON.stringify(t.slots || {})); saveProject(np); addToWorkspace(np.id); loadProj(np); setSelSlot(null); setMultiSel(new Set()); setShowTpls(false) }} onDeleteUser={() => {}} onClose={() => setShowTpls(false)} />}
+      {showTpls && <TemplateModal builtIn={BUILT_TPLS as never} userTemplates={[]} onApply={(t: any) => { const np = newProject(t.name || proj.name, t.rows); np.slots = JSON.parse(JSON.stringify(t.slots || {})); saveProject(np); addToWorkspace(np.id); loadProj(np); clearSlotSelection(); setShowTpls(false) }} onDeleteUser={() => {}} onClose={() => setShowTpls(false)} />}
       {showImportJson && <ImportJsonModal onImport={({ name, rows, slots }) => {
-        const np = newProject(name, rows); np.slots = slots; saveProject(np); addToWorkspace(np.id); loadProj(np); setSelSlot(null); setMultiSel(new Set()); setShowImportJson(false)
+        const np = newProject(name, rows); np.slots = slots; saveProject(np); addToWorkspace(np.id); loadProj(np); clearSlotSelection(); setShowImportJson(false)
       }} onClose={() => setShowImportJson(false)} />}
-      {showProjs && <ProjectModal list={loadProjectList()} onOpen={p => { loadProj(p); setSelSlot(null); setMultiSel(new Set()); setShowProjs(false) }} onDelete={id => { deleteProject(id); forceRender(x => x + 1) }} onClose={() => setShowProjs(false)} />}
+      {showProjs && <ProjectModal list={loadProjectList()} onOpen={p => { loadProj(p); clearSlotSelection(); setShowProjs(false) }} onDelete={id => { deleteProject(id); forceRender(x => x + 1) }} onClose={() => setShowProjs(false)} />}
       {ctxMenu && <CtxMenu x={ctxMenu.x} y={ctxMenu.y} items={ctxMenu.items} onClose={() => setCtxMenu(null)} />}
       {shareResult && (
         <GlassModal onClose={() => setShareResult(null)} title="Поделиться ссылкой">

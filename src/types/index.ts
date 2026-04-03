@@ -101,6 +101,7 @@ export type ProjectAction =
   | { type: 'SN'; name: string }
   | { type: 'SGT'; guiType: string }
   | { type: 'CA' }
+  | { type: 'REPL'; remove: string[]; set: Record<string, SlotData> }
   | { type: 'FE'; data: SlotData }
   | { type: 'UNDO' }
   | { type: 'REDO' }

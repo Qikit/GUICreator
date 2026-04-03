@@ -4,6 +4,8 @@ import type { Workspace, Project, SlotData } from '@/types'
 import { gid } from '@/utils/id'
 import { newProject } from '@/utils/slot'
 import { saveProject, loadProject, loadProjectList } from '@/storage'
+import { useProjectStore } from '@/store/projectStore'
+import { useSelectionStore } from '@/store/selectionStore'
 import { ItemTexture, CtxMenu, HoverTooltip } from '@/components/shared'
 import { getGuiType } from '@/data/guiTypes'
 import { MiniMenu } from './MiniMenu'
@@ -18,30 +20,30 @@ interface Props {
   onUpdateWS: (ws: Workspace) => void
   projects: Record<string, Project>
   activeProjectId: string | null
-  selSlot: string | null
   onSlotSelect: (projectId: string, slotKey: string) => void
   palItem: string | null
   onPlaceItem: (projectId: string, slotKey: string) => void
   onRemoveItem: (projectId: string, slotKey: string) => void
   onMoveSlot: (projectId: string, from: string, to: string) => void
   showNums: boolean
-  showRP: boolean
   onActivateMenu: (projectId: string) => void
   onBrushPick: (itemId: string) => void
   onSlotPickup: (projectId: string, slotKey: string) => void
   onResizeMenu: (projectId: string, rows: number) => void
   onSetGuiType: (projectId: string, guiType: string) => void
   onSetEraser: () => void
-  multiSel: Set<string>
   onMultiToggle: (projectId: string, slotKey: string) => void
-  onDeselect: () => void
   onDeselectPalette: () => void
   onClearAll: (projectId: string) => void
   onRenameMenu?: (projectId: string, name: string) => void
   onMenuRemoved?: (projectId: string) => void
+  clipboard?: { multi: boolean; data: Record<string, SlotData> | SlotData; keys?: string[] } | null
+  setClipboard?: (c: { multi: boolean; data: Record<string, SlotData> | SlotData; keys?: string[] } | null) => void
 }
 
-export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, selSlot, onSlotSelect, palItem, onPlaceItem, onRemoveItem, onMoveSlot, showNums, showRP, onActivateMenu, onBrushPick, onSlotPickup, onResizeMenu, onSetGuiType, onSetEraser, multiSel, onMultiToggle, onDeselect, onDeselectPalette, onClearAll, onRenameMenu, onMenuRemoved }: Props) {
+export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, onSlotSelect, palItem, onPlaceItem, onRemoveItem, onMoveSlot, showNums, onActivateMenu, onBrushPick, onSlotPickup, onResizeMenu, onSetGuiType, onSetEraser, onMultiToggle, onDeselectPalette, onClearAll, onRenameMenu, onMenuRemoved, clipboard, setClipboard }: Props) {
+  const { dispatch } = useProjectStore()
+  const { selSlot, multiSel, selectSlot, toggleMulti, clearSlotSelection, selectedMenus, setSelectedMenus, clearMenuSelection, toggleMenu } = useSelectionStore()
   const [pan, setPan] = useState({ x: 0, y: 0 })
   const [zoom, setZoom] = useState(1)
   const [connectMode, setConnectMode] = useState(false)
@@ -55,7 +57,7 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
   const [giveItemSlot, setGiveItemSlot] = useState<SlotData | null>(null)
   const [showAddPopover, setShowAddPopover] = useState(false)
   const [selBox, setSelBox] = useState<{ x1: number; y1: number; x2: number; y2: number } | null>(null)
-  const [selectedMenus, setSelectedMenus] = useState<Set<string>>(new Set())
+  const groupDragStart = useRef<Map<string, { x: number; y: number }> | null>(null)
   const [painting, setPainting] = useState(false)
   const [draggingSlot, setDraggingSlot] = useState<{ menuId: string; key: string; data: SlotData } | null>(null)
   const [dragMousePos, setDragMousePos] = useState({ x: 0, y: 0 })
@@ -113,8 +115,8 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
 
     if (e.button !== 0) return
     if (connecting) { setConnecting(null); return }
-    setSelectedMenus(new Set())
-    onDeselect()
+    clearMenuSelection()
+    clearSlotSelection()
     onDeselectPalette()
     setGrabbing(true)
     const sx = e.clientX - pan.x, sy = e.clientY - pan.y
@@ -240,12 +242,38 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
       onPlaceItem(menuId, slot)
       return
     }
+    if (e.button === 2 && !palItem) {
+      e.preventDefault(); e.stopPropagation()
+      onActivateMenu(menuId)
+      const sel = useSelectionStore.getState()
+      if (sel.multiSel.has(slot) && sel.multiSel.size > 1) {
+        setHoverData(null)
+        setSlotCtx({ x: e.clientX, y: e.clientY, menuId, slotKey: slot })
+        return
+      }
+      sel.startDragSel(menuId, slot)
+      const onUp = (ev: MouseEvent) => {
+        window.removeEventListener('mouseup', onUp)
+        const st = useSelectionStore.getState()
+        st.endDragSel()
+        if (st.multiSel.size > 0) {
+          setHoverData(null)
+          setSlotCtx({ x: ev.clientX, y: ev.clientY, menuId, slotKey: slot })
+        }
+      }
+      window.addEventListener('mouseup', onUp)
+      return
+    }
     if (e.button === 0 && !palItem && !connectMode) {
       const p = projects[menuId]
       if (p?.slots[slot]) {
         e.stopPropagation()
         const startX = e.clientX, startY = e.clientY
         let started = false
+        const sel = useSelectionStore.getState()
+        const isGroupDrag = sel.multiSel.has(slot) && sel.multiSel.size > 1
+        const groupKeys = isGroupDrag ? [...sel.multiSel] : null
+
         const mv = (ev: MouseEvent) => {
           if (!started && (Math.abs(ev.clientX - startX) > 4 || Math.abs(ev.clientY - startY) > 4)) {
             started = true
@@ -266,7 +294,26 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
               const targetKey = slotEl.getAttribute('data-slot-key')!
               const targetMenu = slotEl.getAttribute('data-menu-id')!
               if (targetMenu === menuId && targetKey !== slot) {
-                onMoveSlot(menuId, slot, targetKey)
+                if (isGroupDrag && groupKeys) {
+                  const [sr, sc] = slot.split('-').map(Number)
+                  const [tr, tc] = targetKey.split('-').map(Number)
+                  const dr = tr - sr, dc = tc - sc
+                  const newSlots: Record<string, SlotData> = {}
+                  const removeKeys: string[] = []
+                  for (const k of groupKeys) {
+                    if (!p.slots[k]) continue
+                    const [r, c] = k.split('-').map(Number)
+                    const nr = r + dr, nc = c + dc
+                    if (nr >= 0 && nr < p.rows && nc >= 0 && nc < 9) {
+                      newSlots[`${nr}-${nc}`] = JSON.parse(JSON.stringify(p.slots[k]))
+                    }
+                    removeKeys.push(k)
+                  }
+                  dispatch({ type: 'REPL', remove: removeKeys, set: newSlots })
+                  useSelectionStore.getState().setMultiSel(new Set(Object.keys(newSlots)))
+                } else {
+                  onMoveSlot(menuId, slot, targetKey)
+                }
               }
             }
             setTimeout(() => { wasDraggingRef.current = false }, 0)
@@ -399,7 +446,7 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
               connections: workspace.connections.filter(c => !selectedMenus.has(c.fromMenu) && !selectedMenus.has(c.toMenu))
             }
             onUpdateWS(updated)
-            setSelectedMenus(new Set())
+            clearMenuSelection()
           } else if (!selSlot) {
             const idx = workspace.menus.findIndex(m => m.projectId === activeProjectId)
             if (idx >= 0) removeFromCanvas(idx)
@@ -437,7 +484,28 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
         {workspace.menus.map((m, i) => {
           const p = projects[m.projectId]; if (!p) return null
           return <MiniMenu key={m.projectId} project={p} x={m.x} y={m.y} zoom={zoom}
-            onDrag={(nx, ny) => moveMenu(i, nx, ny)}
+            onDrag={(nx, ny) => {
+              if (selectedMenus.has(m.projectId) && selectedMenus.size > 1) {
+                if (!groupDragStart.current) {
+                  groupDragStart.current = new Map()
+                  for (const mm of workspace.menus) {
+                    if (selectedMenus.has(mm.projectId)) groupDragStart.current.set(mm.projectId, { x: mm.x, y: mm.y })
+                  }
+                }
+                const start = groupDragStart.current.get(m.projectId)!
+                const dx = nx - start.x, dy = ny - start.y
+                const newMenus = workspace.menus.map(mm => {
+                  const ms = groupDragStart.current!.get(mm.projectId)
+                  if (ms) return { ...mm, x: Math.round(ms.x + dx), y: Math.round(ms.y + dy) }
+                  return mm
+                })
+                onUpdateWS({ ...workspace, menus: newMenus })
+              } else {
+                moveMenu(i, nx, ny)
+              }
+            }}
+            onDragEnd={() => { groupDragStart.current = null }}
+            onToggleMenuSelect={pid => toggleMenu(pid)}
             onSlotClick={onSlotClick}
             onSlotRightClick={onSlotRightClick}
             connectingFrom={connectMode ? connecting : null}
@@ -448,7 +516,6 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
             selectedSlot={m.projectId === activeProjectId ? selSlot : null}
             multiSel={m.projectId === activeProjectId ? multiSel : undefined}
             showNums={showNums}
-            showRP={showRP}
             onSlotHover={(data, x, y) => data ? setHoverData({ data, x, y }) : setHoverData(null)}
             palItem={palItem}
             onDeleteMenu={pid => {
@@ -465,8 +532,12 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
             isMultiSelected={selectedMenus.has(m.projectId)}
             onSlotEnter={(menuId, slot) => {
               if (painting && palItem) onPlaceItem(menuId, slot)
+              const { isDragSel, dragMenuId, dragOverSlot } = useSelectionStore.getState()
+              if (isDragSel && dragMenuId === menuId) dragOverSlot(slot)
             }}
-            dragSourceKey={draggingSlot?.menuId === m.projectId ? draggingSlot.key : null}
+            dragSourceKeys={draggingSlot?.menuId === m.projectId
+              ? (multiSel.has(draggingSlot.key) && multiSel.size > 1 ? multiSel : new Set([draggingSlot.key]))
+              : null}
           />
         })}
         {selBox && (
@@ -489,6 +560,45 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
       ]} />, document.body)}
       {slotCtx && (() => {
         const p = projects[slotCtx.menuId]
+        const ms = multiSel
+        const isMultiCtx = ms.size > 1 && ms.has(slotCtx.slotKey)
+
+        if (isMultiCtx && p) {
+          return createPortal(<CtxMenu x={slotCtx.x} y={slotCtx.y} onClose={() => setSlotCtx(null)} items={[
+            { label: `Копировать (${ms.size})`, fn: () => {
+              const d: Record<string, SlotData> = {}
+              for (const k of ms) if (p.slots[k]) d[k] = JSON.parse(JSON.stringify(p.slots[k]))
+              setClipboard?.({ multi: true, data: d, keys: [...ms] })
+              setSlotCtx(null)
+            }},
+            { label: 'Отзеркалить \u2194', fn: () => {
+              const keys = [...ms]
+              const filledKeys = keys.filter(k => p.slots[k])
+              if (filledKeys.length === 0) { setSlotCtx(null); return }
+              const cols = filledKeys.map(k => parseInt(k.split('-')[1]))
+              const minC = Math.min(...cols), maxC = Math.max(...cols)
+              const newSlots: Record<string, SlotData> = {}
+              const removeKeys: string[] = []
+              for (const k of filledKeys) {
+                const [r, c] = k.split('-').map(Number)
+                const mc = maxC - c + minC
+                const nk = `${r}-${mc}`
+                newSlots[nk] = JSON.parse(JSON.stringify(p.slots[k]))
+                removeKeys.push(k)
+              }
+              dispatch({ type: 'REPL', remove: removeKeys, set: newSlots })
+              useSelectionStore.getState().setMultiSel(new Set(Object.keys(newSlots)))
+              setSlotCtx(null)
+            }},
+            { sep: true },
+            { label: `Удалить (${ms.size})`, danger: true, fn: () => {
+              dispatch({ type: 'RM', keys: [...ms] })
+              clearSlotSelection()
+              setSlotCtx(null)
+            }},
+          ]} />, document.body)
+        }
+
         const hasItem = p?.slots[slotCtx.slotKey]
         return createPortal(<CtxMenu x={slotCtx.x} y={slotCtx.y} onClose={() => setSlotCtx(null)} items={[
           ...(hasItem ? [
@@ -540,12 +650,34 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, s
       {connectMode && connecting && <div className={s.connHint}>Кликните по целевому меню · Esc — отмена</div>}
       {connectMode && !connecting && <div className={s.connHint}>Режим связей: кликните по слоту-источнику · Esc — выход</div>}
       {hoverData && !draggingSlot && <HoverTooltip data={hoverData.data} x={hoverData.x} y={hoverData.y} />}
-      {draggingSlot && createPortal(
-        <div style={{ position: 'fixed', left: dragMousePos.x - 20, top: dragMousePos.y - 20, width: 40, height: 40, pointerEvents: 'none', zIndex: 9999, opacity: 0.85, filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.5))' }}>
-          <ItemTexture itemId={draggingSlot.data.itemId} potionColor={draggingSlot.data.potionColor} skullTexture={draggingSlot.data.skullTexture} armorTrim={draggingSlot.data.armorTrim} />
-        </div>,
-        document.body,
-      )}
+      {draggingSlot && (() => {
+        const isGroup = multiSel.has(draggingSlot.key) && multiSel.size > 1
+        if (isGroup) {
+          const p = projects[draggingSlot.menuId]
+          if (!p) return null
+          const [baseR, baseC] = draggingSlot.key.split('-').map(Number)
+          return createPortal(
+            <div style={{ position: 'fixed', left: dragMousePos.x - 20, top: dragMousePos.y - 20, pointerEvents: 'none', zIndex: 9999 }}>
+              {[...multiSel].map(k => {
+                const d = p.slots[k]; if (!d) return null
+                const [r, c] = k.split('-').map(Number)
+                return (
+                  <div key={k} style={{ position: 'absolute', left: (c - baseC) * 50, top: (r - baseR) * 50, width: 40, height: 40, opacity: 0.85, filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.5))' }}>
+                    <ItemTexture itemId={d.itemId} potionColor={d.potionColor} skullTexture={d.skullTexture} armorTrim={d.armorTrim} />
+                  </div>
+                )
+              })}
+            </div>,
+            document.body,
+          )
+        }
+        return createPortal(
+          <div style={{ position: 'fixed', left: dragMousePos.x - 20, top: dragMousePos.y - 20, width: 40, height: 40, pointerEvents: 'none', zIndex: 9999, opacity: 0.85, filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.5))' }}>
+            <ItemTexture itemId={draggingSlot.data.itemId} potionColor={draggingSlot.data.potionColor} skullTexture={draggingSlot.data.skullTexture} armorTrim={draggingSlot.data.armorTrim} />
+          </div>,
+          document.body,
+        )
+      })()}
       {giveContainerMenuId && (() => {
         const p = projects[giveContainerMenuId]
         return p ? createPortal(<GiveContainerModal project={p} onClose={() => setGiveContainerMenuId(null)} />, document.body) : null
