@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom'
 import type { SlotData } from '@/types'
 import { ItemTexture } from '@/components/shared'
 
@@ -16,9 +17,11 @@ export function TemplatePreview({ name, rows, slots, x, y }: Props) {
   const height = rows * SLOT + 52
   const left = Math.max(8, Math.min(x + 18, window.innerWidth - width - 8))
   const top = Math.max(8, Math.min(y + 18, window.innerHeight - height - 8))
-  return (
+  // Портал в body: диалог модалки создаёт containing block (backdrop-filter) и клипает (overflow-y),
+  // поэтому position: fixed внутри него не привязывается к вьюпорту.
+  return createPortal(
     <div style={{
-      position: 'fixed', left, top, zIndex: 1000, pointerEvents: 'none',
+      position: 'fixed', left, top, zIndex: 2000, pointerEvents: 'none',
       background: 'var(--glass-panel)', backdropFilter: 'var(--glass-blur)', WebkitBackdropFilter: 'var(--glass-blur)',
       border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-md)', padding: 8,
       boxShadow: '0 12px 40px rgba(0,0,0,0.5)',
@@ -36,6 +39,7 @@ export function TemplatePreview({ name, rows, slots, x, y }: Props) {
           )
         })}
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }
