@@ -21,6 +21,7 @@ export const SHORTCUT_ACTIONS: ShortcutAction[] = [
   { id: 'selectAll', label: 'Выделить всё', defaults: [{ code: 'KeyA', ctrl: true }] },
   { id: 'delete', label: 'Удалить слот', defaults: [{ code: 'Delete' }, { code: 'Backspace' }] },
   { id: 'eraser', label: 'Ластик', defaults: [{ code: 'KeyE' }] },
+  { id: 'toggleArrows', label: 'Стрелки связей', defaults: [{ code: 'KeyL' }] },
   { id: 'export', label: 'Экспорт', defaults: [{ code: 'KeyE', ctrl: true }] },
   { id: 'save', label: 'Сохранить', defaults: [{ code: 'KeyS', ctrl: true }] },
 ]

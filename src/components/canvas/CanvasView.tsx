@@ -27,6 +27,7 @@ interface Props {
   onRemoveItem: (projectId: string, slotKey: string) => void
   onMoveSlot: (projectId: string, from: string, to: string) => void
   showNums: boolean
+  showConns: boolean
   onActivateMenu: (projectId: string) => void
   onBrushPick: (itemId: string) => void
   onSlotPickup: (projectId: string, slotKey: string) => void
@@ -42,7 +43,7 @@ interface Props {
   setClipboard?: (c: { multi: boolean; data: Record<string, SlotData> | SlotData; keys?: string[] } | null) => void
 }
 
-export function CanvasView({ workspace, fitNonce, onUpdateWS, projects, activeProjectId, onSlotSelect, palItem, onPlaceItem, onRemoveItem, onMoveSlot, showNums, onActivateMenu, onBrushPick, onSlotPickup, onResizeMenu, onSetGuiType, onSetEraser, onMultiToggle, onDeselectPalette, onClearAll, onRenameMenu, onMenuRemoved, clipboard, setClipboard }: Props) {
+export function CanvasView({ workspace, fitNonce, onUpdateWS, projects, activeProjectId, onSlotSelect, palItem, onPlaceItem, onRemoveItem, onMoveSlot, showNums, showConns, onActivateMenu, onBrushPick, onSlotPickup, onResizeMenu, onSetGuiType, onSetEraser, onMultiToggle, onDeselectPalette, onClearAll, onRenameMenu, onMenuRemoved, clipboard, setClipboard }: Props) {
   const { dispatch } = useProjectStore()
   const { selSlot, multiSel, selectSlot, toggleMulti, clearSlotSelection, selectedMenus, setSelectedMenus, clearMenuSelection, toggleMenu } = useSelectionStore()
   const [pan, setPan] = useState({ x: 0, y: 0 })
@@ -480,7 +481,7 @@ export function CanvasView({ workspace, fitNonce, onUpdateWS, projects, activePr
       <div className={s.canvasSurf} style={{ transform: `translate(${pan.x}px,${pan.y}px) scale(${zoom})` }}>
         <svg style={{ position: 'absolute', top: 0, left: 0, width: 1, height: 1, overflow: 'visible', pointerEvents: 'none', zIndex: 5 }}>
           <defs><marker id="arrowhead" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="var(--ac)" /></marker></defs>
-          {workspace.connections.map(c => {
+          {showConns && workspace.connections.map(c => {
             const from = getSlotCenter(c.fromMenu, c.fromSlot); const to = getMenuTop(c.toMenu)
             if (!from || !to) return null
             const dy = to.y - from.y

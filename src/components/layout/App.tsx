@@ -30,7 +30,7 @@ import tb from '@/styles/toolbar.module.css'
 
 export function App() {
   const { present: proj, past, future, dispatch, undo, redo, setName, loadProject: loadProj } = useProjectStore()
-  const { showNums, toggleNums, animations, toggleAnimations } = usePrefsStore()
+  const { showNums, showConns, toggleNums, toggleConns, animations, toggleAnimations } = usePrefsStore()
 
   const { selSlot, selectSlot, toggleMulti, clearSlotSelection } = useSelectionStore()
   const [palItem, setPalItem] = useState<string | null>(null)
@@ -290,6 +290,7 @@ export function App() {
           <div className={tb.sep} />
           <div className={tb.group}>
             <GlowButton onClick={toggleNums} variant={showNums ? 'primary' : 'ghost'} data-tip="Номера слотов">#</GlowButton>
+            <GlowButton onClick={toggleConns} variant={showConns ? 'primary' : 'ghost'} data-tip="Стрелки связей">→</GlowButton>
             <GlowButton onClick={toggleAnimations} variant={animations ? 'primary' : 'ghost'} data-tip="Анимации">✦</GlowButton>
           </div>
         </>}
@@ -387,6 +388,7 @@ export function App() {
             onRemoveItem={handleRemoveItem}
             onMoveSlot={handleMoveSlot}
             showNums={showNums}
+            showConns={showConns}
             onActivateMenu={switchToProject}
             onBrushPick={id => { setPalItem(id); setPalPreset(null) }}
             onSlotPickup={handleSlotPickup}

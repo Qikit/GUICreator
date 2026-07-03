@@ -33,6 +33,7 @@ export function useKeyboardShortcuts(params: Params) {
 
   const { selSlot, multiSel, selectSlot, clearSlotSelection } = useSelectionStore()
   const shortcuts = usePrefsStore(s => s.shortcuts)
+  const toggleConns = usePrefsStore(s => s.toggleConns)
 
   useEffect(() => {
     const h = (e: KeyboardEvent) => {
@@ -47,6 +48,7 @@ export function useKeyboardShortcuts(params: Params) {
           e.preventDefault()
           if (palItem === '__eraser__') { setPalItem(null); setPalPreset(null) } else { setPalItem('__eraser__'); setPalPreset(null) }
           return
+        case 'toggleArrows': e.preventDefault(); toggleConns(); return
         case 'delete':
           if (multiSel.size > 0) { e.preventDefault(); dispatch({ type: 'RM', keys: [...multiSel] }); clearSlotSelection() }
           else if (selSlot && proj.slots[selSlot]) { e.preventDefault(); dispatch({ type: 'RS', key: selSlot }) }
@@ -125,5 +127,5 @@ export function useKeyboardShortcuts(params: Params) {
     }
     window.addEventListener('keydown', h)
     return () => window.removeEventListener('keydown', h)
-  }, [selSlot, proj, clipboard, multiSel, palItem, undo, redo, dispatch, onDuplicateProject, shortcuts])
+  }, [selSlot, proj, clipboard, multiSel, palItem, undo, redo, dispatch, onDuplicateProject, shortcuts, toggleConns])
 }

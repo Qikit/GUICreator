@@ -38,6 +38,9 @@ describe('matchAction (дефолты)', () => {
     expect(matchAction(ev('Delete'), none)).toBe('delete')
     expect(matchAction(ev('Backspace'), none)).toBe('delete')
   })
+  it('toggleArrows по L', () => {
+    expect(matchAction(ev('KeyL'), none)).toBe('toggleArrows')
+  })
   it('нераспознанное → null', () => {
     expect(matchAction(ev('KeyQ'), none)).toBeNull()
   })
