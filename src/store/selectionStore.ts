@@ -6,6 +6,8 @@ interface SelectionStore {
   selectedMenus: Set<string>
   isDragSel: boolean
   dragMenuId: string | null
+  dragAnchor: string | null
+  dragBase: Set<string>
 
   selectSlot: (key: string | null) => void
   toggleMulti: (key: string) => void
@@ -29,6 +31,8 @@ export const useSelectionStore = create<SelectionStore>((set) => ({
   selectedMenus: new Set(),
   isDragSel: false,
   dragMenuId: null,
+  dragAnchor: null,
+  dragBase: new Set(),
 
   selectSlot: (key) => set({ selSlot: key, multiSel: new Set() }),
   toggleMulti: (key) => set((s) => {
@@ -53,12 +57,19 @@ export const useSelectionStore = create<SelectionStore>((set) => ({
   clearMenuSelection: () => set({ selectedMenus: new Set() }),
 
   startDragSel: (menuId, key) => set((s) => {
-    const n = new Set(s.multiSel); n.add(key)
-    return { isDragSel: true, dragMenuId: menuId, multiSel: n, selSlot: key }
+    const base = new Set(s.multiSel)
+    const n = new Set(base); n.add(key)
+    return { isDragSel: true, dragMenuId: menuId, dragAnchor: key, dragBase: base, multiSel: n, selSlot: key }
   }),
   dragOverSlot: (key) => set((s) => {
-    if (!s.isDragSel) return s
-    const n = new Set(s.multiSel); n.add(key)
+    if (!s.isDragSel || !s.dragAnchor) return s
+    const [ar, ac] = s.dragAnchor.split('-').map(Number)
+    const [br, bc] = key.split('-').map(Number)
+    if (Number.isNaN(br) || Number.isNaN(bc)) return s
+    const r0 = Math.min(ar, br), r1 = Math.max(ar, br)
+    const c0 = Math.min(ac, bc), c1 = Math.max(ac, bc)
+    const n = new Set(s.dragBase)
+    for (let r = r0; r <= r1; r++) for (let c = c0; c <= c1; c++) n.add(`${r}-${c}`)
     return { multiSel: n }
   }),
   endDragSel: () => set({ isDragSel: false, dragMenuId: null }),
