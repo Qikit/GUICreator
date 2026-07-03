@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import type { SlotPreset, ItemDatabase } from '@/types'
 import { ItemTexture } from '@/components/shared'
 import { ruName, ERASER_ID } from '@/utils/slot'
+import { enToRu, ruToEn } from '@/utils/keyboardLayout'
 import { PalItem } from './PalItem'
 import { usePrefsStore } from '@/store/prefsStore'
 import s from '@/styles/palette.module.css'
@@ -51,15 +52,17 @@ export function Palette({ itemDB, selItem, onSelect, recent }: Props) {
   const toggle = (k: string) => setOpenCats(p => ({ ...p, [k]: !p[k] }))
 
   const filtered = useMemo(() => {
-    if (!search) return itemDB
-    const q = search.toLowerCase()
+    if (!search.trim()) return itemDB
+    const base = search.trim().toLowerCase()
+    const queries = [...new Set([base, enToRu(base), ruToEn(base)])].filter(Boolean)
+    const match = (hay: string) => queries.some(q => hay.includes(q))
     const r: ItemDatabase = {}
     for (const [k, cat] of Object.entries(itemDB)) {
       const items = cat.items.filter(i => {
-        if (i.id.includes(q) || i.name.toLowerCase().includes(q) || ruName(i.id).toLowerCase().includes(q) || cat.label.toLowerCase().includes(q)) return true
+        if (match(i.id) || match(i.name.toLowerCase()) || match(ruName(i.id).toLowerCase()) || match(cat.label.toLowerCase())) return true
         if (i.preset?.displayName) {
           const dt = i.preset.displayName.map(s => s.text).join('').toLowerCase()
-          if (dt.includes(q)) return true
+          if (match(dt)) return true
         }
         return false
       })
