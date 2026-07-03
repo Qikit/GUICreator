@@ -15,6 +15,7 @@ interface Props {
   onShare: () => void
   onNewWorkspace: () => void
   onAllWorkspaces: () => void
+  onSettings: () => void
 }
 
 export function BurgerMenu(p: Props) {
@@ -43,6 +44,9 @@ export function BurgerMenu(p: Props) {
       <div className={tb.burgerSection}>Workspace</div>
       <button onClick={run(p.onNewWorkspace)}>Новый workspace</button>
       <button onClick={run(p.onAllWorkspaces)}>Все workspaces</button>
+
+      <div className={tb.burgerSection}>Прочее</div>
+      <button onClick={run(p.onSettings)}>Настройки</button>
     </div>
   )
 }

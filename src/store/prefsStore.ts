@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import type { Binding } from '@/data/shortcuts'
 
 type DockOrder = [string, string, string]
 
@@ -14,6 +15,7 @@ interface PrefsStore {
   givePrefix: string
   giveContainer: string
   giveShulkerColor: string
+  shortcuts: Record<string, Binding | null>
   setGiveVersion: (v: '1.16.5' | '1.20.5+') => void
   setGiveTarget: (t: string) => void
   setGivePrefix: (p: string) => void
@@ -26,6 +28,9 @@ interface PrefsStore {
   setPanelWidth: (side: 'left' | 'right', width: number) => void
   resetPanelWidth: (side: 'left' | 'right') => void
   setPaletteView: (view: 'grid' | 'largeGrid' | 'list') => void
+  setShortcut: (id: string, b: Binding | null) => void
+  resetShortcut: (id: string) => void
+  resetAllShortcuts: () => void
 }
 
 const STORAGE_KEY = 'guicreator-prefs'
@@ -53,6 +58,7 @@ function persistPrefs(state: PrefsStore) {
     givePrefix: state.givePrefix,
     giveContainer: state.giveContainer,
     giveShulkerColor: state.giveShulkerColor,
+    shortcuts: state.shortcuts,
   }))
 }
 
@@ -71,6 +77,7 @@ export const usePrefsStore = create<PrefsStore>((set, get) => ({
   givePrefix: (persisted as any).givePrefix ?? 'minecraft:',
   giveContainer: (persisted as any).giveContainer ?? 'chest',
   giveShulkerColor: (persisted as any).giveShulkerColor ?? '',
+  shortcuts: (persisted as { shortcuts?: Record<string, Binding | null> }).shortcuts ?? {},
   setGiveVersion: (v) => { set({ giveVersion: v }); persistPrefs(get()) },
   setGiveTarget: (t) => { set({ giveTarget: t }); persistPrefs(get()) },
   setGivePrefix: (p) => { set({ givePrefix: p }); persistPrefs(get()) },
@@ -83,4 +90,7 @@ export const usePrefsStore = create<PrefsStore>((set, get) => ({
   setPanelWidth: (side, width) => { set(s => ({ panelWidths: { ...s.panelWidths, [side]: width } })); persistPrefs(get()) },
   resetPanelWidth: (side) => { set(s => ({ panelWidths: { ...s.panelWidths, [side]: DEFAULT_PANEL_WIDTHS[side] } })); persistPrefs(get()) },
   setPaletteView: (view) => { set({ paletteView: view }); persistPrefs(get()) },
+  setShortcut: (id, b) => { set(s => ({ shortcuts: { ...s.shortcuts, [id]: b } })); persistPrefs(get()) },
+  resetShortcut: (id) => { set(s => { const n = { ...s.shortcuts }; delete n[id]; return { shortcuts: n } }); persistPrefs(get()) },
+  resetAllShortcuts: () => { set({ shortcuts: {} }); persistPrefs(get()) },
 }))

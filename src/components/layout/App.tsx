@@ -13,7 +13,7 @@ import { Palette } from '@/components/palette'
 import { ItemEditor } from '@/components/editor'
 import { HoverTooltip, CtxMenu } from '@/components/shared'
 import type { CtxMenuItem } from '@/components/shared'
-import { ExportModal, GradientModal, ColorPickerModal, TemplateModal, ProjectModal, ImportModal, SaveTemplateModal } from '@/components/modals'
+import { ExportModal, GradientModal, ColorPickerModal, TemplateModal, ProjectModal, ImportModal, SaveTemplateModal, SettingsModal } from '@/components/modals'
 import { CanvasView } from '@/components/canvas'
 import { DockLayout } from './DockLayout'
 import { BurgerMenu } from './BurgerMenu'
@@ -42,6 +42,7 @@ export function App() {
   const [showProjs, setShowProjs] = useState(false)
   const [showImport, setShowImport] = useState(false)
   const [showSaveTpl, setShowSaveTpl] = useState(false)
+  const [showSettings, setShowSettings] = useState(false)
   const [ctxMenu, setCtxMenu] = useState<{ x: number; y: number; items: CtxMenuItem[] } | null>(null)
   const [htt, setHTT] = useState<{ data: SlotData; x: number; y: number } | null>(null)
   const [saveStatus, setSaveStatus] = useState('Saved')
@@ -318,6 +319,7 @@ export function App() {
                 onShare={shareLink}
                 onNewWorkspace={() => { const ws = newWorkspace(); saveWorkspace(ws); setActiveWS(ws); refreshCache(ws) }}
                 onAllWorkspaces={() => setShowWorkspaces(true)}
+                onSettings={() => setShowSettings(true)}
               />
             </>)}
           </div>
@@ -438,6 +440,7 @@ export function App() {
       {showImport && <ImportModal onImport={handleImport} onClose={() => setShowImport(false)} />}
       {showSaveTpl && <SaveTemplateModal initialName={proj.name} onSave={(t) => saveTpl({ ...t, rows: proj.rows, slots: JSON.parse(JSON.stringify(proj.slots)) })} onClose={() => setShowSaveTpl(false)} />}
       {showProjs && <ProjectModal list={loadProjectList()} onOpen={p => { loadProj(p); clearSlotSelection(); setShowProjs(false) }} onDelete={id => { deleteProject(id); forceRender(x => x + 1) }} onClose={() => setShowProjs(false)} />}
+      {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
       {ctxMenu && <CtxMenu x={ctxMenu.x} y={ctxMenu.y} items={ctxMenu.items} onClose={() => setCtxMenu(null)} />}
       {shareResult && (
         <GlassModal onClose={() => setShareResult(null)} title="Поделиться ссылкой">
