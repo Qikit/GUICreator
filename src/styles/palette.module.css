@@ -14,6 +14,26 @@
 .palItem:hover { background: var(--glass-hover); border-color: var(--glass-border); transform: scale(1.05); }
 .palItemSel { border-color: var(--accent); background: var(--accent-subtle); box-shadow: 0 0 8px rgba(139,92,246,0.2); }
 .palItem .itemTex { width: 28px; height: 28px; image-rendering: pixelated; pointer-events: none; }
+.favStar {
+  position: absolute; top: 0; right: 0; z-index: 2;
+  width: 15px; height: 15px; padding: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; line-height: 1; color: var(--tx3);
+  background: rgba(0,0,0,0.4); border: none; border-radius: 0 0 0 4px;
+  cursor: pointer; opacity: 0; transition: opacity 120ms ease, color 120ms ease;
+}
+.palItem:hover .favStar { opacity: 1; }
+.favStar:hover { color: #ffd54a; }
+.favStarOn { opacity: 1; color: #ffd54a; }
+.listFav {
+  margin-left: auto; flex-shrink: 0; padding: 0 2px;
+  background: none; border: none; cursor: pointer;
+  font-size: 12px; line-height: 1; color: var(--tx3);
+  opacity: 0; transition: opacity 120ms ease, color 120ms ease;
+}
+.listItem:hover .listFav { opacity: 1; }
+.listFav:hover { color: #ffd54a; }
+.listFavOn { opacity: 1; color: #ffd54a; }
 .footer { padding: var(--sp-sm) var(--sp-md); border-top: 1px solid var(--glass-border); display: flex; gap: var(--sp-xs); }
 .footer input { flex: 1; min-width: 0; font-size: 11px; }
 .eraserBtn { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-sm); border: 1px solid rgba(248,113,113,0.25); background: none; color: var(--er); cursor: pointer; font-size: 13px; transition: all 150ms; flex-shrink: 0; -webkit-tap-highlight-color: transparent; }

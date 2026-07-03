@@ -47,7 +47,8 @@ function TipBtn({ className, onClick, tip, children, style }: {
 export function Palette({ itemDB, selItem, onSelect, recent }: Props) {
   const [search, setSearch] = useState('')
   const [openCats, setOpenCats] = useState<Record<string, boolean>>({ glass_panes: true, functional: true })
-  const { paletteView, setPaletteView } = usePrefsStore()
+  const { paletteView, setPaletteView, favorites, toggleFavorite } = usePrefsStore()
+  const favSet = useMemo(() => new Set(favorites), [favorites])
 
   const toggle = (k: string) => setOpenCats(p => ({ ...p, [k]: !p[k] }))
 
@@ -80,6 +81,7 @@ export function Palette({ itemDB, selItem, onSelect, recent }: Props) {
     const next: Record<string, boolean> = { ...openCats }
     for (const k of allKeys) next[k] = shouldOpen
     next.__r = shouldOpen
+    next.__f = shouldOpen
     setOpenCats(next)
   }, [filtered, openCats])
 
@@ -105,6 +107,11 @@ export function Palette({ itemDB, selItem, onSelect, recent }: Props) {
                   skullTexture={preset?.skullTexture}
                 />
                 <span>{ruName(id) || (typeof it === 'string' ? id : it.name)}</span>
+                <button
+                  className={`${s.listFav} ${favSet.has(id) ? s.listFavOn : ''}`}
+                  title={favSet.has(id) ? 'Убрать из избранного' : 'В избранное'}
+                  onClick={e => { e.stopPropagation(); toggleFavorite(id) }}
+                >★</button>
               </div>
             )
           })}
@@ -116,7 +123,8 @@ export function Palette({ itemDB, selItem, onSelect, recent }: Props) {
       return (
         <div className={gridClass}>
           {(items as unknown as string[]).map(id => (
-            <PalItem key={id} id={id} selected={selItem === id} onSelect={onSelect} size={paletteView === 'largeGrid' ? 44 : 28} />
+            <PalItem key={id} id={id} selected={selItem === id} onSelect={onSelect} size={paletteView === 'largeGrid' ? 44 : 28}
+              isFav={favSet.has(id)} onToggleFav={toggleFavorite} />
           ))}
         </div>
       )
@@ -132,6 +140,8 @@ export function Palette({ itemDB, selItem, onSelect, recent }: Props) {
             preset={it.preset as SlotPreset | undefined}
             onSelect={onSelect}
             size={paletteView === 'largeGrid' ? 44 : 28}
+            isFav={favSet.has(it.id)}
+            onToggleFav={toggleFavorite}
           />
         ))}
       </div>
@@ -164,6 +174,17 @@ export function Palette({ itemDB, selItem, onSelect, recent }: Props) {
         {search && <button className={s.clearBtn} onClick={() => setSearch('')}>✕</button>}
       </div>
       <div className={`${s.body} ${paletteView === 'largeGrid' ? s.bodyLarge : ''}`}>
+        {favorites.length > 0 && (
+          <div className={s.category}>
+            <div className={s.catHeader} onClick={() => toggle('__f')}>
+              <span style={{ fontSize: 12, color: '#ffd54a', width: 14, textAlign: 'center' }}>★</span>
+              Избранное
+              <span className={s.catCount}>({favorites.length})</span>
+            </div>
+            {openCats.__f !== false && renderItems(favorites as any, '__f', true)}
+          </div>
+        )}
+
         {recent.length > 0 && (
           <div className={s.category}>
             <div className={s.catHeader} onClick={() => toggle('__r')}>

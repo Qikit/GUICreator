@@ -11,6 +11,7 @@ interface PrefsStore {
   collapsed: { left: boolean; right: boolean }
   panelWidths: { left: number; right: number }
   paletteView: 'grid' | 'largeGrid' | 'list'
+  favorites: string[]
   giveVersion: '1.16.5' | '1.20.5+'
   giveTarget: string
   givePrefix: string
@@ -30,6 +31,7 @@ interface PrefsStore {
   setPanelWidth: (side: 'left' | 'right', width: number) => void
   resetPanelWidth: (side: 'left' | 'right') => void
   setPaletteView: (view: 'grid' | 'largeGrid' | 'list') => void
+  toggleFavorite: (id: string) => void
   setShortcut: (id: string, b: Binding | null) => void
   resetShortcut: (id: string) => void
   resetAllShortcuts: () => void
@@ -56,6 +58,7 @@ function persistPrefs(state: PrefsStore) {
     collapsed: state.collapsed,
     panelWidths: state.panelWidths,
     paletteView: state.paletteView,
+    favorites: state.favorites,
     giveVersion: state.giveVersion,
     giveTarget: state.giveTarget,
     givePrefix: state.givePrefix,
@@ -76,6 +79,7 @@ export const usePrefsStore = create<PrefsStore>((set, get) => ({
   collapsed: (persisted as { collapsed?: { left: boolean; right: boolean } }).collapsed ?? { left: false, right: false },
   panelWidths: (persisted as { panelWidths?: { left: number; right: number } }).panelWidths ?? DEFAULT_PANEL_WIDTHS,
   paletteView: (persisted as { paletteView?: 'grid' | 'largeGrid' | 'list' }).paletteView ?? 'grid',
+  favorites: (persisted as { favorites?: string[] }).favorites ?? [],
   giveVersion: (persisted as any).giveVersion ?? '1.20.5+',
   giveTarget: (persisted as any).giveTarget ?? '@p',
   givePrefix: (persisted as any).givePrefix ?? 'minecraft:',
@@ -95,6 +99,7 @@ export const usePrefsStore = create<PrefsStore>((set, get) => ({
   setPanelWidth: (side, width) => { set(s => ({ panelWidths: { ...s.panelWidths, [side]: width } })); persistPrefs(get()) },
   resetPanelWidth: (side) => { set(s => ({ panelWidths: { ...s.panelWidths, [side]: DEFAULT_PANEL_WIDTHS[side] } })); persistPrefs(get()) },
   setPaletteView: (view) => { set({ paletteView: view }); persistPrefs(get()) },
+  toggleFavorite: (id) => { set(s => ({ favorites: s.favorites.includes(id) ? s.favorites.filter(f => f !== id) : [...s.favorites, id] })); persistPrefs(get()) },
   setShortcut: (id, b) => { set(s => ({ shortcuts: { ...s.shortcuts, [id]: b } })); persistPrefs(get()) },
   resetShortcut: (id) => { set(s => { const n = { ...s.shortcuts }; delete n[id]; return { shortcuts: n } }); persistPrefs(get()) },
   resetAllShortcuts: () => { set({ shortcuts: {} }); persistPrefs(get()) },

@@ -12,9 +12,11 @@ interface Props {
   preset?: SlotPreset
   onSelect: (id: string, preset?: SlotPreset) => void
   size?: number
+  isFav?: boolean
+  onToggleFav?: (id: string) => void
 }
 
-export function PalItem({ id, selected, preset, onSelect, size = 28 }: Props) {
+export function PalItem({ id, selected, preset, onSelect, size = 28, isFav, onToggleFav }: Props) {
   const [hover, setHover] = useState<{ x: number; y: number } | null>(null)
 
   return (
@@ -28,6 +30,14 @@ export function PalItem({ id, selected, preset, onSelect, size = 28 }: Props) {
       }}
       onMouseLeave={() => setHover(null)}
     >
+      {onToggleFav && (
+        <button
+          className={`${ps.favStar} ${isFav ? ps.favStarOn : ''}`}
+          title={isFav ? 'Убрать из избранного' : 'В избранное'}
+          onClick={e => { e.stopPropagation(); onToggleFav(id) }}
+          onMouseDown={e => e.stopPropagation()}
+        >★</button>
+      )}
       <ItemTexture
         itemId={id}
         size={size}
