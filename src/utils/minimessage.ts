@@ -15,23 +15,33 @@ const FMT: Record<string, keyof Omit<TextSegment, 'text' | 'color'>> = {
   obfuscated: 'obfuscated', obf: 'obfuscated',
 }
 
-function expandGradients(str: string): string {
-  return str.replace(/<gradient((?::#[0-9A-Fa-f]{6})+)>([\s\S]*?)<\/gradient>/gi,
-    (_match, colorsStr: string, text: string) => {
+// Невидимый NUL-разделитель вокруг id группы градиента перед каждым символом.
+// Пользователь не может его ввести; позволяет сериализатору детерминированно
+// собрать градиент обратно из исходных стопов. Единый источник для expand и regex.
+const GMARK = String.fromCharCode(0)
+
+function expandGradients(str: string): { text: string; stops: Record<string, string[]> } {
+  const stops: Record<string, string[]> = {}
+  let gi = 0
+  const text = str.replace(/<gradient((?::#[0-9A-Fa-f]{6})+)>([\s\S]*?)<\/gradient>/gi,
+    (_match, colorsStr: string, inner: string) => {
       const colors = colorsStr.split(':').filter(Boolean).map((c: string) => c.toUpperCase())
-      if (colors.length < 2 || text.length === 0) return text
+      if (colors.length < 2 || inner.length === 0) return inner
+      const id = `g${gi++}`
+      stops[id] = colors
       let result = ''
-      const len = text.length
+      const len = inner.length
       for (let i = 0; i < len; i++) {
         const t = len === 1 ? 0 : i / (len - 1)
         const totalSegs = colors.length - 1
         const segIdx = Math.min(Math.floor(t * totalSegs), totalSegs - 1)
         const segT = (t * totalSegs) - segIdx
         const hex = lerpColor(colors[segIdx], colors[segIdx + 1], segT)
-        result += `<${hex}>${text[i]}</${hex}>`
+        result += `<${hex}>${GMARK}${id}${GMARK}${inner[i]}</${hex}>`
       }
       return result
     })
+  return { text, stops }
 }
 
 export function parseMM(input: string): TextSegment[] {
@@ -41,7 +51,8 @@ export function parseMM(input: string): TextSegment[] {
   const stack: Array<Omit<TextSegment, 'text'>> = [{ ...DEF_STYLE }]
   const cur = () => stack[stack.length - 1]
 
-  const expanded = expandGradients(input)
+  const { text: expanded, stops: gradStops } = expandGradients(input)
+  const markRe = new RegExp(`^${GMARK}(g\\d+)${GMARK}`)
 
   while (pos < expanded.length) {
     if (expanded[pos] === '<') {
@@ -65,11 +76,15 @@ export function parseMM(input: string): TextSegment[] {
     } else {
       let end = expanded.indexOf('<', pos)
       if (end === -1) end = expanded.length
-      const text = expanded.slice(pos, end)
+      let text = expanded.slice(pos, end)
       pos = end
       if (text) {
         const s = cur()
-        segs.push({ text, color: s.color, bold: s.bold, italic: s.italic, underlined: s.underlined, strikethrough: s.strikethrough, obfuscated: s.obfuscated })
+        let gradientId: string | undefined
+        let gradientStops: string[] | undefined
+        const mk = text.match(markRe)
+        if (mk && gradStops[mk[1]]) { gradientId = mk[1]; gradientStops = gradStops[gradientId]; text = text.slice(mk[0].length) }
+        segs.push({ text, color: s.color, bold: s.bold, italic: s.italic, underlined: s.underlined, strikethrough: s.strikethrough, obfuscated: s.obfuscated, ...(gradientId ? { gradientId, gradientStops } : {}) })
       }
     }
   }
@@ -78,7 +93,8 @@ export function parseMM(input: string): TextSegment[] {
   for (const s of segs) {
     const last = merged[merged.length - 1]
     if (last && last.color === s.color && last.bold === s.bold && last.italic === s.italic &&
-        last.underlined === s.underlined && last.strikethrough === s.strikethrough && last.obfuscated === s.obfuscated) {
+        last.underlined === s.underlined && last.strikethrough === s.strikethrough && last.obfuscated === s.obfuscated &&
+        last.gradientId === s.gradientId) {
       last.text += s.text
     } else { merged.push({ ...s }) }
   }
@@ -108,35 +124,60 @@ function detectGradientStops(colors: string[]): string[] | null {
   return null
 }
 
+function styleWrap(inner: string, s: Pick<TextSegment, 'bold' | 'italic' | 'underlined' | 'strikethrough' | 'obfuscated'>): string {
+  if (s.obfuscated) inner = `<obfuscated>${inner}</obfuscated>`
+  if (s.strikethrough) inner = `<strikethrough>${inner}</strikethrough>`
+  if (s.underlined) inner = `<underlined>${inner}</underlined>`
+  if (s.italic) inner = `<italic>${inner}</italic>`
+  if (s.bold) inner = `<bold>${inner}</bold>`
+  return inner
+}
+
+function segOne(s: TextSegment): string {
+  const cn = mcName(s.color) || s.color
+  const inner = styleWrap(s.text, s)
+  if (cn === 'white' || cn === '#FFFFFF') return inner
+  return `<${cn}>${inner}</${cn}>`
+}
+
 export function seg2mm(segs: TextSegment[]): string {
   if (!segs || !segs.length) return ''
+
+  // Детерминированная сборка градиентов по gradientId (новые данные)
+  if (segs.some(s => s.gradientId)) {
+    let r = ''
+    let i = 0
+    while (i < segs.length) {
+      const g = segs[i].gradientId
+      const stops = segs[i].gradientStops
+      if (g && stops) {
+        let j = i
+        while (j < segs.length && segs[j].gradientId === g) j++
+        const run = segs.slice(i, j)
+        const inner = styleWrap(run.map(s => s.text).join(''), run[0])
+        r += `<gradient:${stops.join(':')}>${inner}</gradient>`
+        i = j
+      } else {
+        r += segOne(segs[i]); i++
+      }
+    }
+    return r
+  }
+
+  // Legacy fallback: угадать градиент из посимвольных цветов (старые сохранённые меню)
   if (segs.length >= 3 && segs.every(s => s.text.length === 1)) {
     const { bold, italic, underlined, strikethrough, obfuscated } = segs[0]
     if (segs.every(s => s.bold === bold && s.italic === italic && s.underlined === underlined && s.strikethrough === strikethrough && s.obfuscated === obfuscated)) {
       const stops = detectGradientStops(segs.map(s => s.color))
       if (stops) {
-        let inner = segs.map(s => s.text).join('')
-        if (obfuscated) inner = `<obfuscated>${inner}</obfuscated>`
-        if (strikethrough) inner = `<strikethrough>${inner}</strikethrough>`
-        if (underlined) inner = `<underlined>${inner}</underlined>`
-        if (italic) inner = `<italic>${inner}</italic>`
-        if (bold) inner = `<bold>${inner}</bold>`
+        const inner = styleWrap(segs.map(s => s.text).join(''), segs[0])
         return `<gradient:${stops.join(':')}>${inner}</gradient>`
       }
     }
   }
+
   let r = ''
-  for (const s of segs) {
-    const cn = mcName(s.color) || s.color
-    let inner = s.text
-    if (s.obfuscated) inner = `<obfuscated>${inner}</obfuscated>`
-    if (s.strikethrough) inner = `<strikethrough>${inner}</strikethrough>`
-    if (s.underlined) inner = `<underlined>${inner}</underlined>`
-    if (s.italic) inner = `<italic>${inner}</italic>`
-    if (s.bold) inner = `<bold>${inner}</bold>`
-    if (cn === 'white' || cn === '#FFFFFF') r += inner
-    else r += `<${cn}>${inner}</${cn}>`
-  }
+  for (const s of segs) r += segOne(s)
   return r
 }
 
@@ -145,11 +186,11 @@ export function seg2leg(segs: TextSegment[]): string {
   let r = ''
   for (const s of segs) {
     r += closestMC(s.color)
-    if (s.bold) r += '\u00A7l'
-    if (s.italic) r += '\u00A7o'
-    if (s.underlined) r += '\u00A7n'
-    if (s.strikethrough) r += '\u00A7m'
-    if (s.obfuscated) r += '\u00A7k'
+    if (s.bold) r += '§l'
+    if (s.italic) r += '§o'
+    if (s.underlined) r += '§n'
+    if (s.strikethrough) r += '§m'
+    if (s.obfuscated) r += '§k'
     r += s.text
   }
   return r

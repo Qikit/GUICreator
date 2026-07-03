@@ -6,6 +6,8 @@ export interface TextSegment {
   underlined: boolean
   strikethrough: boolean
   obfuscated: boolean
+  gradientId?: string
+  gradientStops?: string[]
 }
 
 export interface ArmorTrim {
