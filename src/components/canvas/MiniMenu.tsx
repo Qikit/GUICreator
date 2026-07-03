@@ -258,7 +258,7 @@ export function MiniMenu({ project, x, y, zoom, onDrag, onSlotClick, onSlotRight
   const toolbar = isActive ? (
     <div className={s.mmToolbar}>
       <button className={s.mmToolBtn} data-tip="Удалить меню"
-        onClick={e => { e.stopPropagation(); if (confirm('Удалить меню с canvas?')) onDeleteMenu?.(project.id) }}>
+        onClick={e => { e.stopPropagation(); onDeleteMenu?.(project.id) }}>
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 4h10M5 4V3a1 1 0 011-1h2a1 1 0 011 1v1M4 4v7a1 1 0 001 1h4a1 1 0 001-1V4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/></svg>
       </button>
       <button className={`${s.mmToolBtn} ${palItem === '__eraser__' ? s.mmToolBtnActive : ''}`} data-tip="Ластик"

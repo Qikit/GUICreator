@@ -17,6 +17,7 @@ interface ConnectingFrom { menuId: string; slot: string }
 
 interface Props {
   workspace: Workspace
+  fitNonce?: number
   onUpdateWS: (ws: Workspace) => void
   projects: Record<string, Project>
   activeProjectId: string | null
@@ -41,7 +42,7 @@ interface Props {
   setClipboard?: (c: { multi: boolean; data: Record<string, SlotData> | SlotData; keys?: string[] } | null) => void
 }
 
-export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, onSlotSelect, palItem, onPlaceItem, onRemoveItem, onMoveSlot, showNums, onActivateMenu, onBrushPick, onSlotPickup, onResizeMenu, onSetGuiType, onSetEraser, onMultiToggle, onDeselectPalette, onClearAll, onRenameMenu, onMenuRemoved, clipboard, setClipboard }: Props) {
+export function CanvasView({ workspace, fitNonce, onUpdateWS, projects, activeProjectId, onSlotSelect, palItem, onPlaceItem, onRemoveItem, onMoveSlot, showNums, onActivateMenu, onBrushPick, onSlotPickup, onResizeMenu, onSetGuiType, onSetEraser, onMultiToggle, onDeselectPalette, onClearAll, onRenameMenu, onMenuRemoved, clipboard, setClipboard }: Props) {
   const { dispatch } = useProjectStore()
   const { selSlot, multiSel, selectSlot, toggleMulti, clearSlotSelection, selectedMenus, setSelectedMenus, clearMenuSelection, toggleMenu } = useSelectionStore()
   const [pan, setPan] = useState({ x: 0, y: 0 })
@@ -72,46 +73,49 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, o
   const FRAME_PAD = 7 + 3
   const HEADER_H = 32
 
+  const startMenuMarquee = (e: React.MouseEvent) => {
+    e.preventDefault()
+    const rect = surfRef.current!.getBoundingClientRect()
+    const startX = (e.clientX - rect.left - pan.x) / zoom
+    const startY = (e.clientY - rect.top - pan.y) / zoom
+    const base = new Set(useSelectionStore.getState().selectedMenus)
+    setSelBox({ x1: startX, y1: startY, x2: startX, y2: startY })
+    const mv = (ev: MouseEvent) => {
+      const cx = (ev.clientX - rect.left - pan.x) / zoom
+      const cy = (ev.clientY - rect.top - pan.y) / zoom
+      setSelBox(prev => prev ? { ...prev, x2: cx, y2: cy } : null)
+    }
+    const up = () => {
+      setSelBox(prev => {
+        if (prev) {
+          const minX = Math.min(prev.x1, prev.x2), maxX = Math.max(prev.x1, prev.x2)
+          const minY = Math.min(prev.y1, prev.y2), maxY = Math.max(prev.y1, prev.y2)
+          const sel = new Set<string>(base)
+          for (const m of workspace.menus) {
+            const p = projects[m.projectId]; if (!p) continue
+            const gt = getGuiType(p.guiType)
+            const menuW = gt && gt.texture ? gt.containerWidth * 2 : FRAME_PAD * 2 + 9 * (SLOT_SIZE + SLOT_GAP) - SLOT_GAP
+            const menuH = gt && gt.texture ? HEADER_H + gt.containerHeight * 2 : HEADER_H + FRAME_PAD * 2 + p.rows * (SLOT_SIZE + SLOT_GAP) - SLOT_GAP
+            if (m.x + menuW > minX && m.x < maxX && m.y + menuH > minY && m.y < maxY) {
+              sel.add(m.projectId)
+            }
+          }
+          setSelectedMenus(sel)
+        }
+        return null
+      })
+      window.removeEventListener('mousemove', mv)
+      window.removeEventListener('mouseup', up)
+    }
+    window.addEventListener('mousemove', mv)
+    window.addEventListener('mouseup', up)
+  }
+
   const onBgDown = (e: React.MouseEvent) => {
     if ((e.target as HTMLElement).closest(`.${s.miniMenu}`) || (e.target as HTMLElement).closest(`.${s.canvasBottomBar}`) || (e.target as HTMLElement).closest(`.${s.wsName}`) || (e.target as HTMLElement).closest(`.${ss.ctxMenu}`)) return
 
-    if (e.button === 2) {
-      e.preventDefault()
-      const rect = surfRef.current!.getBoundingClientRect()
-      const startX = (e.clientX - rect.left - pan.x) / zoom
-      const startY = (e.clientY - rect.top - pan.y) / zoom
-      setSelBox({ x1: startX, y1: startY, x2: startX, y2: startY })
-      const mv = (ev: MouseEvent) => {
-        const cx = (ev.clientX - rect.left - pan.x) / zoom
-        const cy = (ev.clientY - rect.top - pan.y) / zoom
-        setSelBox(prev => prev ? { ...prev, x2: cx, y2: cy } : null)
-      }
-      const up = () => {
-        setSelBox(prev => {
-          if (prev) {
-            const minX = Math.min(prev.x1, prev.x2), maxX = Math.max(prev.x1, prev.x2)
-            const minY = Math.min(prev.y1, prev.y2), maxY = Math.max(prev.y1, prev.y2)
-            const sel = new Set<string>()
-            for (const m of workspace.menus) {
-              const p = projects[m.projectId]; if (!p) continue
-              const gt = getGuiType(p.guiType)
-              const menuW = gt && gt.texture ? gt.containerWidth * 2 : FRAME_PAD * 2 + 9 * (SLOT_SIZE + SLOT_GAP) - SLOT_GAP
-              const menuH = gt && gt.texture ? HEADER_H + gt.containerHeight * 2 : HEADER_H + FRAME_PAD * 2 + p.rows * (SLOT_SIZE + SLOT_GAP) - SLOT_GAP
-              if (m.x + menuW > minX && m.x < maxX && m.y + menuH > minY && m.y < maxY) {
-                sel.add(m.projectId)
-              }
-            }
-            setSelectedMenus(sel)
-          }
-          return null
-        })
-        window.removeEventListener('mousemove', mv)
-        window.removeEventListener('mouseup', up)
-      }
-      window.addEventListener('mousemove', mv)
-      window.addEventListener('mouseup', up)
-      return
-    }
+    if (e.button === 2) { startMenuMarquee(e); return }
+    if (e.button === 0 && e.shiftKey) { startMenuMarquee(e); return }
 
     if (e.button !== 0) return
     if (connecting) { setConnecting(null); return }
@@ -257,6 +261,30 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, o
         useSelectionStore.getState().endDragSel()
       }
       window.addEventListener('mouseup', onUp)
+      return
+    }
+    if (e.button === 0 && e.shiftKey && !palItem && !connectMode) {
+      e.stopPropagation()
+      onActivateMenu(menuId)
+      const startX = e.clientX, startY = e.clientY
+      let started = false
+      const mv = (ev: MouseEvent) => {
+        if (!started && (Math.abs(ev.clientX - startX) > 4 || Math.abs(ev.clientY - startY) > 4)) {
+          started = true
+          wasDraggingRef.current = true
+          useSelectionStore.getState().startDragSel(menuId, slot)
+        }
+      }
+      const up = () => {
+        window.removeEventListener('mousemove', mv)
+        window.removeEventListener('mouseup', up)
+        if (started) {
+          useSelectionStore.getState().endDragSel()
+          setTimeout(() => { wasDraggingRef.current = false }, 0)
+        }
+      }
+      window.addEventListener('mousemove', mv)
+      window.addEventListener('mouseup', up)
       return
     }
     if (e.button === 0 && !palItem && !connectMode) {
@@ -409,7 +437,7 @@ export function CanvasView({ workspace, onUpdateWS, projects, activeProjectId, o
 
   useEffect(() => {
     requestAnimationFrame(() => fitAll())
-  }, [workspace.id])
+  }, [workspace.id, fitNonce])
 
   useEffect(() => {
     const stop = () => setPainting(false)

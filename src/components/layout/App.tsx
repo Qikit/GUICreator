@@ -5,7 +5,7 @@ import { usePrefsStore } from '@/store/prefsStore'
 import { useSelectionStore } from '@/store/selectionStore'
 import { ITEM_DB } from '@/data/items'
 import { BUILT_TPLS } from '@/data/templates'
-import { saveProject, loadProject, loadProjectList, deleteProject, loadPrefs, savePrefs, saveWorkspace, loadWorkspace, loadWorkspaceList, newWorkspace, saveUserTemplates, deleteWorkspace } from '@/storage'
+import { saveProject, loadProject, loadProjectList, deleteProject, loadPrefs, savePrefs, saveWorkspace, loadWorkspace, loadWorkspaceList, newWorkspace, saveUserTemplates, loadUserTemplates, deleteWorkspace } from '@/storage'
 import { loadLocale } from '@/loaders'
 import { makeSlot, newProject, ERASER_ID } from '@/utils/slot'
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
@@ -13,16 +13,18 @@ import { Palette } from '@/components/palette'
 import { ItemEditor } from '@/components/editor'
 import { HoverTooltip, CtxMenu } from '@/components/shared'
 import type { CtxMenuItem } from '@/components/shared'
-import { ExportModal, GradientModal, ColorPickerModal, TemplateModal, ProjectModal, ImportJsonModal } from '@/components/modals'
+import { ExportModal, GradientModal, ColorPickerModal, TemplateModal, ProjectModal, ImportModal, SaveTemplateModal } from '@/components/modals'
 import { CanvasView } from '@/components/canvas'
 import { DockLayout } from './DockLayout'
+import { BurgerMenu } from './BurgerMenu'
 import { StatusBar } from './StatusBar'
 import { GlowButton, GlassModal, glassModalStyles } from '@/components/ui'
-import { parseAbstractMenus } from '@/utils/importMenu'
 import { AmbientBackground } from './AmbientBackground'
 import { Grid } from '@/components/grid'
-import { generateShareUrl, detectShareInUrl, decodeShareUrl } from '@/utils/shareUrl'
+import { generateShareUrl, detectShareInUrl } from '@/utils/shareUrl'
+import { parseAnyImport } from '@/utils/import'
 import { useIsMobile } from '@/hooks/useIsMobile'
+import { useFileDrop } from '@/hooks/useFileDrop'
 import type { ShareResult } from '@/utils/shareUrl'
 import tb from '@/styles/toolbar.module.css'
 
@@ -38,7 +40,8 @@ export function App() {
   const [showColorPicker, setShowColorPicker] = useState(false)
   const [showTpls, setShowTpls] = useState(false)
   const [showProjs, setShowProjs] = useState(false)
-  const [showImportJson, setShowImportJson] = useState(false)
+  const [showImport, setShowImport] = useState(false)
+  const [showSaveTpl, setShowSaveTpl] = useState(false)
   const [ctxMenu, setCtxMenu] = useState<{ x: number; y: number; items: CtxMenuItem[] } | null>(null)
   const [htt, setHTT] = useState<{ data: SlotData; x: number; y: number } | null>(null)
   const [saveStatus, setSaveStatus] = useState('Saved')
@@ -46,7 +49,7 @@ export function App() {
   const [clipboard, setClipboard] = useState<{ multi: boolean; data: Record<string, SlotData> | SlotData; keys?: string[]; rows?: number } | null>(null)
   const [showMenu, setShowMenu] = useState(false)
   const [showWorkspaces, setShowWorkspaces] = useState(false)
-  const [uTpls, setUTpls] = useState<unknown[]>([])
+  const [uTpls, setUTpls] = useState<unknown[]>(() => loadUserTemplates())
   const saveTpl = (t: unknown) => { const upd = [...uTpls, t]; setUTpls(upd); saveUserTemplates(upd) }
   const [activeWS, setActiveWS] = useState<Workspace | null>(null)
   const [projectCache, setProjectCache] = useState<Record<string, Project>>({})
@@ -61,6 +64,7 @@ export function App() {
   const updateWS = useCallback((ws: Workspace) => { setActiveWS(ws); saveWorkspace(ws); refreshCache(ws) }, [refreshCache])
 
   const [shareResult, setShareResult] = useState<ShareResult | null>(null)
+  const [fitNonce, setFitNonce] = useState(0)
   const isMobile = useIsMobile()
   const [, forceRender] = useState(0)
 
@@ -151,14 +155,44 @@ export function App() {
     } : undefined,
   })
 
-  const importFromShareUrl = (url: string) => {
-    const data = decodeShareUrl(url)
-    if (!data) { alert('Не удалось декодировать ссылку'); return }
-    for (const p of data.projects) saveProject(p)
-    saveWorkspace(data.workspace)
-    setActiveWS(data.workspace)
-    refreshCache(data.workspace)
-    if (data.projects.length) { loadProj(data.projects[0]); clearSlotSelection() }
+  const handleImport = useCallback((raw: string) => {
+    const res = parseAnyImport(raw)
+    if (res.kind === 'error') { alert(res.message); return }
+    if (res.kind === 'menu') {
+      saveProject(res.project); addToWorkspace(res.project.id); loadProj(res.project); clearSlotSelection()
+      setFitNonce(n => n + 1); return
+    }
+    if (!activeWS) return
+    for (const p of res.projects) saveProject(p)
+    const imported = res.workspace
+    const newMenus = [...activeWS.menus]
+    const maxX = newMenus.reduce((mx, m) => Math.max(mx, m.x), 0)
+    for (const m of imported.menus) if (!newMenus.find(e => e.projectId === m.projectId)) newMenus.push({ ...m, x: m.x + maxX + 300 })
+    const newConns = [...activeWS.connections, ...imported.connections.filter(c => !activeWS.connections.find(e => e.id === c.id))]
+    updateWS({ ...activeWS, menus: newMenus, connections: newConns })
+    if (res.templates) { setUTpls(res.templates); saveUserTemplates(res.templates) }
+    const last = res.projects[res.projects.length - 1]
+    if (last) { loadProj(last); clearSlotSelection() }
+    setFitNonce(n => n + 1)
+  }, [activeWS, addToWorkspace, updateWS, loadProj, clearSlotSelection])
+
+  const { isDragging } = useFileDrop(handleImport)
+
+  const exportBackup = () => {
+    if (!activeWS) return
+    const projs = activeWS.menus.map(m => loadProject(m.projectId)).filter(Boolean)
+    const d = { workspace: activeWS, projects: projs, templates: uTpls }
+    const blob = new Blob([JSON.stringify(d, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url; a.download = `${activeWS.name.replace(/[^a-zA-Z0-9Ѐ-ӿ]/g, '_')}-backup.json`; a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  const shareLink = () => {
+    if (!activeWS) return
+    const projs = activeWS.menus.map(m => loadProject(m.projectId)).filter(Boolean) as Project[]
+    setShareResult(generateShareUrl({ workspace: activeWS, projects: projs }, window.location.href))
   }
 
   const handlePalSelect = (id: string, preset?: SlotPreset) => {
@@ -269,29 +303,22 @@ export function App() {
             <GlowButton onClick={() => setShowMenu(!showMenu)}>☰</GlowButton>
             {showMenu && (<>
               {isMobile && <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 199 }} onClick={() => setShowMenu(false)} />}
-              <div className={tb.burgerDd}>
-                {isMobile && <>
-                  <button onClick={() => { setShowMenu(false); setShowExport(true) }}>Экспорт</button>
-                  <button onClick={() => { setShowMenu(false); setShowGrad(true) }}>Градиент</button>
-                  <button onClick={() => { setShowMenu(false); setShowColorPicker(true) }}>Цвета</button>
-                  <div style={{ height: 1, background: 'var(--glass-border)', margin: '2px 0' }} />
-                </>}
-                <button onClick={() => { setShowMenu(false); setShowTpls(true) }}>Шаблоны</button>
-                <button onClick={() => { setShowMenu(false); const name = prompt('Название шаблона:', proj.name); if (!name) return; const desc = prompt('Описание:', ''); saveTpl({ name, desc: desc || '', rows: proj.rows, slots: JSON.parse(JSON.stringify(proj.slots)) }) }}>Сохранить шаблон</button>
-                <div style={{ height: 1, background: 'var(--glass-border)', margin: '2px 0' }} />
-                <button onClick={() => { setShowMenu(false); const np = newProject(); saveProject(np); addToWorkspace(np.id); loadProj(np); clearSlotSelection() }}>Новый проект</button>
-                <button onClick={() => { setShowMenu(false); setShowProjs(true) }}>Открыть проект</button>
-                <div style={{ height: 1, background: 'var(--glass-border)', margin: '2px 0' }} />
-                <button onClick={() => { setShowMenu(false); if (!activeWS) return; const projIds = activeWS.menus.map(m => m.projectId); const projs = projIds.map(id => loadProject(id)).filter(Boolean); const d = { workspace: activeWS, projects: projs, templates: uTpls }; const blob = new Blob([JSON.stringify(d, null, 2)], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `${activeWS.name.replace(/[^a-zA-Z0-9\u0400-\u04FF]/g, '_')}-backup.json`; a.click(); URL.revokeObjectURL(url) }}>Бэкап</button>
-                <button onClick={() => { setShowMenu(false); if (!activeWS) return; const projs = activeWS.menus.map(m => loadProject(m.projectId)).filter(Boolean) as Project[]; const result = generateShareUrl({ workspace: activeWS, projects: projs }, window.location.href); setShareResult(result) }}>Поделиться ссылкой</button>
-                <button onClick={() => { setShowMenu(false); const url = prompt('Вставьте ссылку с #share='); if (url) importFromShareUrl(url) }}>Загрузить из ссылки</button>
-                <button onClick={() => { setShowMenu(false); const inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.json'; inp.style.display = 'none'; document.body.appendChild(inp); inp.onchange = (ev: Event) => { const f = (ev.target as HTMLInputElement).files?.[0]; if (!f) return; const reader = new FileReader(); reader.onload = (re) => { try { const d = JSON.parse(re.target?.result as string); if (d.projects) { for (const p of d.projects) saveProject(p) } if (d.workspace && activeWS) { const imported = d.workspace as Workspace; const newMenus = [...activeWS.menus]; const maxX = newMenus.reduce((mx, m) => Math.max(mx, m.x), 0); for (const m of imported.menus) { if (!newMenus.find(e => e.projectId === m.projectId)) newMenus.push({ ...m, x: m.x + maxX + 300 }) } const newConns = [...activeWS.connections, ...imported.connections.filter(c => !activeWS.connections.find(e => e.id === c.id))]; const updated = { ...activeWS, menus: newMenus, connections: newConns }; updateWS(updated) } else if (d.projects?.length && activeWS) { const newMenus = [...activeWS.menus]; let ox = newMenus.reduce((mx, m) => Math.max(mx, m.x), 0) + 300; for (const p of d.projects) { if (!newMenus.find(e => e.projectId === p.id)) { newMenus.push({ projectId: p.id, x: ox, y: 100 }); ox += 250 } }; updateWS({ ...activeWS, menus: newMenus, connections: activeWS.connections }) } const last = d.projects?.[d.projects.length - 1]; if (last) { loadProj(last); clearSlotSelection() } } catch (err) { alert('Ошибка: ' + (err as Error).message) } finally { document.body.removeChild(inp) } }; reader.readAsText(f) }; inp.click() }}>Импорт</button>
-                <button onClick={() => { setShowMenu(false); const text = prompt('Вставьте конфиг AbstractMenus (YAML):'); if (!text) return; const am = parseAbstractMenus(text); if (!am) { alert('Не удалось распарсить. Поддерживается AbstractMenus (YAML).'); return }; const np = newProject(am.name, am.rows); np.slots = am.slots; saveProject(np); addToWorkspace(np.id); loadProj(np); clearSlotSelection() }}>Импорт AbstractMenus</button>
-                <button onClick={() => { setShowMenu(false); setShowImportJson(true) }}>Импорт JSON (из игры)</button>
-                <div style={{ height: 1, background: 'var(--glass-border)', margin: '2px 0' }} />
-                <button onClick={() => { setShowMenu(false); const ws = newWorkspace(); saveWorkspace(ws); setActiveWS(ws); refreshCache(ws) }}>Новый workspace</button>
-                {loadWorkspaceList().length > 1 && <button onClick={() => { setShowMenu(false); setShowWorkspaces(true) }}>Workspaces</button>}
-              </div>
+              <BurgerMenu
+                isMobile={isMobile}
+                onClose={() => setShowMenu(false)}
+                onExport={() => setShowExport(true)}
+                onGradient={() => setShowGrad(true)}
+                onColors={() => setShowColorPicker(true)}
+                onTemplates={() => setShowTpls(true)}
+                onSaveTemplate={() => setShowSaveTpl(true)}
+                onNewProject={() => { const np = newProject(); saveProject(np); addToWorkspace(np.id); loadProj(np); clearSlotSelection() }}
+                onOpenProject={() => setShowProjs(true)}
+                onImport={() => setShowImport(true)}
+                onExportBackup={exportBackup}
+                onShare={shareLink}
+                onNewWorkspace={() => { const ws = newWorkspace(); saveWorkspace(ws); setActiveWS(ws); refreshCache(ws) }}
+                onAllWorkspaces={() => setShowWorkspaces(true)}
+              />
             </>)}
           </div>
         </div>
@@ -407,10 +434,9 @@ export function App() {
       {showExport && <ExportModal project={proj} onClose={() => setShowExport(false)} />}
       {showGrad && <GradientModal onClose={() => setShowGrad(false)} />}
       {showColorPicker && <ColorPickerModal onClose={() => setShowColorPicker(false)} />}
-      {showTpls && <TemplateModal builtIn={BUILT_TPLS as never} userTemplates={[]} onApply={(t: any) => { const np = newProject(t.name || proj.name, t.rows); np.slots = JSON.parse(JSON.stringify(t.slots || {})); saveProject(np); addToWorkspace(np.id); loadProj(np); clearSlotSelection(); setShowTpls(false) }} onDeleteUser={() => {}} onClose={() => setShowTpls(false)} />}
-      {showImportJson && <ImportJsonModal onImport={({ name, rows, slots }) => {
-        const np = newProject(name, rows); np.slots = slots; saveProject(np); addToWorkspace(np.id); loadProj(np); clearSlotSelection(); setShowImportJson(false)
-      }} onClose={() => setShowImportJson(false)} />}
+      {showTpls && <TemplateModal builtIn={BUILT_TPLS as never} userTemplates={uTpls as never} onApply={(t: any) => { const np = newProject(t.name || proj.name, t.rows); np.slots = JSON.parse(JSON.stringify(t.slots || {})); saveProject(np); addToWorkspace(np.id); loadProj(np); clearSlotSelection(); setShowTpls(false) }} onDeleteUser={(idx: number) => { const upd = uTpls.filter((_, i) => i !== idx); setUTpls(upd); saveUserTemplates(upd) }} onClose={() => setShowTpls(false)} />}
+      {showImport && <ImportModal onImport={handleImport} onClose={() => setShowImport(false)} />}
+      {showSaveTpl && <SaveTemplateModal initialName={proj.name} onSave={(t) => saveTpl({ ...t, rows: proj.rows, slots: JSON.parse(JSON.stringify(proj.slots)) })} onClose={() => setShowSaveTpl(false)} />}
       {showProjs && <ProjectModal list={loadProjectList()} onOpen={p => { loadProj(p); clearSlotSelection(); setShowProjs(false) }} onDelete={id => { deleteProject(id); forceRender(x => x + 1) }} onClose={() => setShowProjs(false)} />}
       {ctxMenu && <CtxMenu x={ctxMenu.x} y={ctxMenu.y} items={ctxMenu.items} onClose={() => setCtxMenu(null)} />}
       {shareResult && (
@@ -452,6 +478,11 @@ export function App() {
             <GlowButton onClick={() => setShowWorkspaces(false)}>Закрыть</GlowButton>
           </div>
         </GlassModal>
+      )}
+      {isDragging && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 500, background: 'rgba(139,92,246,0.12)', border: '3px dashed var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none', fontSize: 18, color: 'var(--tx1)' }}>
+          Отпустите файл для импорта
+        </div>
       )}
     </div>
   )

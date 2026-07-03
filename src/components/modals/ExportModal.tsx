@@ -54,6 +54,8 @@ export function ExportModal({ project, onClose }: Props) {
           displayName: { legacy: seg2leg(sl.displayName), minimessage: seg2mm(sl.displayName), segments: sl.displayName },
           lore: { legacy: sl.lore.map((l: any) => seg2leg(l)), minimessage: sl.lore.map((l: any) => seg2mm(l)), segments: sl.lore },
           amount: sl.amount, enchanted: sl.enchanted, customModelData: sl.customModelData,
+          potionColor: sl.potionColor ?? null, skullTexture: sl.skullTexture ?? null,
+          rpTexture: sl.rpTexture ?? null, armorTrim: sl.armorTrim ?? null, hideFlags: sl.hideFlags ?? 0,
         })),
         metadata: { exportedAt: new Date().toISOString(), tool: 'MC Menu Designer v4', totalSlots: gt ? gt.slots.length : project.rows * 9, filledSlots: filled.length },
       }, null, 2)
