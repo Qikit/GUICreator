@@ -52,6 +52,22 @@ describe('seg2mm', () => {
     expect(mm).toContain('Hello')
     expect(mm).toContain('red')
   })
+
+  it('не дописывает закрывающий цветной тег', () => {
+    expect(seg2mm(parseMM('<red>Hello'))).toBe('<red>Hello')
+  })
+
+  it('возвращается в дефолт явным <white>, цвет не течёт в белый', () => {
+    expect(seg2mm(parseMM('<red>A</red>B'))).toBe('<red>A<white>B')
+  })
+
+  it('декорация остаётся замкнутой, цвет — открытым', () => {
+    expect(seg2mm(parseMM('<red><bold>A</bold></red>B'))).toBe('<red><bold>A</bold><white>B')
+  })
+
+  it('не дублирует одинаковый цвет подряд', () => {
+    expect(seg2mm(parseMM('<gold>A<gold>B'))).toBe('<gold>AB')
+  })
 })
 
 describe('seg2leg', () => {

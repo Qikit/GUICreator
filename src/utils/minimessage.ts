@@ -133,39 +133,16 @@ function styleWrap(inner: string, s: Pick<TextSegment, 'bold' | 'italic' | 'unde
   return inner
 }
 
-function segOne(s: TextSegment): string {
-  const cn = mcName(s.color) || s.color
-  const inner = styleWrap(s.text, s)
-  if (cn === 'white' || cn === '#FFFFFF') return inner
-  return `<${cn}>${inner}</${cn}>`
+function colorTag(hex: string): string {
+  const cn = mcName(hex) || hex
+  return cn === '#FFFFFF' ? 'white' : cn
 }
 
 export function seg2mm(segs: TextSegment[]): string {
   if (!segs || !segs.length) return ''
 
-  // Детерминированная сборка градиентов по gradientId (новые данные)
-  if (segs.some(s => s.gradientId)) {
-    let r = ''
-    let i = 0
-    while (i < segs.length) {
-      const g = segs[i].gradientId
-      const stops = segs[i].gradientStops
-      if (g && stops) {
-        let j = i
-        while (j < segs.length && segs[j].gradientId === g) j++
-        const run = segs.slice(i, j)
-        const inner = styleWrap(run.map(s => s.text).join(''), run[0])
-        r += `<gradient:${stops.join(':')}>${inner}</gradient>`
-        i = j
-      } else {
-        r += segOne(segs[i]); i++
-      }
-    }
-    return r
-  }
-
   // Legacy fallback: угадать градиент из посимвольных цветов (старые сохранённые меню)
-  if (segs.length >= 3 && segs.every(s => s.text.length === 1)) {
+  if (!segs.some(s => s.gradientId) && segs.length >= 3 && segs.every(s => s.text.length === 1)) {
     const { bold, italic, underlined, strikethrough, obfuscated } = segs[0]
     if (segs.every(s => s.bold === bold && s.italic === italic && s.underlined === underlined && s.strikethrough === strikethrough && s.obfuscated === obfuscated)) {
       const stops = detectGradientStops(segs.map(s => s.color))
@@ -177,7 +154,31 @@ export function seg2mm(segs: TextSegment[]): string {
   }
 
   let r = ''
-  for (const s of segs) r += segOne(s)
+  // Цвет — открытый тег: закрывающий не пишем, границу задаёт следующий цветной
+  // тег. active — активный цвет верхнего уровня; в дефолт (white) возвращаемся
+  // явным <white>, иначе цвет протечёт в белый сегмент. Декорации и градиенты
+  // остаются самозамкнутыми (styleWrap / <gradient>…</gradient>), поэтому не текут
+  // и не сбивают active: </gradient> возвращает верхний цвет.
+  let active = 'white'
+  let i = 0
+  while (i < segs.length) {
+    const g = segs[i].gradientId
+    const stops = segs[i].gradientStops
+    if (g && stops) {
+      let j = i
+      while (j < segs.length && segs[j].gradientId === g) j++
+      const run = segs.slice(i, j)
+      const inner = styleWrap(run.map(s => s.text).join(''), run[0])
+      r += `<gradient:${stops.join(':')}>${inner}</gradient>`
+      i = j
+    } else {
+      const s = segs[i]
+      const cn = colorTag(s.color)
+      if (cn !== active) { r += `<${cn}>`; active = cn }
+      r += styleWrap(s.text, s)
+      i++
+    }
+  }
   return r
 }
 
