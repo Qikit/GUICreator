@@ -209,14 +209,13 @@ export function CanvasView({ workspace, fitNonce, onUpdateWS, projects, activePr
   }
 
   const onSlotRightClick = (menuId: string, slotKey: string, cx: number, cy: number, asCtx?: boolean) => {
+    // Выделение по ПКМ обслуживает mousedown (startDragSel/dragOverSlot). Тоггл здесь
+    // не нужен: браузер шлёт contextmenu на слот под курсором уже после drag, и toggle
+    // снимал последний выделенный слот. Оставляем только открытие ctx-меню (asCtx).
     if (asCtx) {
       onSlotSelect(menuId, slotKey)
       setHoverData(null)
       setSlotCtx({ x: cx, y: cy, menuId, slotKey })
-      return
-    }
-    if (!palItem) {
-      onMultiToggle(menuId, slotKey)
     }
   }
 
